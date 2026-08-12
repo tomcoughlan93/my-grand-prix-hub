@@ -1,10 +1,17 @@
 // tina/config.ts
 import { defineConfig } from "tinacms";
 
+// Fallback to local mode when Cloud tokens are missing (e.g. during static builds)
+const isLocal =
+  process.env.TINA_PUBLIC_IS_LOCAL === "true" ||
+  process.env.NODE_ENV === "development" ||
+  !process.env.TINA_TOKEN;
+
 export default defineConfig({
+  contentApiUrlOverride: isLocal ? "/api/tina/gql" : undefined,
   branch: process.env.HEAD || process.env.VERCEL_GIT_COMMIT_REF || "main",
-  clientId: process.env.NEXT_PUBLIC_TINA_CLIENT_ID,
-  token: process.env.TINA_TOKEN,
+  clientId: process.env.NEXT_PUBLIC_TINA_CLIENT_ID || "",
+  token: process.env.TINA_TOKEN || "",
   build: {
     outputFolder: "admin",
     publicFolder: "public",
