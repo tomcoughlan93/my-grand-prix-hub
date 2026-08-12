@@ -1,0 +1,55 @@
+---
+// src/pages/grandstands/[...slug].astro
+export const prerender = true;
+
+import { getCollection, render, type CollectionEntry } from 'astro:content';
+import BaseLayout from '../../layouts/Layout.astro';
+
+export async function getStaticPaths() {
+  const allGrandstands = await getCollection('grandstands');
+  return allGrandstands.map((entry: CollectionEntry<'grandstands'>) => ({
+    params: { slug: entry.id.replace(/\.[^/.]+$/, "").toLowerCase() },
+    props: { entry },
+  }));
+}
+
+interface Props {
+  entry: CollectionEntry<'grandstands'>;
+}
+
+const { entry } = Astro.props;
+
+if (!entry) {
+  return Astro.redirect('/404');
+}
+
+const { Content } = await render(entry);
+---
+
+<BaseLayout title={entry.data?.title ? `${entry.data.title} Review` : 'Grandstand Review'}>
+  <article style="max-width: 800px; margin: 0 auto; padding: 2rem 1rem;">
+    {entry.data?.heroImage && (
+      <img 
+        src={entry.data.heroImage} 
+        alt={entry.data.title || ''} 
+        style="width: 100%; max-height: 400px; object-fit: cover; border-radius: 8px; margin-bottom: 1.5rem;" 
+      />
+    )}
+    
+    <h1 style="font-size: 2.5rem; margin-bottom: 0.5rem; color: #111;">{entry.data?.title}</h1>
+    
+    <div style="display: flex; gap: 1rem; align-items: center; margin-bottom: 1.5rem; font-size: 1rem; color: #555;">
+      {entry.data?.circuit && <span>📍 <strong>Circuit:</strong> {entry.data.circuit}</span>}
+      {entry.data?.viewRating && <span>⭐ <strong>Rating:</strong> {entry.data.viewRating}</span>}
+      {entry.data?.covered !== undefined && (
+        <span>{entry.data.covered ? '☂️ Covered Seating' : '☀️ Open Seating'}</span>
+      )}
+    </div>
+
+    <hr style="border: 0; border-top: 1px solid #eee; margin: 2rem 0;" />
+    
+    <div style="line-height: 1.7; font-size: 1.1rem;">
+      <Content />
+    </div>
+  </article>
+</BaseLayout>

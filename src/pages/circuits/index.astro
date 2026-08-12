@@ -1,0 +1,66 @@
+---
+// src/pages/circuits/index.astro
+export const prerender = true;
+
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/Layout.astro';
+
+// Fetch all circuit guides from src/content/circuits/
+const circuits = await getCollection('circuits');
+---
+
+<BaseLayout title="F1 & Motorsport Circuit Guides | Grand Prix Travel Hub">
+  <section style="max-width: 1000px; margin: 0 auto; padding: 2rem 1rem;">
+    <header style="margin-bottom: 2.5rem; text-align: center;">
+      <h1 style="font-size: 2.5rem; margin-bottom: 0.5rem; color: #111;">F1 & Motorsport Circuit Guides</h1>
+      <p style="color: #555; font-size: 1.1rem; max-width: 600px; margin: 0 auto;">
+        Explore spectator advice, grandstand reviews, and travel tips for Formula 1 and motorsport venues around the world.
+      </p>
+    </header>
+
+    {circuits.length === 0 ? (
+      <div style="text-align: center; padding: 3rem; background: #f9f9f9; border-radius: 8px;">
+        <p style="color: #666; font-size: 1.1rem;">No circuit guides found yet.</p>
+      </div>
+    ) : (
+      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem;">
+        {circuits.map((entry) => {
+          // Astro v6 uses entry.id for route slugs
+          const slug = entry.id.replace(/\.[^/.]+$/, "").toLowerCase();
+          
+          return (
+            <a 
+              href={`/circuits/${slug}`} 
+              style="text-decoration: none; color: inherit; border: 1px solid #e2e8f0; border-radius: 10px; overflow: hidden; display: flex; flex-direction: column; transition: transform 0.2s, box-shadow 0.2s;"
+            >
+              {entry.data?.heroImage ? (
+                <img 
+                  src={entry.data.heroImage} 
+                  alt={entry.data?.title || slug} 
+                  style="width: 100%; height: 180px; object-fit: cover;"
+                />
+              ) : (
+                <div style="width: 100%; height: 180px; background: #222; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 2rem;">
+                  🏎️
+                </div>
+              )}
+              <div style="padding: 1.25rem; display: flex; flex-direction: column; flex-grow: 1;">
+                {entry.data?.country && (
+                  <span style="font-size: 0.85rem; color: #e10600; font-weight: bold; text-transform: uppercase; margin-bottom: 0.25rem;">
+                    📍 {entry.data.country}
+                  </span>
+                )}
+                <h2 style="font-size: 1.35rem; margin: 0 0 0.5rem 0; color: #111;">
+                  {entry.data?.title || slug}
+                </h2>
+                <span style="margin-top: auto; font-size: 0.9rem; color: #0066cc; font-weight: 600; padding-top: 0.75rem;">
+                  Read guide &rarr;
+                </span>
+              </div>
+            </a>
+          );
+        })}
+      </div>
+    )}
+  </section>
+</BaseLayout>

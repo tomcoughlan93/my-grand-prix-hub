@@ -1,23 +1,80 @@
-<!doctype html>
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<meta name="viewport" content="width=device-width" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro Basics</title>
-	</head>
-	<body>
-		<slot />
-	</body>
-</html>
+---
+// src/layouts/Layout.astro
+interface Props {
+  title?: string;
+}
 
-<style>
-	html,
-	body {
-		margin: 0;
-		width: 100%;
-		height: 100%;
-	}
-</style>
+const { title = 'Grand Prix Travel Hub' } = Astro.props;
+---
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title}</title>
+  </head>
+  <body style="font-family: system-ui, -apple-system, sans-serif; margin: 0; padding: 0; background-color: #fafafa; color: #1a1a1a;">
+    
+    <!-- Site Header & Navigation -->
+    <header style="background: #111; color: #fff; padding: 1rem 2rem; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
+      <div style="max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+        
+        <!-- Logo / Home Link -->
+        <a href="/" style="color: #fff; text-decoration: none; font-weight: 800; font-size: 1.25rem; display: flex; align-items: center; gap: 0.5rem;">
+          🏎️ <span>Grand Prix Travel</span>
+        </a>
+
+        <!-- Navigation Links (Content Pillars) -->
+        <nav style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+          <a 
+            href="/circuits" 
+            style="color: #fff; text-decoration: none; font-weight: 600; background: #e10600; padding: 0.4rem 0.8rem; border-radius: 6px; font-size: 0.95rem; transition: background 0.2s;"
+            onmouseleave="this.style.background='#e10600'" 
+            onmouseenter="this.style.background='#b80500'"
+          >
+            Circuit Guides
+          </a>
+          <a 
+            href="/grandstands" 
+            style="color: #ccc; text-decoration: none; font-weight: 500; font-size: 0.95rem; padding: 0.4rem 0.6rem; transition: color 0.2s;"
+            onmouseleave="this.style.color='#ccc'" 
+            onmouseenter="this.style.color='#fff'"
+          >
+            Grandstand Reviews
+          </a>
+          <a 
+            href="/travel-tickets" 
+            style="color: #ccc; text-decoration: none; font-weight: 500; font-size: 0.95rem; padding: 0.4rem 0.6rem; transition: color 0.2s;"
+            onmouseleave="this.style.color='#ccc'" 
+            onmouseenter="this.style.color='#fff'"
+          >
+            Ticket & Travel Advice
+          </a>
+          <a 
+            href="/city-guides" 
+            style="color: #ccc; text-decoration: none; font-weight: 500; font-size: 0.95rem; padding: 0.4rem 0.6rem; transition: color 0.2s;"
+            onmouseleave="this.style.color='#ccc'" 
+            onmouseenter="this.style.color='#fff'"
+          >
+            City & Pub Guides
+          </a>
+        </nav>
+
+      </div>
+    </header>
+
+    <!-- Main Page Content -->
+    <main style="min-height: calc(100vh - 180px);">
+      <slot />
+    </main>
+
+    <!-- Site Footer -->
+    <footer style="text-align: center; padding: 2rem; border-top: 1px solid #eaeaea; background: #fff; margin-top: 4rem; color: #666; font-size: 0.9rem;">
+      <div style="max-width: 1200px; margin: 0 auto;">
+        <p>&copy; {new Date().getFullYear()} Grand Prix Travel Hub. Unofficial spectator guides.</p>
+      </div>
+    </footer>
+
+  </body>
+</html>

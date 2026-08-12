@@ -1,11 +1,176 @@
 ---
-import Welcome from '../components/Welcome.astro';
-import Layout from '../layouts/Layout.astro';
+// src/pages/index.astro
+export const prerender = true;
 
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/Layout.astro';
+
+// Fetch guides from all four collections
+const circuits = (await getCollection('circuits')).slice(0, 3);
+const grandstands = (await getCollection('grandstands')).slice(0, 3);
+const cityGuides = (await getCollection('cityGuides')).slice(0, 3);
+const travelTickets = (await getCollection('travelTickets')).slice(0, 3);
 ---
 
-<Layout>
-	<Welcome />
-</Layout>
+<BaseLayout title="Grand Prix Travel Hub | Unofficial F1 & Motorsport Spectator Guides">
+  
+  <!-- Hero Section -->
+  <section style="background: linear-gradient(135deg, #111 0%, #1a1a1a 100%); color: #fff; padding: 4rem 1.5rem; text-align: center; border-bottom: 4px solid #e10600;">
+    <div style="max-width: 800px; margin: 0 auto;">
+      <h1 style="font-size: 3rem; font-weight: 800; margin-bottom: 1rem; line-height: 1.1;">
+        The Ultimate Spectator Guides for F1 & Motorsport
+      </h1>
+      <p style="font-size: 1.2rem; color: #ccc; margin-bottom: 2rem;">
+        Trackside reviews, grandstand view breakdowns, travel logistics, and local pub hubs.
+      </p>
+      <a 
+        href="/circuits" 
+        style="display: inline-block; background: #e10600; color: #fff; text-decoration: none; font-weight: 700; padding: 0.8rem 1.8rem; border-radius: 6px; transition: background 0.2s;"
+        onmouseleave="this.style.background='#e10600'" 
+        onmouseenter="this.style.background='#b80500'"
+      >
+        Explore Circuit Guides &rarr;
+      </a>
+    </div>
+  </section>
+
+  <div style="max-width: 1100px; margin: 0 auto; padding: 3rem 1.5rem;">
+
+    <!-- 1. Circuit Guides Section -->
+    <section style="margin-bottom: 3.5rem;">
+      <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 1.5rem;">
+        <div>
+          <h2 style="font-size: 1.8rem; margin: 0; color: #111;">🏎️ Circuit Guides</h2>
+          <p style="color: #666; margin: 0.25rem 0 0 0;">Comprehensive race weekend spectator overviews.</p>
+        </div>
+        <a href="/circuits" style="color: #0066cc; font-weight: 600; text-decoration: none;">View all &rarr;</a>
+      </div>
+
+      {circuits.length === 0 ? (
+        <p style="color: #888; font-style: italic;">No circuit guides added yet.</p>
+      ) : (
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem;">
+          {circuits.map((item) => {
+            const slug = item.id.replace(/\.[^/.]+$/, "").toLowerCase();
+            return (
+              <a href={`/circuits/${slug}`} style="text-decoration: none; color: inherit; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; background: #fff;">
+                {item.data?.heroImage ? (
+                  <img src={item.data.heroImage} alt={item.data?.title || slug} style="width: 100%; height: 160px; object-fit: cover;" />
+                ) : (
+                  <div style="width: 100%; height: 160px; background: #222; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 2rem;">🏎️</div>
+                )}
+                <div style="padding: 1rem;">
+                  {item.data?.country && <span style="font-size: 0.75rem; color: #e10600; font-weight: bold; text-transform: uppercase;">📍 {item.data.country}</span>}
+                  <h3 style="font-size: 1.15rem; margin: 0.25rem 0 0 0; color: #111;">{item.data?.title || slug}</h3>
+                </div>
+              </a>
+            );
+          })}
+        </div>
+      )}
+    </section>
+
+    <!-- 2. Grandstand Reviews Section -->
+    <section style="margin-bottom: 3.5rem;">
+      <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 1.5rem;">
+        <div>
+          <h2 style="font-size: 1.8rem; margin: 0; color: #111;">🪑 Grandstand Reviews</h2>
+          <p style="color: #666; margin: 0.25rem 0 0 0;">View quality, shade, and seating comfort breakdowns.</p>
+        </div>
+        <a href="/grandstands" style="color: #0066cc; font-weight: 600; text-decoration: none;">View all &rarr;</a>
+      </div>
+
+      {grandstands.length === 0 ? (
+        <p style="color: #888; font-style: italic;">No grandstand reviews added yet.</p>
+      ) : (
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem;">
+          {grandstands.map((item) => {
+            const slug = item.id.replace(/\.[^/.]+$/, "").toLowerCase();
+            return (
+              <a href={`/grandstands/${slug}`} style="text-decoration: none; color: inherit; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; background: #fff;">
+                {item.data?.heroImage ? (
+                  <img src={item.data.heroImage} alt={item.data?.title || slug} style="width: 100%; height: 160px; object-fit: cover;" />
+                ) : (
+                  <div style="width: 100%; height: 160px; background: #222; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 2rem;">🪑</div>
+                )}
+                <div style="padding: 1rem;">
+                  {item.data?.circuit && <span style="font-size: 0.75rem; color: #e10600; font-weight: bold; text-transform: uppercase;">📍 {item.data.circuit}</span>}
+                  <h3 style="font-size: 1.15rem; margin: 0.25rem 0 0 0; color: #111;">{item.data?.title || slug}</h3>
+                </div>
+              </a>
+            );
+          })}
+        </div>
+      )}
+    </section>
+
+    <!-- 3. Ticket & Travel Advice Section -->
+    <section style="margin-bottom: 3.5rem;">
+      <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 1.5rem;">
+        <div>
+          <h2 style="font-size: 1.8rem; margin: 0; color: #111;">🎫 Ticket & Travel Advice</h2>
+          <p style="color: #666; margin: 0.25rem 0 0 0;">Shuttle buses, ticket sales, and transfer logistics.</p>
+        </div>
+        <a href="/travel-tickets" style="color: #0066cc; font-weight: 600; text-decoration: none;">View all &rarr;</a>
+      </div>
+
+      {travelTickets.length === 0 ? (
+        <p style="color: #888; font-style: italic;">No travel or ticket guides added yet.</p>
+      ) : (
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem;">
+          {travelTickets.map((item) => {
+            const slug = item.id.replace(/\.[^/.]+$/, "").toLowerCase();
+            return (
+              <a href={`/travel-tickets/${slug}`} style="text-decoration: none; color: inherit; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; background: #fff;">
+                {item.data?.heroImage ? (
+                  <img src={item.data.heroImage} alt={item.data?.title || slug} style="width: 100%; height: 160px; object-fit: cover;" />
+                ) : (
+                  <div style="width: 100%; height: 160px; background: #222; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 2rem;">🎫</div>
+                )}
+                <div style="padding: 1rem;">
+                  {item.data?.category && <span style="font-size: 0.75rem; color: #e10600; font-weight: bold; text-transform: uppercase;">✈️ {item.data.category}</span>}
+                  <h3 style="font-size: 1.15rem; margin: 0.25rem 0 0 0; color: #111;">{item.data?.title || slug}</h3>
+                </div>
+              </a>
+            );
+          })}
+        </div>
+      )}
+    </section>
+
+    <!-- 4. City & Pub Guides Section -->
+    <section style="margin-bottom: 2rem;">
+      <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 1.5rem;">
+        <div>
+          <h2 style="font-size: 1.8rem; margin: 0; color: #111;">🍻 City & Pub Guides</h2>
+          <p style="color: #666; margin: 0.25rem 0 0 0;">Where fans meet off-track, sports pubs, and local nightlife.</p>
+        </div>
+        <a href="/city-guides" style="color: #0066cc; font-weight: 600; text-decoration: none;">View all &rarr;</a>
+      </div>
+
+      {cityGuides.length === 0 ? (
+        <p style="color: #888; font-style: italic;">No city guides added yet.</p>
+      ) : (
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem;">
+          {cityGuides.map((item) => {
+            const slug = item.id.replace(/\.[^/.]+$/, "").toLowerCase();
+            return (
+              <a href={`/city-guides/${slug}`} style="text-decoration: none; color: inherit; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; background: #fff;">
+                {item.data?.heroImage ? (
+                  <img src={item.data.heroImage} alt={item.data?.title || slug} style="width: 100%; height: 160px; object-fit: cover;" />
+                ) : (
+                  <div style="width: 100%; height: 160px; background: #222; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 2rem;">🍻</div>
+                )}
+                <div style="padding: 1rem;">
+                  {item.data?.city && <span style="font-size: 0.75rem; color: #e10600; font-weight: bold; text-transform: uppercase;">📍 {item.data.city}</span>}
+                  <h3 style="font-size: 1.15rem; margin: 0.25rem 0 0 0; color: #111;">{item.data?.title || slug}</h3>
+                </div>
+              </a>
+            );
+          })}
+        </div>
+      )}
+    </section>
+
+  </div>
+</BaseLayout>
