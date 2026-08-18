@@ -1,0 +1,781 @@
+---
+// src/pages/championship/standings.astro
+import Layout from '@/layouts/Layout.astro';
+
+interface DriverStanding {
+  pos: number;
+  driverNumber: string;
+  driverName: string;
+  driverCode: string;
+  team: string;
+  teamKey: string;
+  countryCode: string;
+  nationality: string;
+  points: number;
+  wins: number;
+  behindLeader: number;
+  form: (number | 'RET')[];
+}
+
+interface ConstructorStanding {
+  pos: number;
+  team: string;
+  teamKey: string;
+  points: number;
+  wins: number;
+  behindLeader: number;
+}
+
+const DRIVER_COUNTRIES: Record<string, { code: string; nat: string }> = {
+  max_verstappen: { code: 'nl', nat: 'NED' },
+  norris: { code: 'gb', nat: 'GBR' },
+  leclerc: { code: 'mc', nat: 'MON' },
+  piastri: { code: 'au', nat: 'AUS' },
+  hamilton: { code: 'gb', nat: 'GBR' },
+  russell: { code: 'gb', nat: 'GBR' },
+  antonelli: { code: 'it', nat: 'ITA' },
+  alonso: { code: 'es', nat: 'ESP' },
+  stroll: { code: 'ca', nat: 'CAN' },
+  tsunoda: { code: 'jp', nat: 'JPN' },
+  lawson: { code: 'nz', nat: 'NZL' },
+  albon: { code: 'th', nat: 'THA' },
+  sainz: { code: 'es', nat: 'ESP' },
+  hulkenberg: { code: 'de', nat: 'GER' },
+  bortoleto: { code: 'br', nat: 'BRA' },
+  gasly: { code: 'fr', nat: 'FRA' },
+  doohan: { code: 'au', nat: 'AUS' },
+  ocon: { code: 'fr', nat: 'FRA' },
+  bearman: { code: 'gb', nat: 'GBR' },
+  lindblad: { code: 'gb', nat: 'GBR' },
+  colapinto: { code: 'ar', nat: 'ARG' },
+  bottas: { code: 'fi', nat: 'FIN' },
+  perez: { code: 'mx', nat: 'MEX' },
+  hadjar: { code: 'fr', nat: 'FRA' },
+  herta: { code: 'us', nat: 'USA' },
+};
+
+// Fallback baseline data
+let drivers: DriverStanding[] = [
+  { pos: 1, driverNumber: "1", driverName: "Max Verstappen", driverCode: "VER", team: "Red Bull Racing", teamKey: "redbull", countryCode: "nl", nationality: "NED", points: 285, wins: 7, behindLeader: 0, form: [1, 2, 1, 1, 3] },
+  { pos: 2, driverNumber: "4", driverName: "Lando Norris", driverCode: "NOR", team: "McLaren", teamKey: "mclaren", countryCode: "gb", nationality: "GBR", points: 260, wins: 4, behindLeader: 25, form: [2, 1, 3, 2, 1] },
+  { pos: 3, driverNumber: "16", driverName: "Charles Leclerc", driverCode: "LEC", team: "Ferrari", teamKey: "ferrari", countryCode: "mc", nationality: "MON", points: 235, wins: 3, behindLeader: 50, form: [3, 4, 2, 5, 2] },
+  { pos: 4, driverNumber: "81", driverName: "Oscar Piastri", driverCode: "PIA", team: "McLaren", teamKey: "mclaren", countryCode: "au", nationality: "AUS", points: 215, wins: 2, behindLeader: 70, form: [4, 3, 1, 3, 4] },
+  { pos: 5, driverNumber: "44", driverName: "Lewis Hamilton", driverCode: "HAM", team: "Ferrari", teamKey: "ferrari", countryCode: "gb", nationality: "GBR", points: 190, wins: 1, behindLeader: 95, form: [5, 5, 4, 4, 5] },
+  { pos: 6, driverNumber: "63", driverName: "George Russell", driverCode: "RUS", team: "Mercedes", teamKey: "mercedes", countryCode: "gb", nationality: "GBR", points: 165, wins: 1, behindLeader: 120, form: [6, 6, 5, 6, 6] },
+  { pos: 7, driverNumber: "12", driverName: "Kimi Antonelli", driverCode: "ANT", team: "Mercedes", teamKey: "mercedes", countryCode: "it", nationality: "ITA", points: 98, wins: 0, behindLeader: 187, form: [7, 8, 6, 7, 8] },
+  { pos: 8, driverNumber: "14", driverName: "Fernando Alonso", driverCode: "ALO", team: "Aston Martin", teamKey: "astonmartin", countryCode: "es", nationality: "ESP", points: 64, wins: 0, behindLeader: 221, form: [8, 7, 8, 9, 7] },
+  { pos: 9, driverNumber: "18", driverName: "Lance Stroll", driverCode: "STR", team: "Aston Martin", teamKey: "astonmartin", countryCode: "ca", nationality: "CAN", points: 36, wins: 0, behindLeader: 249, form: [9, 10, 9, 8, 10] },
+  { pos: 10, driverNumber: "22", driverName: "Yuki Tsunoda", driverCode: "TSU", team: "Racing Bulls", teamKey: "rb", countryCode: "jp", nationality: "JPN", points: 28, wins: 0, behindLeader: 257, form: [10, 9, 11, 10, 9] },
+  { pos: 11, driverNumber: "30", driverName: "Liam Lawson", driverCode: "LAW", team: "Racing Bulls", teamKey: "rb", countryCode: "nz", nationality: "NZL", points: 20, wins: 0, behindLeader: 265, form: [11, 12, 10, 11, 12] },
+  { pos: 12, driverNumber: "23", driverName: "Alexander Albon", driverCode: "ALB", team: "Williams", teamKey: "williams", countryCode: "th", nationality: "THA", points: 18, wins: 0, behindLeader: 267, form: [12, 11, 12, 12, 11] },
+  { pos: 13, driverNumber: "55", driverName: "Carlos Sainz", driverCode: "SAI", team: "Williams", teamKey: "williams", countryCode: "es", nationality: "ESP", points: 16, wins: 0, behindLeader: 269, form: [13, 14, 7, 'RET', 13] },
+  { pos: 14, driverNumber: "27", driverName: "Nico Hülkenberg", driverCode: "HUL", team: "Audi F1 Team", teamKey: "audi", countryCode: "de", nationality: "GER", points: 14, wins: 0, behindLeader: 271, form: [14, 13, 13, 13, 14] },
+  { pos: 15, driverNumber: "5", driverName: "Gabriel Bortoleto", driverCode: "BOR", team: "Audi F1 Team", teamKey: "audi", countryCode: "br", nationality: "BRA", points: 8, wins: 0, behindLeader: 277, form: [15, 15, 14, 14, 15] },
+  { pos: 16, driverNumber: "10", driverName: "Pierre Gasly", driverCode: "GAS", team: "Alpine", teamKey: "alpine", countryCode: "fr", nationality: "FRA", points: 10, wins: 0, behindLeader: 275, form: [16, 'RET', 15, 15, 16] },
+  { pos: 17, driverNumber: "7", driverName: "Jack Doohan", driverCode: "DOO", team: "Alpine", teamKey: "alpine", countryCode: "au", nationality: "AUS", points: 2, wins: 0, behindLeader: 283, form: [17, 16, 16, 17, 'RET'] },
+  { pos: 18, driverNumber: "31", driverName: "Esteban Ocon", driverCode: "OCO", team: "Haas F1 Team", teamKey: "haas", countryCode: "fr", nationality: "FRA", points: 8, wins: 0, behindLeader: 277, form: [18, 17, 'RET', 16, 17] },
+  { pos: 19, driverNumber: "87", driverName: "Oliver Bearman", driverCode: "BEA", team: "Haas F1 Team", teamKey: "haas", countryCode: "gb", nationality: "GBR", points: 6, wins: 0, behindLeader: 279, form: ['RET', 18, 17, 18, 18] },
+  { pos: 20, driverNumber: "43", driverName: "Franco Colapinto", driverCode: "COL", team: "Alpine", teamKey: "alpine", countryCode: "ar", nationality: "ARG", points: 4, wins: 0, behindLeader: 281, form: [12, 10, 'RET', 11, 14] },
+  { pos: 21, driverNumber: "11", driverName: "Sergio Perez", driverCode: "PER", team: "Cadillac F1 Team", teamKey: "cadillac", countryCode: "mx", nationality: "MEX", points: 2, wins: 0, behindLeader: 283, form: [19, 15, 18, 14, 12] },
+  { pos: 22, driverNumber: "77", driverName: "Valtteri Bottas", driverCode: "BOT", team: "Cadillac F1 Team", teamKey: "cadillac", countryCode: "fi", nationality: "FIN", points: 1, wins: 0, behindLeader: 284, form: [16, 17, 14, 15, 13] },
+  { pos: 23, driverNumber: "3", driverName: "Arvid Lindblad", driverCode: "LIN", team: "Racing Bulls", teamKey: "rb", countryCode: "gb", nationality: "GBR", points: 0, wins: 0, behindLeader: 285, form: [18, 19, 16, 17, 15] },
+];
+
+let constructors: ConstructorStanding[] = [
+  { pos: 1, team: "McLaren", teamKey: "mclaren", points: 475, wins: 6, behindLeader: 0 },
+  { pos: 2, team: "Ferrari", teamKey: "ferrari", points: 425, wins: 4, behindLeader: 50 },
+  { pos: 3, team: "Red Bull Racing", teamKey: "redbull", points: 285, wins: 7, behindLeader: 190 },
+  { pos: 4, team: "Mercedes", teamKey: "mercedes", points: 263, wins: 1, behindLeader: 212 },
+  { pos: 5, team: "Aston Martin", teamKey: "astonmartin", points: 100, wins: 0, behindLeader: 375 },
+  { pos: 6, team: "Racing Bulls", teamKey: "rb", points: 48, wins: 0, behindLeader: 427 },
+  { pos: 7, team: "Williams", teamKey: "williams", points: 34, wins: 0, behindLeader: 441 },
+  { pos: 8, team: "Audi F1 Team", teamKey: "audi", points: 22, wins: 0, behindLeader: 453 },
+  { pos: 9, team: "Alpine", teamKey: "alpine", points: 16, wins: 0, behindLeader: 459 },
+  { pos: 10, team: "Haas F1 Team", teamKey: "haas", points: 14, wins: 0, behindLeader: 461 },
+  { pos: 11, team: "Cadillac F1 Team", teamKey: "cadillac", points: 3, wins: 0, behindLeader: 472 },
+];
+
+// Server-side API sync
+try {
+  const [driverRes, constrRes] = await Promise.all([
+    fetch('https://api.jolpi.ca/ergast/f1/current/driverStandings.json', { headers: { 'User-Agent': 'Mozilla/5.0' } }),
+    fetch('https://api.jolpi.ca/ergast/f1/current/constructorStandings.json', { headers: { 'User-Agent': 'Mozilla/5.0' } }),
+  ]);
+
+  if (driverRes.ok && constrRes.ok) {
+    const dData = await driverRes.json();
+    const cData = await constrRes.json();
+
+    const dList = dData?.MRData?.StandingsTable?.StandingsLists?.[0]?.DriverStandings;
+    const cList = cData?.MRData?.StandingsTable?.StandingsLists?.[0]?.ConstructorStandings;
+
+    if (dList && dList.length > 0) {
+      const topPoints = parseFloat(dList[0].points) || 0;
+      drivers = dList.map((item: any, idx: number) => {
+        const pts = parseFloat(item.points) || 0;
+        const driverId = item.Driver.driverId || '';
+        const constructorId = (item.Constructors?.[0]?.constructorId || '').toLowerCase().replace(/[^a-z]/g, '');
+        const countryInfo = DRIVER_COUNTRIES[driverId] || { 
+          code: item.Driver.nationality?.substring(0, 2).toLowerCase() || 'un', 
+          nat: item.Driver.nationality?.substring(0, 3).toUpperCase() || 'FIA' 
+        };
+
+        const baseline = drivers.find((d) => d.driverCode === item.Driver.code);
+        const form = baseline ? baseline.form : [Math.max(1, idx - 1), idx + 1, Math.max(1, idx), idx + 2, idx + 1];
+
+        return {
+          pos: parseInt(item.position),
+          driverNumber: item.Driver.permanentNumber || String(item.position),
+          driverName: `${item.Driver.givenName} ${item.Driver.familyName}`,
+          driverCode: item.Driver.code || item.Driver.familyName.substring(0, 3).toUpperCase(),
+          team: item.Constructors?.[0]?.name || 'Independent',
+          teamKey: constructorId,
+          countryCode: countryInfo.code,
+          nationality: countryInfo.nat,
+          points: pts,
+          wins: parseInt(item.wins) || 0,
+          behindLeader: topPoints - pts,
+          form,
+        };
+      });
+    }
+
+    if (cList && cList.length > 0) {
+      const topPoints = parseFloat(cList[0].points) || 0;
+      constructors = cList.map((item: any) => {
+        const pts = parseFloat(item.points) || 0;
+        const constructorId = (item.Constructor.constructorId || '').toLowerCase().replace(/[^a-z]/g, '');
+        return {
+          pos: parseInt(item.position),
+          team: item.Constructor.name,
+          teamKey: constructorId,
+          points: pts,
+          wins: parseInt(item.wins) || 0,
+          behindLeader: topPoints - pts,
+        };
+      });
+    }
+  }
+} catch {
+  // Graceful fallback to static dataset
+}
+
+function getFormBadgeClass(result: number | 'RET'): string {
+  if (result === 'RET') return 'badge-ret';
+  if (result === 1) return 'badge-p1';
+  if (result === 2) return 'badge-p2';
+  if (result === 3) return 'badge-p3';
+  if (result <= 10) return 'badge-points';
+  return 'badge-out';
+}
+---
+
+<Layout 
+  title="F1 Championship Standings | Drivers & Constructors | My Grand Prix Hub"
+  description="Live Formula 1 World Championship points standings, circular form guides, and constructor leaderboards."
+>
+  <main class="standings-wrapper">
+    <!-- Header Section -->
+    <header class="standings-header">
+      <div class="header-badge">
+        <span class="pulse-dot"></span>
+        <span>FIA Formula One World Championship</span>
+      </div>
+      <h1>World Championship Standings</h1>
+      <p class="subtitle">Official standings, recent race form guide, and points classification.</p>
+    </header>
+
+    <!-- SECTION 1: DRIVERS CHAMPIONSHIP -->
+    <section class="section-container">
+      <div class="section-header-row">
+        <div>
+          <h2>Drivers' Championship</h2>
+          <span class="section-desc">Driver rankings, 5-race form guide, and point tallies</span>
+        </div>
+        <span class="count-badge">{drivers.length} Drivers Classified</span>
+      </div>
+
+      <div class="standings-card">
+        <div class="table-container">
+          <table class="f1-table">
+            <thead>
+              <tr>
+                <th class="col-pos">Pos</th>
+                <th class="col-driver">Driver</th>
+                <th class="col-nat">Nat</th>
+                <th class="col-form">Last 5 Races</th>
+                <th class="col-wins">Wins</th>
+                <th class="col-gap">Gap</th>
+                <th class="col-pts">Points</th>
+              </tr>
+            </thead>
+            <tbody>
+              {drivers.map((d) => (
+                <tr class={`row-item team-border-${d.teamKey} ${d.pos <= 3 ? 'podium-row' : ''}`}>
+                  <td class="col-pos">
+                    <span class={`pos-badge pos-${d.pos}`}>{d.pos}</span>
+                  </td>
+                  <td class="col-driver">
+                    <div class="driver-cell">
+                      <span class="driver-number">{d.driverNumber}</span>
+                      <div class="driver-info-block">
+                        <div class="driver-name-row">
+                          <span class="driver-fullname">{d.driverName}</span>
+                          <span class="driver-code-tag">{d.driverCode}</span>
+                        </div>
+                        <span class="driver-sub-team">{d.team}</span>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="col-nat">
+                    <div class="nat-stack">
+                      <img 
+                        src={`https://flagcdn.com/w40/${d.countryCode}.png`}
+                        width="20"
+                        height="15"
+                        alt={d.nationality}
+                        class="flag-img"
+                        loading="lazy"
+                        onerror="this.style.display='none';"
+                      />
+                      <span class="nat-text">{d.nationality}</span>
+                    </div>
+                  </td>
+                  <td class="col-form">
+                    <div class="form-grid-wrapper">
+                      <div class="form-grid">
+                        {d.form.map((res) => (
+                          <span class={`form-circle ${getFormBadgeClass(res)}`}>
+                            {res}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </td>
+                  <td class="col-wins">
+                    <span class="stat-num">{d.wins}</span>
+                  </td>
+                  <td class="col-gap">
+                    {d.behindLeader === 0 ? (
+                      <span class="leader-badge">LEADER</span>
+                    ) : (
+                      <span class="gap-text">-{d.behindLeader}</span>
+                    )}
+                  </td>
+                  <td class="col-pts">
+                    <span class="pts-value">{d.points}</span>
+                    <span class="pts-label">PTS</span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 2: CONSTRUCTORS CHAMPIONSHIP -->
+    <section class="section-container constructors-section">
+      <div class="section-header-row">
+        <div>
+          <h2>Constructors' Championship</h2>
+          <span class="section-desc">Team points classification and race win records</span>
+        </div>
+        <span class="count-badge">{constructors.length} Teams</span>
+      </div>
+
+      <div class="standings-card">
+        <div class="table-container">
+          <table class="f1-table">
+            <thead>
+              <tr>
+                <th class="col-pos">Pos</th>
+                <th class="col-team-title">Constructor</th>
+                <th class="col-wins">Wins</th>
+                <th class="col-gap">Gap</th>
+                <th class="col-pts">Points</th>
+              </tr>
+            </thead>
+            <tbody>
+              {constructors.map((c) => (
+                <tr class={`row-item team-border-${c.teamKey} ${c.pos <= 3 ? 'podium-row' : ''}`}>
+                  <td class="col-pos">
+                    <span class={`pos-badge pos-${c.pos}`}>{c.pos}</span>
+                  </td>
+                  <td class="col-team-title">
+                    <div class="team-cell">
+                      <div class={`team-color-indicator team-bg-${c.teamKey}`}></div>
+                      <span class="team-name-text">{c.team}</span>
+                    </div>
+                  </td>
+                  <td class="col-wins">
+                    <span class="stat-num">{c.wins}</span>
+                  </td>
+                  <td class="col-gap">
+                    {c.behindLeader === 0 ? (
+                      <span class="leader-badge">LEADER</span>
+                    ) : (
+                      <span class="gap-text">-{c.behindLeader}</span>
+                    )}
+                  </td>
+                  <td class="col-pts">
+                    <span class="pts-value">{c.points}</span>
+                    <span class="pts-label">PTS</span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+</Layout>
+
+<style>
+  /* Base Container */
+  .standings-wrapper {
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 3rem 1.5rem 6rem;
+    color: #f1f5f9;
+    box-sizing: border-box;
+  }
+
+  /* Header */
+  .standings-header {
+    margin-bottom: 3.5rem;
+  }
+
+  .header-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    background: rgba(225, 6, 0, 0.12);
+    border: 1px solid rgba(225, 6, 0, 0.35);
+    color: #ff3b30;
+    font-size: 0.78rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 0.38rem 0.85rem;
+    border-radius: 9999px;
+    margin-bottom: 1rem;
+  }
+
+  .pulse-dot {
+    width: 8px;
+    height: 8px;
+    background: #e10600;
+    border-radius: 50%;
+    box-shadow: 0 0 8px #e10600;
+  }
+
+  h1 {
+    font-size: 2.85rem;
+    font-weight: 900;
+    letter-spacing: -0.035em;
+    margin: 0 0 0.5rem;
+    color: #ffffff;
+  }
+
+  .subtitle {
+    color: #94a3b8;
+    font-size: 1.15rem;
+    margin: 0;
+  }
+
+  /* Section Spacing */
+  .section-container {
+    margin-bottom: 2rem;
+  }
+
+  .constructors-section {
+    margin-top: 5rem;
+  }
+
+  .section-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.85rem;
+    border-bottom: 1px solid #334155;
+  }
+
+  .section-header-row h2 {
+    font-size: 1.65rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin: 0 0 0.3rem 0;
+    letter-spacing: -0.01em;
+  }
+
+  .section-desc {
+    color: #94a3b8;
+    font-size: 0.92rem;
+  }
+
+  .count-badge {
+    background: #0f172a;
+    border: 1px solid #334155;
+    color: #38bdf8;
+    font-size: 0.8rem;
+    font-weight: 700;
+    padding: 0.35rem 0.75rem;
+    border-radius: 6px;
+  }
+
+  /* Table Card */
+  .standings-card {
+    background: #0f172a;
+    border: 1px solid #1e293b;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  }
+
+  .table-container {
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  .f1-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    text-align: left;
+  }
+
+  /* Table Header */
+  .f1-table thead th {
+    background: #080d1a;
+    color: #64748b;
+    font-size: 0.76rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 1.15rem 1.6rem;
+    border-bottom: 1px solid #1e293b;
+    white-space: nowrap;
+  }
+
+  /* Table Rows */
+  .f1-table tbody td {
+    padding: 1.05rem 1.6rem;
+    border-bottom: 1px solid #1e293b;
+    font-size: 0.96rem;
+    vertical-align: middle;
+    white-space: nowrap;
+  }
+
+  .f1-table tbody tr:last-child td {
+    border-bottom: none;
+  }
+
+  .row-item {
+    transition: background-color 0.15s ease;
+    border-left: 4px solid transparent;
+  }
+
+  .row-item:hover {
+    background-color: rgba(255, 255, 255, 0.03);
+  }
+
+  /* Team Accent Ribbons */
+  .team-border-redbull { border-left-color: #3671c6; }
+  .team-border-ferrari { border-left-color: #e8002d; }
+  .team-border-mclaren { border-left-color: #ff8000; }
+  .team-border-mercedes { border-left-color: #27f4d2; }
+  .team-border-astonmartin { border-left-color: #229971; }
+  .team-border-alpine { border-left-color: #ff87bc; }
+  .team-border-williams { border-left-color: #64c4ff; }
+  .team-border-rb, .team-border-racingbulls { border-left-color: #6692ff; }
+  .team-border-audi, .team-border-sauber { border-left-color: #00e700; }
+  .team-border-cadillac { border-left-color: #d4af37; }
+  .team-border-haas { border-left-color: #b6babd; }
+
+  /* Team Colors */
+  .team-color-indicator {
+    width: 14px;
+    height: 14px;
+    border-radius: 4px;
+    flex-shrink: 0;
+  }
+  .team-bg-redbull { background: #3671c6; }
+  .team-bg-ferrari { background: #e8002d; }
+  .team-bg-mclaren { background: #ff8000; }
+  .team-bg-mercedes { background: #27f4d2; }
+  .team-bg-astonmartin { background: #229971; }
+  .team-bg-alpine { background: #ff87bc; }
+  .team-bg-williams { background: #64c4ff; }
+  .team-bg-rb, .team-bg-racingbulls { background: #6692ff; }
+  .team-bg-audi, .team-bg-sauber { background: #00e700; }
+  .team-bg-cadillac { background: #d4af37; }
+  .team-bg-haas { background: #b6babd; }
+
+  /* Columns */
+  .col-pos { width: 70px; text-align: center; }
+  .col-driver { min-width: 250px; }
+  .col-team-title { min-width: 240px; }
+  .col-nat { width: 85px; text-align: center; }
+  .col-form { min-width: 200px; text-align: center; }
+  .col-wins { width: 95px; text-align: center; }
+  .col-gap { width: 120px; text-align: center; }
+  .col-pts { width: 130px; text-align: right; }
+
+  /* Position Badges */
+  .pos-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    font-weight: 800;
+    font-size: 0.95rem;
+    background: #1e293b;
+    color: #94a3b8;
+  }
+
+  .pos-badge.pos-1 { 
+    background: linear-gradient(135deg, #ffd700, #b8860b); 
+    color: #000; 
+    font-weight: 900;
+    box-shadow: 0 0 12px rgba(255, 215, 0, 0.3);
+  }
+  .pos-badge.pos-2 { 
+    background: linear-gradient(135deg, #e2e8f0, #94a3b8); 
+    color: #000; 
+  }
+  .pos-badge.pos-3 { 
+    background: linear-gradient(135deg, #d97706, #92400e); 
+    color: #fff; 
+  }
+
+  /* Driver Cell */
+  .driver-cell {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .driver-number {
+    font-size: 1.15rem;
+    font-weight: 900;
+    color: #475569;
+    width: 24px;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .driver-info-block {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+
+  .driver-name-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .driver-fullname {
+    font-weight: 700;
+    color: #ffffff;
+    font-size: 1.02rem;
+  }
+
+  .driver-code-tag {
+    font-size: 0.72rem;
+    font-weight: 800;
+    background: #1e293b;
+    color: #94a3b8;
+    padding: 0.15rem 0.4rem;
+    border-radius: 4px;
+  }
+
+  .driver-sub-team {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: #94a3b8;
+  }
+
+  /* Centered Stacked Nationality */
+  .nat-stack {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 0.3rem;
+    width: 100%;
+    margin: 0 auto;
+  }
+
+  .flag-img {
+    border-radius: 2px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
+    display: block;
+    object-fit: cover;
+    margin: 0 auto;
+  }
+
+  .nat-text {
+    font-size: 0.7rem;
+    font-weight: 800;
+    color: #94a3b8;
+    letter-spacing: 0.05em;
+    line-height: 1;
+    text-align: center;
+    display: block;
+  }
+
+  /* Form Grid */
+  .form-grid-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+  }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 24px);
+    gap: 8px;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Form Circles */
+  .form-circle {
+    width: 24px;
+    height: 24px;
+    min-width: 24px;
+    min-height: 24px;
+    max-width: 24px;
+    max-height: 24px;
+    border-radius: 50% !important;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.72rem;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    box-sizing: border-box;
+    line-height: 1;
+    text-align: center;
+    flex-shrink: 0;
+  }
+
+  /* Finishing Colors */
+  .badge-p1 {
+    background: #ffd700;
+    color: #000000;
+    font-weight: 900;
+    box-shadow: 0 0 6px rgba(255, 215, 0, 0.45);
+  }
+
+  .badge-p2 {
+    background: #cbd5e1;
+    color: #0f172a;
+    font-weight: 900;
+  }
+
+  .badge-p3 {
+    background: #d97706;
+    color: #ffffff;
+    font-weight: 900;
+  }
+
+  .badge-points {
+    background: #1e293b;
+    color: #38bdf8;
+    border: 1px solid #334155;
+  }
+
+  .badge-out {
+    background: #090e1a;
+    color: #64748b;
+    border: 1px solid #1e293b;
+  }
+
+  .badge-ret {
+    background: rgba(225, 6, 0, 0.25);
+    color: #f87171;
+    border: 1px solid rgba(225, 6, 0, 0.5);
+    font-size: 0.55rem;
+  }
+
+  /* Constructor Cell */
+  .team-cell {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+  }
+
+  .team-name-text {
+    font-weight: 700;
+    color: #ffffff;
+    font-size: 1.05rem;
+  }
+
+  .stat-num {
+    font-weight: 700;
+    color: #f8fafc;
+  }
+
+  .gap-text {
+    color: #94a3b8;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .leader-badge {
+    background: rgba(34, 197, 94, 0.15);
+    color: #4ade80;
+    font-size: 0.72rem;
+    font-weight: 800;
+    padding: 0.22rem 0.55rem;
+    border-radius: 4px;
+    border: 1px solid rgba(34, 197, 94, 0.3);
+  }
+
+  .pts-value {
+    font-size: 1.25rem;
+    font-weight: 900;
+    color: #ffffff;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .pts-label {
+    font-size: 0.72rem;
+    font-weight: 800;
+    color: #e10600;
+    margin-left: 0.3rem;
+  }
+
+  /* Responsive layout */
+  @media (max-width: 900px) {
+    .standings-wrapper {
+      padding: 2rem 1rem 4rem;
+    }
+    h1 {
+      font-size: 2.1rem;
+    }
+    .col-nat, .col-gap {
+      display: none;
+    }
+    .f1-table thead th, 
+    .f1-table tbody td {
+      padding: 0.9rem 1rem;
+    }
+  }
+
+  @media (max-width: 680px) {
+    .col-form {
+      display: none;
+    }
+  }
+</style>

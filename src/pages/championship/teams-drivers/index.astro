@@ -1,0 +1,650 @@
+---
+// src/pages/championship/teams-drivers.astro
+import Layout from '@/layouts/Layout.astro';
+
+interface Driver {
+  number: string;
+  name: string;
+  code: string;
+  countryCode: string;
+  nationality: string;
+  instagram?: string;
+  x?: string;
+  isChampion?: boolean;
+  wdc?: number;
+}
+
+interface Team {
+  name: string;
+  teamKey: string;
+  base: string;
+  principal: string;
+  powerUnit: string;
+  championships: number;
+  website: string;
+  instagram: string;
+  x: string;
+  isChampion?: boolean;
+  drivers: Driver[];
+}
+
+const TEAMS_DATA: Team[] = [
+  {
+    name: "McLaren Formula 1 Team",
+    teamKey: "mclaren",
+    base: "Woking, United Kingdom",
+    principal: "Andrea Stella",
+    powerUnit: "Mercedes-AMG",
+    championships: 9,
+    website: "https://www.mclaren.com/racing/formula-1/",
+    instagram: "https://www.instagram.com/mclaren/",
+    x: "https://x.com/McLarenF1",
+    isChampion: true,
+    drivers: [
+      { number: "4", name: "Lando Norris", code: "NOR", countryCode: "gb", nationality: "GBR", instagram: "https://www.instagram.com/landonorris/", x: "https://x.com/LandoNorris", isChampion: true, wdc: 1 },
+      { number: "81", name: "Oscar Piastri", code: "PIA", countryCode: "au", nationality: "AUS", instagram: "https://www.instagram.com/oscarpiastri/", x: "https://x.com/OscarPiastri" }
+    ]
+  },
+  {
+    name: "Scuderia Ferrari",
+    teamKey: "ferrari",
+    base: "Maranello, Italy",
+    principal: "Frédéric Vasseur",
+    powerUnit: "Ferrari",
+    championships: 16,
+    website: "https://www.ferrari.com/en-EN/formula1",
+    instagram: "https://www.instagram.com/scuderiaferrari/",
+    x: "https://x.com/ScuderiaFerrari",
+    drivers: [
+      { number: "16", name: "Charles Leclerc", code: "LEC", countryCode: "mc", nationality: "MON", instagram: "https://www.instagram.com/charles_leclerc/", x: "https://x.com/Charles_Leclerc" },
+      { number: "44", name: "Lewis Hamilton", code: "HAM", countryCode: "gb", nationality: "GBR", instagram: "https://www.instagram.com/lewishamilton/", x: "https://x.com/LewisHamilton", wdc: 7 }
+    ]
+  },
+  {
+    name: "Red Bull Racing",
+    teamKey: "redbull",
+    base: "Milton Keynes, United Kingdom",
+    principal: "Christian Horner",
+    powerUnit: "Red Bull Ford Powertrains",
+    championships: 6,
+    website: "https://www.redbullracing.com/",
+    instagram: "https://www.instagram.com/redbullracing/",
+    x: "https://x.com/redbullracing",
+    drivers: [
+      { number: "1", name: "Max Verstappen", code: "VER", countryCode: "nl", nationality: "NED", instagram: "https://www.instagram.com/maxverstappen1/", x: "https://x.com/Max33Verstappen", wdc: 4 },
+      { number: "6", name: "Isack Hadjar", code: "HAD", countryCode: "fr", nationality: "FRA", instagram: "https://www.instagram.com/isackhadjar/", x: "https://x.com/isack_hadjar" }
+    ]
+  },
+  {
+    name: "Mercedes-AMG Petronas F1 Team",
+    teamKey: "mercedes",
+    base: "Brackley, United Kingdom",
+    principal: "Toto Wolff",
+    powerUnit: "Mercedes-AMG",
+    championships: 8,
+    website: "https://www.mercedesamgf1.com/",
+    instagram: "https://www.instagram.com/mercedesamgf1/",
+    x: "https://x.com/MercedesAMGF1",
+    drivers: [
+      { number: "63", name: "George Russell", code: "RUS", countryCode: "gb", nationality: "GBR", instagram: "https://www.instagram.com/georgerussell63/", x: "https://x.com/GeorgeRussell63" },
+      { number: "12", name: "Kimi Antonelli", code: "ANT", countryCode: "it", nationality: "ITA", instagram: "https://www.instagram.com/kimi.antonelli/", x: "https://x.com/KimiAntonelli" }
+    ]
+  },
+  {
+    name: "Aston Martin Aramco F1 Team",
+    teamKey: "astonmartin",
+    base: "Silverstone, United Kingdom",
+    principal: "Mike Krack",
+    powerUnit: "Honda",
+    championships: 0,
+    website: "https://www.astonmartinf1.com/",
+    instagram: "https://www.instagram.com/astonmartinf1/",
+    x: "https://x.com/AstonMartinF1",
+    drivers: [
+      { number: "14", name: "Fernando Alonso", code: "ALO", countryCode: "es", nationality: "ESP", instagram: "https://www.instagram.com/fernandoalo_oficial/", x: "https://x.com/alo_oficial", wdc: 2 },
+      { number: "18", name: "Lance Stroll", code: "STR", countryCode: "ca", nationality: "CAN", instagram: "https://www.instagram.com/lance_stroll/", x: "https://x.com/lance_stroll" }
+    ]
+  },
+  {
+    name: "Visa Cash App RB F1 Team",
+    teamKey: "rb",
+    base: "Faenza, Italy",
+    principal: "Laurent Mekies",
+    powerUnit: "Red Bull Ford Powertrains",
+    championships: 0,
+    website: "https://www.visacashapprb.com/",
+    instagram: "https://www.instagram.com/visacashapprb/",
+    x: "https://x.com/visacashapprb",
+    drivers: [
+      { number: "30", name: "Liam Lawson", code: "LAW", countryCode: "nz", nationality: "NZL", instagram: "https://www.instagram.com/liamlawson30/", x: "https://x.com/LiamLawson30" },
+      { number: "3", name: "Arvid Lindblad", code: "LIN", countryCode: "gb", nationality: "GBR", instagram: "https://www.instagram.com/arvidlindblad/", x: "https://x.com/arvidlindblad" }
+    ]
+  },
+  {
+    name: "Williams Racing",
+    teamKey: "williams",
+    base: "Grove, United Kingdom",
+    principal: "James Vowles",
+    powerUnit: "Mercedes-AMG",
+    championships: 9,
+    website: "https://www.williamsf1.com/",
+    instagram: "https://www.instagram.com/williamsracing/",
+    x: "https://x.com/WilliamsRacing",
+    drivers: [
+      { number: "23", name: "Alexander Albon", code: "ALB", countryCode: "th", nationality: "THA", instagram: "https://www.instagram.com/alex_albon/", x: "https://x.com/alex_albon" },
+      { number: "55", name: "Carlos Sainz", code: "SAI", countryCode: "es", nationality: "ESP", instagram: "https://www.instagram.com/carlossainz55/", x: "https://x.com/Carlossainz55" }
+    ]
+  },
+  {
+    name: "Audi F1 Team",
+    teamKey: "audi",
+    base: "Hinwil, Switzerland & Neuburg, Germany",
+    principal: "Mattia Binotto",
+    powerUnit: "Audi",
+    championships: 0,
+    website: "https://www.audif1.com/en",
+    instagram: "https://www.instagram.com/audisport/",
+    x: "https://x.com/audisport",
+    drivers: [
+      { number: "27", name: "Nico Hülkenberg", code: "HUL", countryCode: "de", nationality: "GER", instagram: "https://www.instagram.com/hulkhulkenberg/", x: "https://x.com/HulkHulkenberg" },
+      { number: "5", name: "Gabriel Bortoleto", code: "BOR", countryCode: "br", nationality: "BRA", instagram: "https://www.instagram.com/gabrielbortoleto_/", x: "https://x.com/gabortoleto85" }
+    ]
+  },
+  {
+    name: "BWT Alpine F1 Team",
+    teamKey: "alpine",
+    base: "Enstone, United Kingdom",
+    principal: "Oliver Oakes",
+    powerUnit: "Mercedes-AMG",
+    championships: 2,
+    website: "https://www.alpinef1.com/",
+    instagram: "https://www.instagram.com/alpinef1team/",
+    x: "https://x.com/AlpineF1Team",
+    drivers: [
+      { number: "10", name: "Pierre Gasly", code: "GAS", countryCode: "fr", nationality: "FRA", instagram: "https://www.instagram.com/pierregasly/", x: "https://x.com/PierreGASLY" },
+      { number: "43", name: "Franco Colapinto", code: "COL", countryCode: "ar", nationality: "ARG", instagram: "https://www.instagram.com/francolapinto/", x: "https://x.com/FranColapinto" }
+    ]
+  },
+  {
+    name: "Haas F1 Team",
+    teamKey: "haas",
+    base: "Kannapolis, United States",
+    principal: "Ayao Komatsu",
+    powerUnit: "Ferrari",
+    championships: 0,
+    website: "https://www.haasf1team.com/",
+    instagram: "https://www.instagram.com/haasf1team/",
+    x: "https://x.com/HaasF1Team",
+    drivers: [
+      { number: "31", name: "Esteban Ocon", code: "OCO", countryCode: "fr", nationality: "FRA", instagram: "https://www.instagram.com/estebanocon/", x: "https://x.com/OconEsteban" },
+      { number: "87", name: "Oliver Bearman", code: "BEA", countryCode: "gb", nationality: "GBR", instagram: "https://www.instagram.com/olliebearman/", x: "https://x.com/OllieBearman" }
+    ]
+  },
+  {
+    name: "Cadillac F1 Team",
+    teamKey: "cadillac",
+    base: "Fishers, Indiana, United States",
+    principal: "Marcin Budkowski",
+    powerUnit: "Ferrari",
+    championships: 0,
+    website: "https://www.cadillacf1team.com/",
+    instagram: "https://www.instagram.com/cadillac/",
+    x: "https://x.com/Cadillac",
+    drivers: [
+      { number: "11", name: "Sergio Perez", code: "PER", countryCode: "mx", nationality: "MEX", instagram: "https://www.instagram.com/schecoperez/", x: "https://x.com/SChecoPerez" },
+      { number: "77", name: "Valtteri Bottas", code: "BOT", countryCode: "fi", nationality: "FIN", instagram: "https://www.instagram.com/valtteribottas/", x: "https://x.com/ValtteriBottas" }
+    ]
+  }
+];
+---
+
+<Layout 
+  title="F1 Teams & Drivers | FIA Formula One World Championship | My Grand Prix Hub"
+  description="Explore the complete Formula 1 grid: team profiles, bases, power units, driver pairings, and official social media channels."
+>
+  <main class="page-container directory-page">
+    <!-- Header Section -->
+    <header class="section-header">
+      <span class="badge">Championship Directory</span>
+      <h1>Teams & Drivers</h1>
+      <p>Technical profiles, team headquarters, engine suppliers, driver pairings, and official links for the 2026 Formula 1 grid.</p>
+    </header>
+
+    <!-- Teams List -->
+    <div class="teams-stack">
+      {TEAMS_DATA.map((team) => (
+        <article class={`team-card team-border-${team.teamKey}`}>
+          
+          <!-- Team Header -->
+          <div class="team-header">
+            <div class="team-identity">
+              <div class={`team-color-indicator team-bg-${team.teamKey}`}></div>
+              <h2>{team.name}</h2>
+              {team.isChampion ? (
+                <div class="champion-icon" title="Defending Constructors' Champion">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M4.222 19.778c.026.173.082.342.164.502.19.373.498.665.875.83A2.08 2.08 0 0 0 6.222 21h11.556a2.08 2.08 0 0 0 .961-.102c.377-.165.685-.457.875-.83.082-.16.138-.329.164-.502L22 6.556a1 1 0 0 0-1.572-.818l-4.606 3.29-2.934-5.867a1 1 0 0 0-1.776 0l-2.934 5.867-4.606-3.29A1 1 0 0 0 2 6.556l2.222 13.222zM6 19l-1.63-9.778 3.52 2.514a1 1 0 0 0 1.258-.176L12 6.16l2.852 5.4a1 1 0 0 0 1.258.176l3.52-2.514L18 19H6z"/>
+                    <path d="M12 21v-2H6v2h12v-2h-6z"/>
+                  </svg>
+                </div>
+              ) : null}
+            </div>
+            
+            <div class="social-links-group">
+              <a href={team.website} target="_blank" rel="noopener noreferrer" class="social-btn website-btn" title={`${team.name} Official Website`}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                <span>Website ↗</span>
+              </a>
+              <a href={team.x} target="_blank" rel="noopener noreferrer" class="social-btn icon-btn" title="X / Twitter">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+              </a>
+              <a href={team.instagram} target="_blank" rel="noopener noreferrer" class="social-btn icon-btn" title="Instagram">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+              </a>
+            </div>
+          </div>
+
+          <!-- Team Specs -->
+          <div class="specs-grid">
+            <div class="spec-item">
+              <span class="spec-label">Headquarters</span>
+              <span class="spec-value">{team.base}</span>
+            </div>
+            <div class="spec-item">
+              <span class="spec-label">Team Principal</span>
+              <span class="spec-value">{team.principal}</span>
+            </div>
+            <div class="spec-item">
+              <span class="spec-label">Power Unit</span>
+              <span class="spec-value">{team.powerUnit}</span>
+            </div>
+            <div class="spec-item">
+              <span class="spec-label">World Titles</span>
+              <span class="spec-value">{team.championships > 0 ? `${team.championships} Constructors` : 'None'}</span>
+            </div>
+          </div>
+
+          <!-- Drivers Container -->
+          <div class="drivers-section">
+            <span class="section-tag">Race Drivers</span>
+            <div class="drivers-grid">
+              {team.drivers.map((driver) => (
+                <div class="driver-card">
+                  <div class="driver-left">
+                    <span class="driver-number">{driver.number}</span>
+                    <div class="driver-meta">
+                      <div class="driver-name-row">
+                        <img 
+                          src={`https://flagcdn.com/w40/${driver.countryCode}.png`}
+                          width="18"
+                          height="13"
+                          alt={driver.nationality}
+                          class="driver-flag"
+                          loading="lazy"
+                        />
+                        <span class="driver-fullname">{driver.name}</span>
+                        {driver.isChampion ? (
+                          <div class="champion-icon" title="Defending Drivers' Champion">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                              <path d="M4.222 19.778c.026.173.082.342.164.502.19.373.498.665.875.83A2.08 2.08 0 0 0 6.222 21h11.556a2.08 2.08 0 0 0 .961-.102c.377-.165.685-.457.875-.83.082-.16.138-.329.164-.502L22 6.556a1 1 0 0 0-1.572-.818l-4.606 3.29-2.934-5.867a1 1 0 0 0-1.776 0l-2.934 5.867-4.606-3.29A1 1 0 0 0 2 6.556l2.222 13.222z"/>
+                            </svg>
+                          </div>
+                        ) : null}
+                        {driver.wdc ? (
+                          <span class="wdc-count-pill" title={`${driver.wdc}x World Champion`}>{driver.wdc}x WDC</span>
+                        ) : null}
+                        <span class="driver-code-tag">{driver.code}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Driver Socials -->
+                  <div class="driver-socials">
+                    {driver.x ? (
+                      <a href={driver.x} target="_blank" rel="noopener noreferrer" class="driver-icon-btn" title={`${driver.name} on X`}>
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                      </a>
+                    ) : null}
+                    {driver.instagram ? (
+                      <a href={driver.instagram} target="_blank" rel="noopener noreferrer" class="driver-icon-btn" title={`${driver.name} on Instagram`}>
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+                      </a>
+                    ) : null}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </article>
+      ))}
+    </div>
+  </main>
+</Layout>
+
+<style is:global>
+  /* Base Container matching existing pages */
+  .directory-page.page-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 3rem 1.5rem 5rem;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .directory-page .section-header {
+    margin-bottom: 3rem;
+  }
+
+  .directory-page .badge {
+    display: inline-block;
+    background-color: var(--color-primary, #e10600);
+    color: #ffffff;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 0.25rem 0.6rem;
+    border-radius: 4px;
+    letter-spacing: 0.05em;
+  }
+
+  .directory-page h1 {
+    font-size: 2.5rem;
+    margin: 0.75rem 0 0.5rem 0;
+    font-weight: 800;
+    color: #f8fafc;
+  }
+
+  .directory-page .section-header p {
+    color: var(--color-muted, #94a3b8);
+    font-size: 1.15rem;
+    margin: 0;
+    max-width: 700px;
+  }
+
+  /* Teams Stack */
+  .directory-page .teams-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 1.75rem;
+  }
+
+  /* Team Card */
+  .directory-page .team-card {
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 8px;
+    padding: 1.5rem 1.75rem;
+    border-left: 5px solid #334155;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+  }
+
+  .directory-page .team-card:hover {
+    transform: translateY(-2px);
+    border-color: #475569;
+  }
+
+  /* Team Accent Ribbons */
+  .directory-page .team-border-redbull { border-left-color: #3671c6; }
+  .directory-page .team-border-ferrari { border-left-color: #e8002d; }
+  .directory-page .team-border-mclaren { border-left-color: #ff8000; }
+  .directory-page .team-border-mercedes { border-left-color: #27f4d2; }
+  .directory-page .team-border-astonmartin { border-left-color: #229971; }
+  .directory-page .team-border-alpine { border-left-color: #ff87bc; }
+  .directory-page .team-border-williams { border-left-color: #64c4ff; }
+  .directory-page .team-border-rb { border-left-color: #6692ff; }
+  .directory-page .team-border-audi { border-left-color: #00e700; }
+  .directory-page .team-border-cadillac { border-left-color: #d4af37; }
+  .directory-page .team-border-haas { border-left-color: #b6babd; }
+
+  /* Team Color Dots */
+  .directory-page .team-color-indicator {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+    flex-shrink: 0;
+  }
+  .directory-page .team-bg-redbull { background: #3671c6; }
+  .directory-page .team-bg-ferrari { background: #e8002d; }
+  .directory-page .team-bg-mclaren { background: #ff8000; }
+  .directory-page .team-bg-mercedes { background: #27f4d2; }
+  .directory-page .team-bg-astonmartin { background: #229971; }
+  .directory-page .team-bg-alpine { background: #ff87bc; }
+  .directory-page .team-bg-williams { background: #64c4ff; }
+  .directory-page .team-bg-rb { background: #6692ff; }
+  .directory-page .team-bg-audi { background: #00e700; }
+  .directory-page .team-bg-cadillac { background: #d4af37; }
+  .directory-page .team-bg-haas { background: #b6babd; }
+
+  /* Team Header */
+  .directory-page .team-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #334155;
+    margin-bottom: 1.25rem;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .directory-page .team-identity {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .directory-page .team-header h2 {
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: #f8fafc;
+    margin: 0;
+  }
+
+  /* Champion Icon */
+  .directory-page .champion-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffd700;
+    filter: drop-shadow(0 0 6px rgba(255, 215, 0, 0.4));
+  }
+
+  /* Social Buttons */
+  .directory-page .social-links-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .directory-page .social-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    background: #0f172a;
+    border: 1px solid #334155;
+    color: #94a3b8;
+    padding: 0.4rem 0.65rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  }
+
+  .directory-page .social-btn:hover {
+    background: #e10600;
+    border-color: #e10600;
+    color: #ffffff;
+  }
+
+  .directory-page .icon-btn {
+    padding: 0.4rem;
+    width: 28px;
+    height: 28px;
+    justify-content: center;
+    box-sizing: border-box;
+  }
+
+  /* Specs Grid */
+  .directory-page .specs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1.25rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .directory-page .spec-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+
+  .directory-page .spec-label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #64748b;
+    font-weight: 700;
+  }
+
+  .directory-page .spec-value {
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: #f8fafc;
+  }
+
+  /* Drivers Sub-Section */
+  .directory-page .drivers-section {
+    background: #0f172a;
+    border: 1px solid #334155;
+    border-radius: 6px;
+    padding: 1rem 1.25rem;
+  }
+
+  .directory-page .section-tag {
+    display: block;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #38bdf8;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+  }
+
+  .directory-page .drivers-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 0.75rem;
+  }
+
+  .directory-page .driver-card {
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 6px;
+    padding: 0.75rem 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .directory-page .driver-left {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .directory-page .driver-number {
+    font-size: 1.15rem;
+    font-weight: 900;
+    color: #475569;
+    width: 22px;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .directory-page .driver-name-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .directory-page .driver-flag {
+    border-radius: 2px;
+    display: block;
+    object-fit: cover;
+  }
+
+  .directory-page .driver-fullname {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #f8fafc;
+  }
+
+  /* Driver WDC Pill */
+  .directory-page .wdc-count-pill {
+    font-size: 0.65rem;
+    font-weight: 800;
+    background: rgba(217, 119, 6, 0.15);
+    color: #f59e0b;
+    padding: 0.15rem 0.4rem;
+    border-radius: 4px;
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .directory-page .driver-code-tag {
+    font-size: 0.72rem;
+    font-weight: 800;
+    background: #0f172a;
+    color: #94a3b8;
+    padding: 0.1rem 0.35rem;
+    border-radius: 4px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .directory-page .driver-socials {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+
+  .directory-page .driver-icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 4px;
+    background: #0f172a;
+    border: 1px solid #334155;
+    color: #94a3b8;
+    text-decoration: none;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  }
+
+  .directory-page .driver-icon-btn:hover {
+    background: #e10600;
+    border-color: #e10600;
+    color: #ffffff;
+  }
+
+  /* Responsive layout adjustments */
+  @media (max-width: 768px) {
+    .directory-page.page-container {
+      padding: 2rem 1rem 4rem;
+    }
+    .directory-page h1 {
+      font-size: 2rem;
+    }
+    .directory-page .specs-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+    .directory-page .drivers-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

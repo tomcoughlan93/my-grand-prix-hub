@@ -1,0 +1,393 @@
+---
+// src/pages/circuits-live/circuit-guides/index.astro
+import Layout from '@/layouts/Layout.astro';
+
+// --- DATA MODEL ---
+const circuits = [
+  {
+    slug: "dutch-grand-prix", 
+    title: "Dutch Grand Prix",
+    circuitName: "Circuit Park Zandvoort",
+    country: "Netherlands",
+    // Authentic aerial shot from Wikimedia Commons (Creative Commons licensed)
+    heroImage: "https://commons.wikimedia.org/wiki/Special:FilePath/Circuit_Park_Zandvoort_aerial_photo.jpg"
+  },
+  {
+    slug: "british-grand-prix",
+    title: "British Grand Prix",
+    circuitName: "Silverstone Circuit",
+    country: "UK",
+    // Authentic aerial shot from Wikimedia Commons (Creative Commons licensed)
+    heroImage: "https://commons.wikimedia.org/wiki/Special:FilePath/Silverstone_Circuit,_July_2,_2018_SkySat_(cropped).jpg"
+  }
+  // Add new tracks here as you build them!
+];
+
+// Sort circuits alphabetically by country, then by title
+circuits.sort((a, b) => {
+  const countryA = a.country || '';
+  const countryB = b.country || '';
+  if (countryA === countryB) {
+    return a.title.localeCompare(b.title);
+  }
+  return countryA.localeCompare(countryB);
+});
+
+// Flag helper
+function getFlagCode(country: string) {
+  const map: Record<string, string> = {
+    'Bahrain': 'bh', 'Saudi Arabia': 'sa', 'Australia': 'au', 'Japan': 'jp', 'China': 'cn',
+    'USA': 'us', 'United States': 'us', 'Italy': 'it', 'Monaco': 'mc', 'Canada': 'ca', 'Spain': 'es',
+    'UK': 'gb', 'Austria': 'at', 'Hungary': 'hu', 'Belgium': 'be', 'Netherlands': 'nl',
+    'Azerbaijan': 'az', 'Singapore': 'sg', 'Mexico': 'mx', 'Brazil': 'br', 'Qatar': 'qa', 'UAE': 'ae'
+  };
+  return map[country] || 'un';
+}
+---
+
+<Layout 
+  title="F1 Circuit Guides | My Grand Prix Hub"
+  description="Comprehensive Formula 1 track layouts, spectator sightlines, and race weekend guides for every circuit on the calendar."
+>
+  <main class="page-container">
+    
+    <div class="header-container">
+      <header class="section-header">
+        <span class="badge">Circuit Directory</span>
+        <h1 class="gradient-title">F1 Circuit Guides</h1>
+        <p>Comprehensive track layouts, spectator sightlines, and race weekend guides.</p>
+      </header>
+
+      <!-- LIVE SEARCH BAR -->
+      <div class="search-wrapper">
+        <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input 
+          type="text" 
+          id="circuit-search" 
+          placeholder="Search by track, country, or GP..." 
+          autocomplete="off"
+        />
+      </div>
+    </div>
+
+    {circuits.length === 0 ? (
+      <div class="empty-state">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        <p>No circuit guides available yet.</p>
+      </div>
+    ) : (
+      <div class="card-grid" id="circuit-grid">
+        {circuits.map((circuit) => (
+          <article 
+            class="card circuit-card" 
+            data-search={`${circuit.title.toLowerCase()} ${circuit.country?.toLowerCase() || ''} ${circuit.circuitName?.toLowerCase() || ''}`}
+          >
+            {circuit.heroImage ? (
+              <div class="card-image-wrap">
+                <img src={circuit.heroImage} alt={circuit.title} class="card-image" loading="lazy" />
+              </div>
+            ) : (
+              <div class="card-image-wrap placeholder-bg">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#334155" stroke-width="2"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242M12 12v9"/><path d="m8 17 4-4 4 4"/></svg>
+              </div>
+            )}
+            
+            <div class="card-content">
+              {circuit.country && (
+                <div class="country-row">
+                  <img src={`https://flagcdn.com/w20/${getFlagCode(circuit.country)}.png`} width="16" height="12" alt={circuit.country} class="country-flag" />
+                  <span class="country-tag">{circuit.country}</span>
+                </div>
+              )}
+              
+              <h2>{circuit.title}</h2>
+              <span class="circuit-name-sub">{circuit.circuitName}</span>
+              
+              <a href={`/circuits-live/circuit-guides/${circuit.slug}`} class="read-btn">
+                Read Circuit Guide 
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              </a>
+            </div>
+          </article>
+        ))}
+        
+        <div id="no-results" class="empty-state hidden">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <p>No circuits found matching your search.</p>
+        </div>
+      </div>
+    )}
+  </main>
+</Layout>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.getElementById('circuit-search') as HTMLInputElement;
+    const circuitCards = document.querySelectorAll('.circuit-card');
+    const noResults = document.getElementById('no-results');
+
+    if (searchInput) {
+      searchInput.addEventListener('input', (e) => {
+        const searchTerm = (e.target as HTMLInputElement).value.toLowerCase().trim();
+        let visibleCount = 0;
+
+        circuitCards.forEach(card => {
+          const searchData = card.getAttribute('data-search') || '';
+          
+          if (searchData.includes(searchTerm)) {
+            (card as HTMLElement).style.display = 'flex';
+            visibleCount++;
+          } else {
+            (card as HTMLElement).style.display = 'none';
+          }
+        });
+
+        if (noResults) {
+          noResults.classList.toggle('hidden', visibleCount !== 0);
+        }
+      });
+    }
+  });
+</script>
+
+<style is:global>
+  .page-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 4rem 1.5rem 6rem 1.5rem;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+
+  .header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 4rem;
+    flex-wrap: wrap;
+    gap: 2rem;
+  }
+
+  .section-header {
+    max-width: 600px;
+  }
+
+  .badge {
+    display: inline-block;
+    background-color: #38bdf8;
+    color: #0f172a;
+    font-size: 0.85rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    padding: 0.4rem 1rem;
+    border-radius: 6px;
+    letter-spacing: 0.08em;
+    margin-bottom: 1.25rem;
+  }
+
+  .gradient-title { 
+    font-size: 3.5rem; 
+    margin: 0 0 1rem 0; 
+    font-weight: 900; 
+    letter-spacing: -0.03em; 
+    line-height: 1.1; 
+    background: linear-gradient(to right, #ffffff, #94a3b8);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .section-header p {
+    color: #94a3b8;
+    font-size: 1.15rem;
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  /* Live Search Bar */
+  .search-wrapper {
+    position: relative;
+    width: 100%;
+    max-width: 350px;
+  }
+
+  .search-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #64748b;
+  }
+
+  #circuit-search {
+    width: 100%;
+    background: #0f172a;
+    border: 1px solid #334155;
+    color: #ffffff;
+    padding: 0.85rem 1rem 0.85rem 2.85rem;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-family: inherit;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    box-sizing: border-box;
+  }
+
+  #circuit-search:focus {
+    outline: none;
+    border-color: #38bdf8;
+    box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15);
+  }
+
+  /* Grid & Cards */
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 2rem;
+  }
+
+  .card {
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 12px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  }
+
+  .card:hover {
+    transform: translateY(-6px);
+    border-color: #475569;
+    box-shadow: 0 12px 24px rgba(0,0,0,0.3);
+  }
+
+  .card-image-wrap {
+    height: 200px;
+    background-color: #0b0f19;
+    position: relative;
+    border-bottom: 1px solid #334155;
+  }
+
+  .placeholder-bg {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  }
+
+  .card-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+  }
+
+  .card:hover .card-image {
+    transform: scale(1.05);
+  }
+
+  .card-content {
+    padding: 1.75rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+  }
+
+  .country-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .country-flag {
+    border-radius: 2px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+  }
+
+  .country-tag {
+    font-size: 0.75rem;
+    color: #38bdf8;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  h2 {
+    font-size: 1.45rem;
+    margin: 0 0 0.25rem 0;
+    color: #ffffff;
+    font-weight: 800;
+    line-height: 1.3;
+    letter-spacing: -0.01em;
+  }
+
+  .circuit-name-sub {
+    color: #94a3b8;
+    font-size: 0.95rem;
+    margin-bottom: 1.5rem;
+    display: block;
+  }
+
+  .read-btn {
+    margin-top: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #ffffff;
+    background: #e10600;
+    padding: 0.6rem 1.2rem;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    text-decoration: none;
+    align-self: flex-start;
+    transition: background 0.2s ease;
+  }
+
+  .card:hover .read-btn {
+    background: #ff1a1a;
+  }
+
+  /* Empty State */
+  .empty-state {
+    grid-column: 1 / -1;
+    background: #1e293b;
+    border: 1px dashed #475569;
+    padding: 4rem 2rem;
+    text-align: center;
+    border-radius: 12px;
+    color: #94a3b8;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .empty-state.hidden {
+    display: none !important;
+  }
+
+  .empty-state p {
+    margin: 0;
+    font-size: 1.05rem;
+  }
+
+  /* Responsive Constraints */
+  @media (max-width: 768px) {
+    .header-container {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .search-wrapper {
+      max-width: 100%;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .gradient-title {
+      font-size: 2.5rem;
+    }
+  }
+</style>

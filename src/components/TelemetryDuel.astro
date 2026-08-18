@@ -1,0 +1,210 @@
+---
+// src/components/TelemetryDuel.astro
+
+interface OpenF1Session {
+  session_key: number;
+}
+
+interface OpenF1Position {
+  driver_number: number;
+  position: number;
+}
+
+interface OpenF1Driver {
+  driver_number: number;
+  name_acronym: string;
+  team_colour: string;
+}
+
+interface OpenF1CarData {
+  driver_number: number;
+  speed: number;
+  throttle: number;
+  brake: number;
+  n_gear: number;
+  rpm: number;
+}
+
+let isLive = false;
+let driver1 = { name: 'UNK', color: '#64748b', speed: 0, throttle: 0, brake: 0, gear: 0, rpm: 0 };
+let driver2 = { name: 'UNK', color: '#64748b', speed: 0, throttle: 0, brake: 0, gear: 0, rpm: 0 };
+
+try {
+  // 1. Get current session
+  const sessionRes = await fetch('https://api.openf1.org/v1/sessions?year=2026');
+  const sessions = (await sessionRes.json()) as OpenF1Session[];
+  
+  if (sessions && sessions.length > 0) {
+    const sessionKey = sessions[sessions.length - 1].session_key;
+
+    // 2. Find who is currently P1 and P2
+    const posRes = await fetch(`https://api.openf1.org/v1/position?session_key=${sessionKey}`);
+    const positions = (await posRes.json()) as OpenF1Position[];
+    
+    // Reverse to get latest updates, find the drivers currently in P1 and P2
+    const latestP1 = positions.reverse().find(p => p.position === 1);
+    const latestP2 = positions.find(p => p.position === 2);
+
+    if (latestP1 && latestP2) {
+      isLive = true;
+      const d1Num = latestP1.driver_number;
+      const d2Num = latestP2.driver_number;
+
+      // 3. Fetch Telemetry and Driver Info for just those two cars
+      const [car1Res, car2Res, driversRes] = await Promise.all([
+        fetch(`https://api.openf1.org/v1/car_data?session_key=${sessionKey}&driver_number=${d1Num}`),
+        fetch(`https://api.openf1.org/v1/car_data?session_key=${sessionKey}&driver_number=${d2Num}`),
+        fetch(`https://api.openf1.org/v1/drivers?session_key=${sessionKey}`)
+      ]);
+
+      const car1Data = (await car1Res.json()) as OpenF1CarData[];
+      const car2Data = (await car2Res.json()) as OpenF1CarData[];
+      const drivers = (await driversRes.json()) as OpenF1Driver[];
+
+      // 4. Map the data
+      const d1Info = drivers.find(d => d.driver_number === d1Num);
+      const d2Info = drivers.find(d => d.driver_number === d2Num);
+      
+      const latestCar1 = car1Data[car1Data.length - 1];
+      const latestCar2 = car2Data[car2Data.length - 1];
+
+      if (latestCar1 && d1Info) {
+        driver1 = {
+          name: d1Info.name_acronym || 'P1',
+          color: `#${d1Info.team_colour}`,
+          speed: latestCar1.speed,
+          throttle: latestCar1.throttle,
+          brake: latestCar1.brake,
+          gear: latestCar1.n_gear,
+          rpm: latestCar1.rpm
+        };
+      }
+
+      if (latestCar2 && d2Info) {
+        driver2 = {
+          name: d2Info.name_acronym || 'P2',
+          color: `#${d2Info.team_colour}`,
+          speed: latestCar2.speed,
+          throttle: latestCar2.throttle,
+          brake: latestCar2.brake,
+          gear: latestCar2.n_gear,
+          rpm: latestCar2.rpm
+        };
+      }
+    }
+  }
+} catch (error) {
+  console.error("Telemetry map fetch failed:", error);
+}
+
+// Fallback Mock Data
+if (!isLive || driver1.name === 'UNK') {
+  driver1 = { name: 'NOR', color: '#FF8000', speed: 284, throttle: 100, brake: 0, gear: 7, rpm: 11200 };
+  driver2 = { name: 'VER', color: '#3671C6', speed: 279, throttle: 85, brake: 0, gear: 7, rpm: 10800 };
+}
+
+// Helpers for the UI bars
+const getMaxSpeed = Math.max(340, driver1.speed, driver2.speed);
+const d1SpeedWidth = (driver1.speed / getMaxSpeed) * 100;
+const d2SpeedWidth = (driver2.speed / getMaxSpeed) * 100;
+---
+
+<div class="telemetry-widget">
+  <div class="widget-header">
+    <div class="header-flex">
+      <h2>Live Telemetry: P1 vs P2</h2>
+      {isLive && <span class="live-indicator">LIVE</span>}
+    </div>
+  </div>
+
+  <div class="telemetry-body">
+    
+    <!-- Speed Duel -->
+    <div class="tel-section">
+      <div class="tel-label-row">
+        <span class="tel-metric">SPEED (km/h)</span>
+      </div>
+      
+      <div class="bar-row">
+        <span class="d-name" style={`color: ${driver1.color};`}>{driver1.name}</span>
+        <div class="bar-track">
+          <div class="bar-fill" style={`width: ${d1SpeedWidth}%; background-color: ${driver1.color};`}></div>
+        </div>
+        <span class="d-val">{driver1.speed}</span>
+      </div>
+      
+      <div class="bar-row">
+        <span class="d-name" style={`color: ${driver2.color};`}>{driver2.name}</span>
+        <div class="bar-track">
+          <div class="bar-fill" style={`width: ${d2SpeedWidth}%; background-color: ${driver2.color};`}></div>
+        </div>
+        <span class="d-val">{driver2.speed}</span>
+      </div>
+    </div>
+
+    <div class="tel-grid">
+      <!-- Throttle -->
+      <div class="tel-box">
+        <span class="tel-metric">THROTTLE %</span>
+        <div class="mini-bar-row">
+          <span style={`color: ${driver1.color};`}>{driver1.name}</span>
+          <div class="mini-track"><div class="mini-fill" style={`width: ${driver1.throttle}%; background-color: ${driver1.color};`}></div></div>
+        </div>
+        <div class="mini-bar-row">
+          <span style={`color: ${driver2.color};`}>{driver2.name}</span>
+          <div class="mini-track"><div class="mini-fill" style={`width: ${driver2.throttle}%; background-color: ${driver2.color};`}></div></div>
+        </div>
+      </div>
+
+      <!-- Gear & Brake Status -->
+      <div class="tel-box">
+        <span class="tel-metric">GEAR / BRAKE</span>
+        <div class="status-row">
+          <span style={`color: ${driver1.color};`}>{driver1.name}</span>
+          <span class="gear-badge">G{driver1.gear}</span>
+          <span class={`brake-dot ${driver1.brake > 0 ? 'braking' : ''}`}></span>
+        </div>
+        <div class="status-row">
+          <span style={`color: ${driver2.color};`}>{driver2.name}</span>
+          <span class="gear-badge">G{driver2.gear}</span>
+          <span class={`brake-dot ${driver2.brake > 0 ? 'braking' : ''}`}></span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<style>
+  .telemetry-widget {
+    background: #0f172a; border-radius: 8px; display: flex; flex-direction: column; height: 100%;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  .widget-header { background: #1e293b; padding: 0.75rem 1rem; border-bottom: 1px solid #334155; }
+  .header-flex { display: flex; justify-content: space-between; align-items: center; }
+  .widget-header h2 { color: #ffffff; font-size: 0.9rem; font-weight: 800; margin: 0; text-transform: uppercase; letter-spacing: 0.05em; }
+  .live-indicator { background: rgba(52, 211, 153, 0.15); color: #34d399; font-size: 0.65rem; font-weight: 800; padding: 0.2rem 0.5rem; border-radius: 4px; }
+  
+  .telemetry-body { padding: 1rem; display: flex; flex-direction: column; gap: 1.5rem; }
+  
+  .tel-metric { color: #64748b; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; display: block; }
+  
+  .bar-row { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem; }
+  .d-name { font-weight: 900; font-size: 0.9rem; width: 35px; }
+  .bar-track { flex-grow: 1; height: 12px; background: #1e293b; border-radius: 6px; overflow: hidden; }
+  .bar-fill { height: 100%; transition: width 0.5s ease-out; }
+  .d-val { color: #ffffff; font-family: ui-monospace, monospace; font-weight: 800; font-size: 1.1rem; width: 45px; text-align: right; }
+
+  .tel-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .tel-box { background: #1e293b; padding: 0.75rem; border-radius: 6px; border: 1px solid #334155; }
+  
+  .mini-bar-row { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.4rem; font-size: 0.8rem; font-weight: 800; }
+  .mini-track { flex-grow: 1; height: 6px; background: #0f172a; border-radius: 3px; overflow: hidden; }
+  .mini-fill { height: 100%; transition: width 0.5s; }
+
+  .status-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.4rem; font-size: 0.8rem; font-weight: 800; padding-right: 0.5rem;}
+  .gear-badge { color: #ffffff; background: #0f172a; padding: 0.1rem 0.4rem; border-radius: 4px; font-family: ui-monospace, monospace; }
+  
+  .brake-dot { width: 12px; height: 12px; border-radius: 50%; background: #334155; border: 1px solid #0f172a; }
+  .braking { background: #ef4444; box-shadow: 0 0 8px #ef4444; }
+</style>

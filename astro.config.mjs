@@ -1,13 +1,9 @@
 import { defineConfig } from 'astro/config';
-import tina from '@tinacms/astro/integration';
-import { tinaAdminDevRedirect } from '@tinacms/astro/vite';
+import node from '@astrojs/node'; // Or your specific host adapter (vercel, netlify, etc.)
 
-// https://astro.build/config
 export default defineConfig({
-  output: 'static',
-  integrations: [tina()],
-  vite: {
-    plugins: [tinaAdminDevRedirect()],
-    ssr: { noExternal: ['@tinacms/astro', '@tinacms/bridge'] },
-  },
+  output: 'server', // <-- This is the magic word!
+  adapter: node({
+    mode: "standalone"
+  })
 });

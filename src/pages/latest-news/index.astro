@@ -1,0 +1,349 @@
+---
+// src/pages/latest-news/index.astro
+import Layout from '@/layouts/Layout.astro';
+import Parser from 'rss-parser';
+
+// Define custom item fields for complete TypeScript safety
+interface CustomFeedItem {
+  mediaContent?: any;
+  mediaThumbnail?: any;
+  enclosure?: { url?: string };
+  contentEncoded?: string;
+  description?: string;
+  content?: string;
+  summary?: string;
+  contentSnippet?: string;
+  title?: string;
+  link?: string;
+  pubDate?: string;
+}
+
+const parser: Parser<{}, CustomFeedItem> = new Parser({
+  customFields: {
+    item: [
+      ['media:content', 'mediaContent', { keepArray: true }],
+      ['media:thumbnail', 'mediaThumbnail', { keepArray: true }],
+      ['enclosure', 'enclosure'],
+      ['content:encoded', 'contentEncoded'],
+      ['description', 'description'],
+    ],
+  },
+});
+
+// Feeds with guaranteed, consistent HD images and valid dates
+const VERIFIED_FEEDS = [
+  { name: 'BBC Sport F1', url: 'https://feeds.bbci.co.uk/sport/formula1/rss.xml' },
+  { name: 'Autosport', url: 'https://www.autosport.com/rss/f1/news/' },
+  { name: 'Motorsport.com', url: 'https://www.motorsport.com/rss/f1/news/' },
+  { name: 'RacingNews365', url: 'https://racingnews365.com/rss' },
+  { name: 'Crash.net F1', url: 'https://www.crash.net/rss/f1' },
+];
+
+interface NewsItem {
+  title: string;
+  link: string;
+  pubDate: string;
+  source: string;
+  snippet: string;
+  imageUrl?: string;
+  dateObj: Date;
+}
+
+function cleanSnippet(str?: string): string {
+  if (!str) return '';
+  const text = str
+    .replace(/<[^>]*>?/gm, '')
+    .replace(/&quot;/g, '"')
+    .replace(/&amp;/g, '&')
+    .replace(/&#039;/g, "'")
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/\s+/g, ' ')
+    .trim();
+  return text.length > 130 ? text.substring(0, 127) + '...' : text;
+}
+
+function extractImage(item: CustomFeedItem, sourceName: string): string | undefined {
+  let url: string | undefined = undefined;
+
+  // 1. Check enclosure
+  if (item.enclosure?.url) {
+    url = item.enclosure.url;
+  }
+  // 2. Check media:content array (Autosport, Motorsport.com)
+  else if (item.mediaContent && Array.isArray(item.mediaContent)) {
+    const found = item.mediaContent.find((m: any) => m.$?.url || m.url);
+    if (found) url = found.$?.url || found.url;
+  }
+  // 3. Check media:thumbnail array (BBC Sport)
+  else if (item.mediaThumbnail && Array.isArray(item.mediaThumbnail)) {
+    const found = item.mediaThumbnail.find((t: any) => t.$?.url || t.url);
+    if (found) url = found.$?.url || found.url;
+  }
+  // 4. Fallback: Parse <img> tag from body HTML
+  if (!url) {
+    const html = item.contentEncoded || item.content || item.summary || item.description || '';
+    const match = html.match(/<img[^>]+src=["']([^"']+)["']/i);
+    if (match && match[1]) url = match[1];
+  }
+
+  if (!url) return undefined;
+
+  // Fix BBC thumbnail resolution to request high-res 976px wide assets
+  if (sourceName === 'BBC Sport F1') {
+    url = url
+      .replace(/\/\d+x\d+\//g, '/976x549/')
+      .replace(/\/p\d+\//g, '/p0976/')
+      .replace(/\/(144|240|320|480)\//g, '/976/');
+  }
+
+  return url;
+}
+
+let articles: NewsItem[] = [];
+
+try {
+  const feedPromises = VERIFIED_FEEDS.map(async (src) => {
+    try {
+      const feed = await parser.parseURL(src.url);
+      const validItems: NewsItem[] = [];
+
+      for (const item of feed.items || []) {
+        const imageUrl = extractImage(item, src.name);
+        const hasValidDate = item.pubDate && !isNaN(new Date(item.pubDate).getTime());
+
+        // Strict filter: Exclude any article lacking an image or valid date
+        if (!imageUrl || !hasValidDate) {
+          continue;
+        }
+
+        const dateObj = new Date(item.pubDate!);
+
+        validItems.push({
+          title: item.title || 'F1 News Headline',
+          link: item.link || '#',
+          pubDate: dateObj.toLocaleDateString('en-GB', {
+            day: 'numeric',
+            month: 'short',
+            hour: '2-digit',
+            minute: '2-digit',
+          }),
+          source: src.name,
+          snippet: cleanSnippet(item.contentSnippet || item.content || item.summary || item.description),
+          imageUrl,
+          dateObj,
+        });
+
+        if (validItems.length >= 6) break;
+      }
+
+      return validItems;
+    } catch (err) {
+      console.warn(`[RSS Notice] Could not fetch ${src.name}:`, err);
+      return [];
+    }
+  });
+
+  const results = await Promise.all(feedPromises);
+  // Sort all items newest first
+  articles = results.flat().sort((a, b) => b.dateObj.getTime() - a.dateObj.getTime());
+} catch (e) {
+  console.error('Error loading news feeds:', e);
+}
+---
+
+<Layout 
+  title="Latest F1 News & Headlines | My Grand Prix Hub"
+  description="Live Formula 1 news aggregated with crisp HD images from BBC Sport, Autosport, Motorsport.com, RacingNews365, and Crash.net."
+>
+  <main class="page-container">
+    <header class="section-header">
+      <span class="badge">Latest News</span>
+      <h1>Latest F1 News</h1>
+      <p>The latest headlines, paddock updates, and technical analysis gathered from top global motorsport publications.</p>
+    </header>
+
+    {articles.length === 0 ? (
+      <div class="empty-state">
+        <p>Unable to load news feed at this moment. Please refresh or check back shortly.</p>
+      </div>
+    ) : (
+      <div class="news-grid">
+        {articles.map((item) => (
+          <article class="news-card">
+            <div class="card-image-wrap">
+              <img src={item.imageUrl} alt={item.title} loading="lazy" class="card-image" />
+            </div>
+            
+            <div class="card-body">
+              <div class="card-meta">
+                <span class="source-tag">{item.source}</span>
+                <span class="pub-time">{item.pubDate}</span>
+              </div>
+              <h2>
+                <a href={item.link} target="_blank" rel="noopener noreferrer">
+                  {item.title}
+                </a>
+              </h2>
+              {item.snippet && <p class="snippet">{item.snippet}</p>}
+              <a href={item.link} target="_blank" rel="noopener noreferrer" class="read-link">
+                Read full article on {item.source} ↗
+              </a>
+            </div>
+          </article>
+        ))}
+      </div>
+    )}
+  </main>
+</Layout>
+
+<style>
+  .page-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 3rem 1.5rem 4rem 1.5rem;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .section-header {
+    margin-bottom: 2.5rem;
+  }
+
+  .badge {
+    display: inline-block;
+    background-color: var(--color-primary, #e10600);
+    color: #ffffff;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 0.25rem 0.6rem;
+    border-radius: 4px;
+    letter-spacing: 0.05em;
+  }
+
+  h1 {
+    font-size: 2.5rem;
+    margin: 0.75rem 0 0.5rem 0;
+    font-weight: 800;
+    color: #f8fafc;
+  }
+
+  .section-header p {
+    color: var(--color-muted, #94a3b8);
+    font-size: 1.15rem;
+    margin: 0;
+    max-width: 650px;
+  }
+
+  .news-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.75rem;
+  }
+
+  .news-card {
+    background: var(--color-card, #1e293b);
+    border: 1px solid var(--color-border, #334155);
+    border-radius: 8px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+  }
+
+  .news-card:hover {
+    transform: translateY(-4px);
+    border-color: #e10600;
+  }
+
+  .card-image-wrap {
+    width: 100%;
+    height: 190px;
+    background-color: #0b0f19;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .card-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    transition: transform 0.3s ease;
+  }
+
+  .news-card:hover .card-image {
+    transform: scale(1.04);
+  }
+
+  .card-body {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+  }
+
+  .card-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+    font-size: 0.8rem;
+  }
+
+  .source-tag {
+    color: #38bdf8;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .pub-time {
+    color: #64748b;
+  }
+
+  .news-card h2 {
+    font-size: 1.2rem;
+    line-height: 1.4;
+    margin: 0 0 0.75rem 0;
+    font-weight: 700;
+  }
+
+  .news-card h2 a {
+    color: #f8fafc;
+    text-decoration: none;
+  }
+
+  .news-card h2 a:hover {
+    color: #e10600;
+  }
+
+  .snippet {
+    color: #94a3b8;
+    font-size: 0.9rem;
+    line-height: 1.55;
+    margin: 0 0 1.25rem 0;
+    flex-grow: 1;
+  }
+
+  .read-link {
+    color: #e10600;
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-decoration: none;
+    margin-top: auto;
+  }
+
+  .read-link:hover {
+    text-decoration: underline;
+  }
+
+  .empty-state {
+    background: #1e293b;
+    padding: 3rem;
+    text-align: center;
+    border-radius: 8px;
+    color: #94a3b8;
+  }
+</style>

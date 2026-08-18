@@ -1,0 +1,231 @@
+---
+// src/components/JourneyPlanner.astro
+
+export interface Props {
+  circuitName: string;
+  lat: number;
+  lon: number;
+}
+
+const { circuitName, lat, lon } = Astro.props;
+---
+
+<div class="journey-planner-card">
+  <!-- Option 1: Smart Deep Link Form -->
+  <div class="planner-header">
+    <div class="title-wrap">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e10600" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>
+        <circle cx="12" cy="10" r="3"/>
+      </svg>
+      <h3>Route to {circuitName}</h3>
+    </div>
+    <p>Enter your hotel, airport, or city to get live Google Maps directions directly to the circuit gates.</p>
+  </div>
+
+  <div class="planner-form">
+    <div class="input-group">
+      <div class="input-icon">📍</div>
+      <input type="text" class="js-origin-input" placeholder="e.g. Amsterdam Centraal or Schiphol Airport" />
+    </div>
+    
+    <div class="routing-actions">
+      <!-- UPDATED TO PUBLIC TRANSPORT -->
+      <button class="route-btn transit-btn js-route-btn" data-mode="transit" data-lat={lat} data-lon={lon}>
+        🚆 Public Transport
+      </button>
+      <button class="route-btn drive-btn js-route-btn" data-mode="driving" data-lat={lat} data-lon={lon}>
+        🚗 Drive
+      </button>
+      <button class="route-btn walk-btn js-route-btn" data-mode="walking" data-lat={lat} data-lon={lon}>
+        🚶 Walk
+      </button>
+    </div>
+  </div>
+
+  <!-- Option 3: Curated Transit Hub (Passed in via Slot) -->
+  <div class="curated-transit-section">
+    <h4 class="curated-title">Trackside Transport Hub</h4>
+    <div class="curated-content">
+      <slot>
+        <p class="fallback-text">Curated transit and parking information coming soon.</p>
+      </slot>
+    </div>
+  </div>
+</div>
+
+<script is:inline>
+  function setupJourneyPlanner() {
+    const btns = document.querySelectorAll('.js-route-btn');
+    
+    btns.forEach(btn => {
+      const newBtn = btn.cloneNode(true);
+      btn.parentNode.replaceChild(newBtn, btn);
+
+      newBtn.addEventListener('click', (e) => {
+        const card = newBtn.closest('.journey-planner-card');
+        const input = card.querySelector('.js-origin-input');
+        
+        const origin = input.value.trim();
+        const mode = newBtn.getAttribute('data-mode');
+        const lat = newBtn.getAttribute('data-lat');
+        const lon = newBtn.getAttribute('data-lon');
+        
+        let url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}&travelmode=${mode}`;
+        
+        if (origin) {
+          url += `&origin=${encodeURIComponent(origin)}`;
+        }
+        
+        window.open(url, '_blank');
+      });
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', setupJourneyPlanner);
+  document.addEventListener('astro:page-load', setupJourneyPlanner);
+</script>
+
+<style>
+  .journey-planner-card {
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    border: 1px solid #334155;
+    border-radius: 12px;
+    padding: 2rem;
+    color: #ffffff;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+
+  .planner-header {
+    margin-bottom: 1.5rem;
+  }
+
+  .title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .title-wrap h3 {
+    margin: 0;
+    font-size: 1.3rem;
+    font-weight: 800;
+  }
+
+  .planner-header p {
+    color: #94a3b8;
+    font-size: 0.95rem;
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  .planner-form {
+    background: #0b0f19;
+    border: 1px solid #1e293b;
+    border-radius: 8px;
+    padding: 1.25rem;
+    margin-bottom: 2rem;
+  }
+
+  .input-group {
+    position: relative;
+    margin-bottom: 1rem;
+  }
+
+  .input-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1.1rem;
+    pointer-events: none;
+  }
+
+  .js-origin-input {
+    width: 100%;
+    background: #1e293b;
+    border: 1px solid #334155;
+    color: #ffffff;
+    font-size: 1rem;
+    padding: 0.85rem 1rem 0.85rem 2.75rem;
+    border-radius: 6px;
+    box-sizing: border-box;
+    transition: border-color 0.2s ease;
+  }
+
+  .js-origin-input:focus {
+    outline: none;
+    border-color: #38bdf8;
+    box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
+  }
+
+  .js-origin-input::placeholder {
+    color: #64748b;
+  }
+
+  .routing-actions {
+    display: grid;
+    /* Updated to auto-fit so the longer text doesn't break out of the button on mobile */
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 0.75rem;
+  }
+
+  .route-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 0.75rem;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+  }
+
+  .transit-btn {
+    background: #38bdf8;
+    color: #0f172a;
+  }
+  .transit-btn:hover { background: #7dd3fc; transform: translateY(-2px); }
+
+  .drive-btn, .walk-btn {
+    background: #1e293b;
+    color: #e2e8f0;
+    border-color: #334155;
+  }
+  .drive-btn:hover, .walk-btn:hover {
+    background: #334155;
+    border-color: #475569;
+    transform: translateY(-2px);
+  }
+
+  /* Curated Transit Hub Styling */
+  .curated-transit-section {
+    border-top: 1px dashed #334155;
+    padding-top: 1.5rem;
+  }
+
+  .curated-title {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #64748b;
+    margin: 0 0 1rem 0;
+    font-weight: 800;
+  }
+
+  .curated-content {
+    color: #e2e8f0;
+    font-size: 0.95rem;
+    line-height: 1.6;
+  }
+
+  .fallback-text {
+    color: #64748b;
+    font-style: italic;
+    margin: 0;
+  }
+</style>

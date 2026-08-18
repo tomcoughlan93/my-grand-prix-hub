@@ -1,0 +1,918 @@
+---
+// src/pages/creators/index.astro
+import Layout from '../../layouts/Layout.astro';
+
+// --- DATA MODEL ---
+
+// 1. "Play on Site" Media Hub (Top 3 Most Popular)
+const featuredMedia = [
+  {
+    title: "P1 with Matt & Tommy",
+    type: "spotify",
+    embedUrl: "https://open.spotify.com/embed/show/20La1QIIVElT4mkc046AIV?"
+  },
+  {
+    title: "Sky Sports F1 Podcast",
+    type: "spotify",
+    embedUrl: "https://open.spotify.com/embed/show/38A3a2EBr6ExRHmHs3loTW?"
+  },
+  {
+    title: "F1: Beyond The Grid",
+    type: "spotify",
+    embedUrl: "https://open.spotify.com/embed/show/44YvwJyqsCEEhNZBxuXZQ9?"
+  }
+];
+
+// 2. Creators Directory
+const creators = [
+  {
+    name: "P1 with Matt & Tommy",
+    type: "Podcast",
+    categories: ["Podcast", "YouTube"],
+    host: "Matt Gallagher & Tommy Bellingham",
+    description: "Matt Gallagher and Tommy Bellingham bring their signature banter, race reactions, and F1 news breakdowns. Essential listening for the modern F1 fan.",
+    tags: ["Race Review", "News", "Humor"],
+    socials: { twitter: "https://twitter.com/p1mattandtommy", instagram: "https://instagram.com/p1mattandtommy" },
+    links: [
+      { name: "YouTube", url: "https://www.youtube.com/@p1withmattandtommy", style: "yt" },
+      { name: "Apple", url: "https://podcasts.apple.com/gb/podcast/p1-with-matt-and-tommy/id1670705840", style: "pod" },
+      { name: "Spotify", url: "https://open.spotify.com/show/1Kk7ZpG17fT63o5d9W7dKx", style: "spot" }
+    ]
+  },
+  {
+    name: "F1: Beyond The Grid",
+    type: "Podcast",
+    categories: ["Podcast"],
+    host: "Tom Clarkson",
+    description: "The official long-form interview podcast. Tom Clarkson sits down with current drivers, legends of the sport, and team bosses for revealing, hour-long conversations.",
+    tags: ["Interviews", "History", "Official"],
+    socials: { twitter: "https://twitter.com/f1", instagram: "https://instagram.com/f1" },
+    links: [
+      { name: "Apple", url: "https://podcasts.apple.com/gb/podcast/f1-beyond-the-grid/id1405972616", style: "pod" },
+      { name: "Spotify", url: "https://open.spotify.com/show/44YvzFFLLAcrBrcemO0DoZ", style: "spot" }
+    ]
+  },
+  {
+    name: "Sky Sports F1 Podcast",
+    type: "Podcast",
+    categories: ["Podcast"],
+    host: "Sky F1 Team",
+    description: "The official podcast from the UK's F1 broadcaster. Features Ted Kravitz, Crofty, Natalie Pinkham and the rest of the team debating the hottest topics in the paddock.",
+    tags: ["Debate", "Expert", "Broadcaster"],
+    socials: { twitter: "https://twitter.com/skysportsf1", instagram: "https://instagram.com/skysportsf1" },
+    links: [
+      { name: "Apple", url: "https://podcasts.apple.com/gb/podcast/sky-sports-f1-podcast/id1675204481", style: "pod" },
+      { name: "Spotify", url: "https://open.spotify.com/show/4FfH0E88M2hFUXi0Z6C8jH", style: "spot" }
+    ]
+  },
+  {
+    name: "Up to Speed",
+    type: "Podcast",
+    categories: ["Podcast"],
+    host: "F1 Creators",
+    description: "Your quick, easily digestible recap of everything happening in the fast-paced world of Formula 1. Perfect for catching up on the go.",
+    tags: ["Recap", "News", "Accessible"],
+    socials: null,
+    links: [
+      { name: "Apple", url: "https://podcasts.apple.com/search?term=Up%20to%20Speed%20F1", style: "pod" },
+      { name: "Spotify", url: "https://open.spotify.com/search/Up%20to%20Speed%20F1/podcasts", style: "spot" }
+    ]
+  },
+  {
+    name: "F1 Nation",
+    type: "Podcast",
+    categories: ["Podcast"],
+    host: "Tom Clarkson & Guests",
+    description: "The official race preview and review podcast from the paddock. Features exclusive interviews and insights straight from the drivers and team principals post-race.",
+    tags: ["Race Review", "News", "Official"],
+    socials: { twitter: "https://twitter.com/f1", instagram: "https://instagram.com/f1" },
+    links: [
+      { name: "Apple", url: "https://podcasts.apple.com/gb/podcast/f1-nation/id1510488661", style: "pod" },
+      { name: "Spotify", url: "https://open.spotify.com/show/5J0D7hF4hR3b3ZzB3yX0nO", style: "spot" }
+    ]
+  },
+  {
+    name: "Shift+F1",
+    type: "Podcast",
+    categories: ["Podcast"],
+    host: "Drew, Rob & Danny",
+    description: "A fantastic, accessible weekly podcast about Formula 1. Great for both seasoned veterans and new fans (check out their Preseason Primer).",
+    tags: ["Accessible", "News", "Humor"],
+    socials: { twitter: "https://twitter.com/shiftf1podcast" },
+    links: [
+      { name: "Apple", url: "https://podcasts.apple.com/us/podcast/shift-f1/id1209355152", style: "pod" },
+      { name: "Spotify", url: "https://open.spotify.com/show/4zM4YXXNtc9wA4P2a3j0b1", style: "spot" }
+    ]
+  },
+  {
+    name: "BBC F1: Chequered Flag",
+    type: "Podcast",
+    categories: ["Podcast"],
+    host: "BBC Radio 5 Live",
+    description: "Expert analysis, exclusive interviews, and immediate post-race reactions from the BBC commentary team.",
+    tags: ["Analysis", "Race Review", "Expert"],
+    socials: { twitter: "https://twitter.com/bbc5live" },
+    links: [
+      { name: "BBC Sounds", url: "https://www.bbc.co.uk/programmes/p02nrsjn/episodes/downloads", style: "default" },
+      { name: "Apple", url: "https://podcasts.apple.com/gb/podcast/f1-chequered-flag/id1393699341", style: "pod" }
+    ]
+  },
+  {
+    name: "Missed Apex Podcast",
+    type: "Podcast",
+    categories: ["Podcast", "YouTube"],
+    host: "Spanners & Trumpets",
+    description: "An independent F1 podcast bringing paddock-level analysis with a fun, slightly irreverent shed-based atmosphere. Features ex-F1 personnel regularly.",
+    tags: ["Independent", "Debate", "Fun"],
+    socials: { twitter: "https://twitter.com/MissedApexF1", instagram: "https://instagram.com/missedapexf1" },
+    links: [
+      { name: "YouTube", url: "https://www.youtube.com/@MissedApexPodcast", style: "yt" },
+      { name: "Apple", url: "https://podcasts.apple.com/us/podcast/missed-apex-f1-podcast/id1156681023", style: "pod" },
+      { name: "Spotify", url: "https://open.spotify.com/show/4zM4YXXNtc9wA4P2a3j0b1", style: "spot" }
+    ]
+  },
+  {
+    name: "The Race",
+    type: "YouTube",
+    categories: ["YouTube", "Podcast"],
+    host: "The Race Media",
+    description: "In-depth technical analysis, historical deep-dives, and breaking news explained clearly with excellent 3D animations and paddock sources.",
+    tags: ["Technical", "News", "Analysis"],
+    socials: { twitter: "https://twitter.com/wearetherace", instagram: "https://instagram.com/wearetherace" },
+    links: [
+      { name: "YouTube Channel", url: "https://www.youtube.com/@TheRace", style: "yt" },
+      { name: "Podcasts", url: "https://the-race.com/podcasts/", style: "pod" }
+    ]
+  },
+  {
+    name: "Driver61",
+    type: "YouTube",
+    categories: ["YouTube"],
+    host: "Scott Mansell",
+    description: "A former professional racing driver breaks down driving techniques, engineering secrets, and track-specific challenges in Formula 1.",
+    tags: ["Engineering", "Driving Technique", "Educational"],
+    socials: { twitter: "https://twitter.com/driver61", instagram: "https://instagram.com/officialdriver61" },
+    links: [
+      { name: "YouTube Channel", url: "https://www.youtube.com/@Driver61", style: "yt" }
+    ]
+  },
+  {
+    name: "Tommo",
+    type: "YouTube",
+    categories: ["YouTube"],
+    host: "Tommo",
+    description: "High-quality video essays, race reviews, and liveries rankings. Tommo blends great production value with passionate F1 fandom.",
+    tags: ["Video Essays", "Culture", "Design"],
+    socials: { twitter: "https://twitter.com/TwommoF1", instagram: "https://instagram.com/twommof1" },
+    links: [
+      { name: "YouTube Channel", url: "https://www.youtube.com/@TommoF1", style: "yt" }
+    ]
+  },
+  {
+    name: "WTF1",
+    type: "YouTube",
+    categories: ["YouTube", "Podcast"],
+    host: "WTF1 Team",
+    description: "Internet best reactions, memes, driver tier lists, and news. Heavily focused on the social and entertainment side of Formula 1.",
+    tags: ["Entertainment", "Memes", "Culture"],
+    socials: { twitter: "https://twitter.com/wtf1official", instagram: "https://instagram.com/wtf1official" },
+    links: [
+      { name: "YouTube Channel", url: "https://www.youtube.com/@WTF1", style: "yt" },
+      { name: "Podcasts", url: "https://wtf1.com/podcast/", style: "pod" }
+    ]
+  },
+  {
+    name: "Live to Dash",
+    type: "YouTube",
+    categories: ["YouTube"],
+    host: "Live to Dash",
+    description: "Follow the ultimate F1 travel vloggers as they travel around the world attending Grand Prix weekends. Get an incredible fan-perspective of the atmosphere, trackside experiences, and global F1 culture.",
+    tags: ["Travel", "Vlogs", "Trackside"],
+    socials: { twitter: "https://twitter.com/livetodash", instagram: "https://instagram.com/livetodash" },
+    links: [
+      { name: "YouTube Channel", url: "https://www.youtube.com/@LivetoDash", style: "yt" }
+    ]
+  },
+  {
+    name: "Kym Illman",
+    type: "YouTube",
+    categories: ["YouTube"],
+    host: "Kym Illman",
+    description: "Renowned F1 photographer Kym Illman takes you behind the scenes of the paddock. Get exclusive looks at the drivers, VIPs, and the fascinating world of F1 photography.",
+    tags: ["Photography", "Behind the Scenes", "Paddock"],
+    socials: { instagram: "https://instagram.com/kymillman" },
+    links: [
+      { name: "YouTube Channel", url: "https://www.youtube.com/@KymIllman", style: "yt" }
+    ]
+  },
+  {
+    name: "Josh Revell",
+    type: "YouTube",
+    categories: ["YouTube"],
+    host: "Josh Revell",
+    description: "Known for his witty commentary and highly entertaining video essays. Josh covers F1 history, driver profiles, and motorsport controversies with a unique comedic flair.",
+    tags: ["Comedy", "Video Essays", "History"],
+    socials: { twitter: "https://twitter.com/thejoshrevell" },
+    links: [
+      { name: "YouTube Channel", url: "https://www.youtube.com/@TheJoshRevell", style: "yt" }
+    ]
+  }
+].sort((a, b) => a.name.localeCompare(b.name));
+---
+
+<Layout 
+  title="F1 Content Creators & Podcasts Directory | My Grand Prix Hub"
+  description="Discover the best Formula 1 YouTube channels, technical analysis videos, and podcasts. Listen and watch directly on site."
+>
+  <main class="page-container">
+    
+    <!-- HEADER -->
+    <header class="hub-header">
+      <span class="badge">Community & Content</span>
+      <h1 class="gradient-title">Creators Directory</h1>
+      <p class="subtitle">Explore the best Formula 1 podcasts, technical analysts, and entertainers to keep your feed fully fueled between race weekends.</p>
+    </header>
+
+    <!-- MEDIA HUB SECTION -->
+    <section class="media-hub-section">
+      <div class="section-header-block">
+        <div class="header-left">
+          <h2><span class="emoji">▶️</span> Play on Site</h2>
+          <p class="section-desc">Listen to the most popular F1 podcast episodes seamlessly without leaving the Hub.</p>
+        </div>
+      </div>
+
+      <div class="media-grid">
+        {featuredMedia.map((media) => (
+          <div class={`media-card ${media.type === 'apple' ? 'card-apple' : 'card-spot'}`}>
+            <div class="media-header">
+              <span class={`media-pill ${media.type === 'spotify' ? 'pill-spot' : 'pill-pod'}`}>
+                {media.type === 'spotify' ? 'Spotify' : 'Apple Podcast'}
+              </span>
+              <span class="media-title-trunc" title={media.title}>{media.title}</span>
+            </div>
+            
+            <div class="embed-container iframe-wrapper">
+              <iframe 
+                src={media.embedUrl} 
+                title={media.title}
+                frameborder="0" 
+                allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" 
+                loading="lazy"
+              ></iframe>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- DIRECTORY SECTION -->
+    <section class="directory-section">
+      <div class="section-header-block directory-header-block">
+        <div class="header-left">
+          <h2>The Full Directory</h2>
+          <p class="section-desc">Find your next favorite F1 content creator.</p>
+        </div>
+        
+        <div class="header-right">
+          <!-- LIVE SEARCH BAR -->
+          <div class="search-wrapper">
+            <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input 
+              type="text" 
+              id="creator-search" 
+              placeholder="Search by name, tag, or topic..." 
+              autocomplete="off"
+            />
+          </div>
+
+          <!-- PILL-SHAPED FILTER TOGGLE -->
+          <div class="filter-group" id="creator-filters">
+            <button class="filter-btn is-active" data-filter="All">All</button>
+            <button class="filter-btn" data-filter="Podcast">Podcasts</button>
+            <button class="filter-btn" data-filter="YouTube">YouTube</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="creators-grid" id="creators-grid">
+        {creators.map((creator) => (
+          <div 
+            class={`creator-card border-accent-${creator.type === 'YouTube' ? 'yt' : 'pod'}`} 
+            data-categories={creator.categories.join(',')}
+            data-search={creator.name.toLowerCase() + ' ' + creator.tags.join(' ').toLowerCase() + ' ' + creator.description.toLowerCase()}
+          >
+            
+            <div class="card-top">
+              <span class={`media-icon ${creator.type === 'YouTube' ? 'icon-yt' : 'icon-pod'}`}>
+                {creator.type === 'YouTube' ? (
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33 2.78 2.78 0 0 0 1.94 2c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.33 29 29 0 0 0-.46-5.33z"/><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02" fill="#0f172a"/></svg>
+                ) : (
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
+                )}
+              </span>
+              <div class="card-top-text">
+                <h3 class="card-title">{creator.name}</h3>
+                <span class="platform-text">{creator.categories.join(' & ')}</span>
+              </div>
+            </div>
+            
+            <div class="card-content">
+              <span class="host-name">Hosted by {creator.host}</span>
+              <p>{creator.description}</p>
+              
+              <div class="tags-container">
+                {creator.tags.map(tag => (
+                  <span class="tag">{tag}</span>
+                ))}
+              </div>
+            </div>
+
+            <div class="card-footer">
+              <div class="links-row">
+                {creator.links.map(link => (
+                  <a href={link.url} target="_blank" rel="noopener noreferrer" class={`btn-link btn-${link.style}`}>
+                    {link.name}
+                  </a>
+                ))}
+                
+                <!-- SOCIAL ICONS -->
+                {creator.socials && (
+                  <div class="social-icons">
+                    {creator.socials.twitter && (
+                      <a href={creator.socials.twitter} target="_blank" title="Twitter / X" class="icon-link">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                      </a>
+                    )}
+                    {creator.socials.instagram && (
+                      <a href={creator.socials.instagram} target="_blank" title="Instagram" class="icon-link">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+                      </a>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        ))}
+        
+        <div id="no-results" class="no-results hidden">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <p>No creators found matching your search.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SUGGEST A CREATOR CTA -->
+    <section class="suggest-section">
+      <div class="suggest-content">
+        <h2>Missing Someone?</h2>
+        <p>This directory is powered by the community. If we're missing an essential F1 creator, let us know!</p>
+        <a href="mailto:suggest@mygrandprixhub.com?subject=Creator Suggestion" class="btn-suggest">Suggest a Creator</a>
+      </div>
+    </section>
+
+  </main>
+</Layout>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const filterBtns = document.querySelectorAll('.filter-btn');
+    const creatorCards = document.querySelectorAll('.creator-card');
+    const searchInput = document.getElementById('creator-search') as HTMLInputElement;
+    const noResults = document.getElementById('no-results');
+
+    let currentFilter = 'All';
+    let currentSearch = '';
+
+    const renderGrid = () => {
+      let visibleCount = 0;
+
+      creatorCards.forEach(card => {
+        const categories = card.getAttribute('data-categories') || '';
+        const searchText = card.getAttribute('data-search') || '';
+        
+        const matchesFilter = (currentFilter === 'All' || categories.includes(currentFilter));
+        const matchesSearch = (currentSearch === '' || searchText.includes(currentSearch));
+
+        if (matchesFilter && matchesSearch) {
+          (card as HTMLElement).style.display = 'flex';
+          visibleCount++;
+        } else {
+          (card as HTMLElement).style.display = 'none';
+        }
+      });
+
+      if (noResults) {
+        noResults.classList.toggle('hidden', visibleCount !== 0);
+      }
+    };
+
+    filterBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        filterBtns.forEach(b => b.classList.remove('is-active'));
+        btn.classList.add('is-active');
+        currentFilter = btn.getAttribute('data-filter') || 'All';
+        renderGrid();
+      });
+    });
+
+    if (searchInput) {
+      searchInput.addEventListener('input', (e) => {
+        currentSearch = (e.target as HTMLInputElement).value.toLowerCase().trim();
+        renderGrid();
+      });
+    }
+  });
+</script>
+
+<style is:global>
+  /* Base Styles */
+  .page-container {
+    max-width: 1200px; 
+    margin: 0 auto; 
+    padding: 4rem 1.5rem 6rem; 
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+
+  /* Header */
+  .hub-header { text-align: center; margin-bottom: 5rem; }
+  
+  .badge { 
+    display: inline-block; 
+    background-color: #38bdf8; 
+    color: #0f172a; 
+    font-size: 0.85rem; 
+    font-weight: 800; 
+    text-transform: uppercase; 
+    padding: 0.4rem 1rem; 
+    border-radius: 6px; 
+    letter-spacing: 0.08em; 
+    margin-bottom: 1.25rem; 
+  }
+  
+  .gradient-title { 
+    font-size: 3.5rem; 
+    margin: 0 0 1rem 0; 
+    font-weight: 900; 
+    letter-spacing: -0.03em; 
+    line-height: 1.1; 
+    background: linear-gradient(to right, #ffffff, #94a3b8);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  
+  .subtitle { 
+    color: #94a3b8; 
+    font-size: 1.15rem; 
+    margin: 0 auto; 
+    font-weight: 400; 
+    max-width: 700px; 
+    line-height: 1.6; 
+  }
+
+  /* Section Headers */
+  .section-header-block {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid #334155;
+  }
+
+  .directory-header-block {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-top: 4rem;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+  }
+
+  .header-left h2 {
+    font-size: 2.2rem;
+    font-weight: 900;
+    color: #ffffff;
+    margin: 0 0 0.4rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    letter-spacing: -0.01em;
+  }
+
+  .header-left .section-desc {
+    color: #94a3b8;
+    font-size: 1.05rem;
+    margin: 0;
+  }
+
+  .header-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 1rem;
+  }
+
+  /* Live Search Bar */
+  .search-wrapper {
+    position: relative;
+    width: 100%;
+    max-width: 350px;
+  }
+
+  .search-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #64748b;
+  }
+
+  #creator-search {
+    width: 100%;
+    background: #0f172a;
+    border: 1px solid #334155;
+    color: #ffffff;
+    padding: 0.75rem 1rem 0.75rem 2.85rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-family: inherit;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    box-sizing: border-box;
+  }
+
+  #creator-search:focus {
+    outline: none;
+    border-color: #38bdf8;
+    box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15);
+  }
+
+  /* Media Hub Section */
+  .media-grid { 
+    display: grid; 
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
+    gap: 2rem; 
+  }
+  
+  .media-card { 
+    background: #0f172a; 
+    border: 1px solid #334155; 
+    border-radius: 12px; 
+    overflow: hidden; 
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    transition: transform 0.2s ease, border-color 0.2s ease;
+  }
+
+  .media-card:hover {
+    transform: translateY(-4px);
+    border-color: #475569;
+  }
+
+  .media-header { 
+    display: flex; 
+    align-items: center; 
+    gap: 0.75rem; 
+    padding: 1.25rem 1.5rem; 
+    border-bottom: 1px solid #1e293b; 
+    background: linear-gradient(180deg, #1e293b 0%, #161f30 100%); 
+  }
+  
+  .media-pill { 
+    font-size: 0.7rem; 
+    font-weight: 800; 
+    text-transform: uppercase; 
+    padding: 0.25rem 0.6rem; 
+    border-radius: 4px; 
+    letter-spacing: 0.05em; 
+  }
+  
+  .pill-spot { background: rgba(30, 215, 96, 0.15); color: #1ed760; border: 1px solid rgba(30, 215, 96, 0.3); }
+  .pill-pod { background: rgba(167, 139, 250, 0.15); color: #a78bfa; border: 1px solid rgba(167, 139, 250, 0.3); }
+  
+  .media-title-trunc { 
+    color: #f8fafc; 
+    font-size: 0.95rem; 
+    font-weight: 700; 
+    white-space: nowrap; 
+    overflow: hidden; 
+    text-overflow: ellipsis; 
+  }
+
+  .embed-container { width: 100%; display: block; }
+  .iframe-wrapper { height: 152px; }
+  .iframe-wrapper iframe { width: 100%; height: 100%; border: none; border-radius: 0 0 12px 12px; display: block; }
+
+  /* Premium Segmented Control Filters */
+  .filter-group { 
+    display: inline-flex; 
+    background: #0b0f19; 
+    border: 1px solid #334155; 
+    border-radius: 9999px; 
+    padding: 0.35rem; 
+    gap: 0.25rem;
+    flex-wrap: wrap;
+  }
+  
+  .filter-btn { 
+    background: transparent; 
+    border: none; 
+    color: #94a3b8; 
+    padding: 0.6rem 1.25rem; 
+    border-radius: 9999px; 
+    font-size: 0.85rem; 
+    font-weight: 800; 
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    cursor: pointer; 
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); 
+  }
+  
+  .filter-btn:hover { 
+    color: #ffffff; 
+  }
+  
+  .filter-btn.is-active { 
+    background: #38bdf8; 
+    color: #0b0f19; 
+    box-shadow: 0 4px 12px rgba(56, 189, 248, 0.3); 
+  }
+
+  /* Creators Grid & Cards */
+  .creators-grid { 
+    display: grid; 
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); 
+    gap: 2rem; 
+  }
+  
+  .creator-card { 
+    background: #1e293b; 
+    border: 1px solid #334155; 
+    border-radius: 12px; 
+    display: flex; 
+    flex-direction: column; 
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  }
+
+  /* Dynamic Card Top Accent Borders */
+  .border-accent-yt { border-top: 4px solid #e10600; }
+  .border-accent-pod { border-top: 4px solid #8b5cf6; }
+
+  .creator-card:hover { 
+    transform: translateY(-6px); 
+    border-color: #475569; 
+    box-shadow: 0 12px 24px rgba(0,0,0,0.3);
+  }
+
+  .card-top { 
+    display: flex; 
+    align-items: center; 
+    gap: 1rem; 
+    padding: 1.5rem; 
+    border-bottom: 1px solid #334155; 
+    background: linear-gradient(180deg, rgba(15, 23, 42, 0.5) 0%, transparent 100%); 
+  }
+  
+  .media-icon { 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    width: 36px; 
+    height: 36px; 
+    border-radius: 8px; 
+    flex-shrink: 0; 
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  }
+  
+  .icon-yt { background: #e10600; color: #ffffff; }
+  .icon-pod { background: #8b5cf6; color: #ffffff; }
+
+  .card-top-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+  
+  .card-title { 
+    font-size: 1.35rem; 
+    font-weight: 800; 
+    color: #ffffff; 
+    margin: 0; 
+    line-height: 1.2; 
+    letter-spacing: -0.01em;
+  }
+
+  .platform-text {
+    color: #64748b;
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .card-content { 
+    padding: 1.5rem; 
+    flex-grow: 1; 
+    display: flex; 
+    flex-direction: column; 
+  }
+  
+  .host-name { 
+    color: #38bdf8; 
+    font-size: 0.85rem; 
+    font-weight: 700; 
+    margin-bottom: 1rem; 
+    text-transform: uppercase; 
+    letter-spacing: 0.05em; 
+  }
+  
+  .card-content p { 
+    color: #cbd5e1; 
+    font-size: 0.95rem; 
+    line-height: 1.6; 
+    margin: 0 0 1.5rem 0; 
+    flex-grow: 1; 
+  }
+  
+  .tags-container { 
+    display: flex; 
+    flex-wrap: wrap; 
+    gap: 0.5rem; 
+  }
+  
+  .tag { 
+    background: #0f172a; 
+    border: 1px solid #334155; 
+    color: #94a3b8; 
+    font-size: 0.75rem; 
+    font-weight: 600; 
+    padding: 0.25rem 0.6rem; 
+    border-radius: 4px; 
+  }
+
+  /* Footer Links & Socials */
+  .card-footer { 
+    padding: 1.25rem 1.5rem; 
+    border-top: 1px solid #334155; 
+    background: rgba(15, 23, 42, 0.3);
+    border-radius: 0 0 12px 12px;
+  }
+  
+  .links-row { 
+    display: flex; 
+    gap: 0.75rem; 
+    flex-wrap: wrap; 
+    align-items: center;
+  }
+  
+  .btn-link { 
+    padding: 0.6rem 1rem; 
+    border-radius: 6px; 
+    font-size: 0.85rem; 
+    font-weight: 800; 
+    text-decoration: none; 
+    flex: 1; 
+    text-align: center; 
+    transition: all 0.2s ease; 
+  }
+  
+  .btn-default { background: #334155; color: #ffffff; }
+  .btn-default:hover { background: #475569; }
+  
+  .btn-yt { background: rgba(225, 6, 0, 0.1); color: #ff4d4d; border: 1px solid rgba(225, 6, 0, 0.3); }
+  .btn-yt:hover { background: #e10600; color: #ffffff; border-color: #e10600;}
+  
+  .btn-spot { background: rgba(30, 215, 96, 0.1); color: #1ed760; border: 1px solid rgba(30, 215, 96, 0.3); }
+  .btn-spot:hover { background: #1db954; color: #000000; border-color: #1db954; }
+  
+  .btn-pod { background: rgba(167, 139, 250, 0.1); color: #a78bfa; border: 1px solid rgba(167, 139, 250, 0.3); }
+  .btn-pod:hover { background: #8b5cf6; color: #ffffff; border-color: #8b5cf6; }
+
+  .social-icons {
+    display: flex;
+    gap: 0.5rem;
+    margin-left: auto;
+  }
+
+  .icon-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 6px;
+    background: #0f172a;
+    border: 1px solid #334155;
+    color: #94a3b8;
+    transition: all 0.2s;
+  }
+
+  .icon-link:hover {
+    color: #38bdf8;
+    border-color: #38bdf8;
+    background: rgba(56, 189, 248, 0.1);
+  }
+
+  /* No Results State */
+  .no-results {
+    grid-column: 1 / -1;
+    padding: 4rem 1.5rem;
+    text-align: center;
+    color: #94a3b8;
+    background: #161f30;
+    border: 1px dashed #334155;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .no-results.hidden {
+    display: none !important;
+  }
+
+  /* Suggest CTA Banner */
+  .suggest-section {
+    margin-top: 5rem;
+    padding: 3rem;
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    border: 1px solid #334155;
+    border-radius: 12px;
+    text-align: center;
+  }
+
+  .suggest-content h2 {
+    color: #ffffff;
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin: 0 0 0.5rem 0;
+  }
+
+  .suggest-content p {
+    color: #94a3b8;
+    font-size: 1.05rem;
+    margin: 0 0 1.5rem 0;
+  }
+
+  .btn-suggest {
+    display: inline-block;
+    background: #ffffff;
+    color: #0f172a;
+    font-weight: 800;
+    padding: 0.75rem 1.5rem;
+    border-radius: 6px;
+    text-decoration: none;
+    transition: background 0.2s;
+  }
+
+  .btn-suggest:hover {
+    background: #cbd5e1;
+  }
+
+  /* Responsive Adjustments */
+  @media (max-width: 900px) {
+    .header-right {
+      width: 100%;
+      align-items: flex-start;
+    }
+    
+    .search-wrapper {
+      max-width: 100%;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .directory-header-block {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    
+    .filter-group {
+      width: 100%;
+      justify-content: space-between;
+    }
+    
+    .filter-btn {
+      flex: 1;
+      text-align: center;
+      padding: 0.6rem 0.5rem;
+      font-size: 0.75rem;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .hub-header h1 { font-size: 2.8rem; }
+    .header-left h2 { font-size: 1.8rem; }
+    
+    .links-row { flex-direction: column; align-items: stretch; }
+    .btn-link { width: 100%; }
+    
+    .social-icons {
+      justify-content: center;
+      margin-left: 0;
+      margin-top: 0.5rem;
+    }
+  }
+</style>

@@ -1,10 +1,18 @@
 ---
 // src/layouts/Layout.astro
+import Header from '../components/Header.astro';
+
+// 1. Define Props Type Interface
 interface Props {
   title?: string;
+  description?: string;
 }
 
-const { title = 'Grand Prix Travel Hub' } = Astro.props;
+// 2. Destructure Props with Fallback Default Strings
+const { 
+  title = "My Grand Prix Hub | F1 Circuit, Travel & Viewing Guides", 
+  description = "Your ultimate fan guide for F1 travel logistics, grandstand reviews, trackside city guides, and broadcast options." 
+} = Astro.props;
 ---
 
 <!DOCTYPE html>
@@ -12,69 +20,94 @@ const { title = 'Grand Prix Travel Hub' } = Astro.props;
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>{title}</title>
   </head>
-  <body style="font-family: system-ui, -apple-system, sans-serif; margin: 0; padding: 0; background-color: #fafafa; color: #1a1a1a;">
-    
-    <!-- Site Header & Navigation -->
-    <header style="background: #111; color: #fff; padding: 1rem 2rem; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
-      <div style="max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
-        
-        <!-- Logo / Home Link -->
-        <a href="/" style="color: #fff; text-decoration: none; font-weight: 800; font-size: 1.25rem; display: flex; align-items: center; gap: 0.5rem;">
-          🏎️ <span>Grand Prix Travel</span>
-        </a>
+  <body>
+    <!-- Persistent Site Header -->
+    <Header />
 
-        <!-- Navigation Links (Content Pillars) -->
-        <nav style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
-          <a 
-            href="/circuits" 
-            style="color: #fff; text-decoration: none; font-weight: 600; background: #e10600; padding: 0.4rem 0.8rem; border-radius: 6px; font-size: 0.95rem; transition: background 0.2s;"
-            onmouseleave="this.style.background='#e10600'" 
-            onmouseenter="this.style.background='#b80500'"
-          >
-            Circuit Guides
-          </a>
-          <a 
-            href="/grandstands" 
-            style="color: #ccc; text-decoration: none; font-weight: 500; font-size: 0.95rem; padding: 0.4rem 0.6rem; transition: color 0.2s;"
-            onmouseleave="this.style.color='#ccc'" 
-            onmouseenter="this.style.color='#fff'"
-          >
-            Grandstand Reviews
-          </a>
-          <a 
-            href="/travel-tickets" 
-            style="color: #ccc; text-decoration: none; font-weight: 500; font-size: 0.95rem; padding: 0.4rem 0.6rem; transition: color 0.2s;"
-            onmouseleave="this.style.color='#ccc'" 
-            onmouseenter="this.style.color='#fff'"
-          >
-            Ticket & Travel Advice
-          </a>
-          <a 
-            href="/city-guides" 
-            style="color: #ccc; text-decoration: none; font-weight: 500; font-size: 0.95rem; padding: 0.4rem 0.6rem; transition: color 0.2s;"
-            onmouseleave="this.style.color='#ccc'" 
-            onmouseenter="this.style.color='#fff'"
-          >
-            City & Pub Guides
-          </a>
-        </nav>
+    <!-- Main Dynamic Content Slot -->
+    <slot />
 
-      </div>
-    </header>
-
-    <!-- Main Page Content -->
-    <main style="min-height: calc(100vh - 180px);">
-      <slot />
-    </main>
-
-    <!-- Site Footer -->
-    <footer style="text-align: center; padding: 2rem; border-top: 1px solid #eaeaea; background: #fff; margin-top: 4rem; color: #666; font-size: 0.9rem;">
-      <div style="max-width: 1200px; margin: 0 auto;">
-        <p>&copy; {new Date().getFullYear()} Grand Prix Travel Hub. Unofficial spectator guides.</p>
+    <!-- Persistent Site Footer -->
+    <footer class="site-footer">
+      <div class="footer-container">
+        <p>&copy; {new Date().getFullYear()} My Grand Prix Hub. Unofficial fan guide, not affiliated with Formula 1.</p>
       </div>
     </footer>
-
   </body>
 </html>
+
+<style is:global>
+  /* 1. Global CSS Variables */
+  :root {
+    --color-bg: #0f172a;
+    --color-card: #1e293b;
+    --color-border: #334155;
+    --color-primary: #e10600; /* F1 Red */
+    --color-text: #f8fafc;
+    --color-muted: #94a3b8;
+  }
+
+  /* 2. CSS Box Reset */
+  *, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* 3. Base Document Layout */
+  html, body {
+    min-height: 100vh;
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body {
+    display: flex;
+    flex-direction: column;
+  }
+
+  main {
+    display: block;
+    width: 100%;
+    flex: 1 0 auto;
+  }
+
+  section {
+    display: block;
+    width: 100%;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  /* 4. Global Footer Styling */
+  .site-footer {
+    background-color: #0b0f19;
+    border-top: 1px solid var(--color-border);
+    padding: 2rem 1.5rem;
+    text-align: center;
+    color: var(--color-muted);
+    font-size: 0.875rem;
+    margin-top: auto;
+  }
+
+  .footer-container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+</style>

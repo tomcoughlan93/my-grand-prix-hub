@@ -1,0 +1,254 @@
+---
+// src/components/TeamRadioFeed.astro
+export {}; // Isolates scope
+
+interface OpenF1Session { session_key: number; }
+interface OpenF1Radio { date: string; driver_number: number; recording_url: string; }
+interface OpenF1Driver { driver_number: number; name_acronym: string; last_name: string; team_colour?: string; }
+interface RadioFeedItem { id: string; driver: string; time: string; audioUrl: string; color: string; }
+
+let radioMessages: RadioFeedItem[] = [];
+let isLive = false;
+
+try {
+  const sessionRes = await fetch('https://api.openf1.org/v1/sessions?session_key=latest');
+  const sessions = (await sessionRes.json()) as OpenF1Session[];
+
+  if (sessions && sessions.length > 0) {
+    const sessionKey = sessions[0].session_key;
+
+    const [radioRes, driversRes] = await Promise.all([
+      fetch(`https://api.openf1.org/v1/team_radio?session_key=${sessionKey}`),
+      fetch(`https://api.openf1.org/v1/drivers?session_key=${sessionKey}`)
+    ]);
+
+    const radios = (await radioRes.json()) as OpenF1Radio[];
+    const drivers = (await driversRes.json()) as OpenF1Driver[];
+
+    if (radios.length > 0 && drivers.length > 0) {
+      isLive = true;
+
+      const processedRadios = radios.map((radio: OpenF1Radio, index: number) => {
+        const driver = drivers.find((d: OpenF1Driver) => d.driver_number === radio.driver_number);
+        const dateObj = new Date(radio.date);
+        const timeString = dateObj.toLocaleTimeString('en-GB', { hour: '2-digit', minute:'2-digit', second:'2-digit' });
+
+        return {
+          id: `radio-${index}`,
+          driver: driver ? (driver.name_acronym || driver.last_name.substring(0,3).toUpperCase()) : `CAR ${radio.driver_number}`,
+          time: timeString,
+          audioUrl: radio.recording_url,
+          color: driver && driver.team_colour ? `#${driver.team_colour}` : '#38bdf8'
+        };
+      });
+
+      radioMessages = processedRadios.reverse().slice(0, 10);
+    }
+  }
+} catch (error) {
+  console.error("Failed to fetch team radio:", error);
+}
+
+if (!isLive || radioMessages.length === 0) {
+  radioMessages = [
+    { id: 'm1', driver: 'VER', time: '15:42:10', audioUrl: '', color: '#3671C6' },
+    { id: 'm2', driver: 'NOR', time: '15:40:05', audioUrl: '', color: '#FF8000' },
+    { id: 'm3', driver: 'RUS', time: '15:38:22', audioUrl: '', color: '#27F4D2' },
+    { id: 'm4', driver: 'HAM', time: '15:35:10', audioUrl: '', color: '#E80020' },
+    { id: 'm5', driver: 'LEC', time: '15:32:00', audioUrl: '', color: '#E80020' }
+  ];
+}
+---
+
+<div class="team-radio-container">
+  <div class="widget-header">
+    <div class="header-flex">
+      <h2>🎧 Team Radio</h2>
+      {isLive && <span class="live-indicator">LIVE AUDIO</span>}
+    </div>
+  </div>
+  
+  <div class="radio-feed">
+    {radioMessages.length === 0 ? (
+      <div class="empty-state">Waiting for driver communications...</div>
+    ) : (
+      radioMessages.map((msg: RadioFeedItem) => (
+        <div class="radio-msg" style={`border-left-color: ${msg.color};`}>
+          <div class="radio-meta">
+            <span class="r-driver" style={`color: ${msg.color};`}>{msg.driver}</span>
+            <span class="r-time">{msg.time}</span>
+          </div>
+          
+          <div class="audio-player-wrapper">
+            {msg.audioUrl ? (
+              <audio controls preload="none" class="f1-audio">
+                <source src={msg.audioUrl} type="audio/mpeg" />
+                Your browser does not support the audio element.
+              </audio>
+            ) : (
+              <div class="mock-audio-bar">
+                <span class="mock-play">▶</span>
+                <div class="mock-wave"></div>
+                <span class="mock-text">Audio unavailable in mock mode</span>
+              </div>
+            )}
+          </div>
+        </div>
+      ))
+    )}
+  </div>
+</div>
+
+<style>
+.team-radio-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0; /* CRITICAL */
+    background: transparent;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+
+  .widget-header {
+    background: #1e293b;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #334155;
+  }
+
+  .header-flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .widget-header h2 {
+    color: #ffffff;
+    font-size: 0.9rem;
+    font-weight: 800;
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .live-indicator {
+    background: rgba(56, 189, 248, 0.15);
+    color: #38bdf8;
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    font-size: 0.65rem;
+    font-weight: 800;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    letter-spacing: 0.05em;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+  }
+
+.radio-feed {
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    flex: 1 1 0%; /* CRITICAL FIX: Replaces flex-grow: 1 */
+    overflow-y: auto;
+    min-height: 0; /* CRITICAL */
+  }
+
+  /* Custom Scrollbar */
+  .radio-feed::-webkit-scrollbar { width: 4px; }
+  .radio-feed::-webkit-scrollbar-track { background: #0f172a; }
+  .radio-feed::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+
+  .radio-msg {
+    background: #1e293b;
+    padding: 0.85rem;
+    border-radius: 6px;
+    border-left: 4px solid #38bdf8; /* Overridden by inline style for team color */
+  }
+
+  .radio-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+  }
+
+  .r-driver {
+    font-weight: 900;
+    font-size: 1rem;
+    letter-spacing: 0.05em;
+  }
+
+  .r-time {
+    color: #64748b;
+    font-size: 0.75rem;
+    font-family: ui-monospace, monospace;
+  }
+
+  /* Audio Player Styling */
+  .audio-player-wrapper {
+    margin-top: 0.5rem;
+  }
+
+  .f1-audio {
+    width: 100%;
+    height: 32px;
+    border-radius: 4px;
+  }
+
+  /* Custom styling for webkit audio players to make them fit the dark theme */
+  audio::-webkit-media-controls-panel {
+    background-color: #cbd5e1;
+  }
+
+  /* Mock Audio Bar (For when API is empty) */
+  .mock-audio-bar {
+    display: flex;
+    align-items: center;
+    background: #0b0f19;
+    padding: 0.4rem 0.75rem;
+    border-radius: 4px;
+    border: 1px solid #334155;
+    gap: 0.75rem;
+  }
+
+  .mock-play {
+    color: #64748b;
+    font-size: 0.8rem;
+  }
+
+  .mock-wave {
+    flex-grow: 1;
+    height: 2px;
+    background: #334155;
+    position: relative;
+  }
+  
+  .mock-wave::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: -2px;
+    height: 6px;
+    width: 6px;
+    border-radius: 50%;
+    background: #64748b;
+  }
+
+  .mock-text {
+    font-size: 0.7rem;
+    color: #64748b;
+    font-style: italic;
+  }
+
+  .empty-state {
+    color: #64748b;
+    font-size: 0.9rem;
+    text-align: center;
+    padding: 2rem 0;
+  }
+</style>

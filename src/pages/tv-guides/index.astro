@@ -1,0 +1,2084 @@
+---
+// src/pages/tv-guides/index.astro
+import Layout from '../../layouts/Layout.astro';
+
+// 1. Available Races (Standard vs Sprint format demonstration)
+const races = [
+  { 
+    id: 'dutch-gp', 
+    name: "Dutch Grand Prix", 
+    round: 12, 
+    flagCode: "nl", 
+    dates: "Aug 21 - 23, 2026",
+    isSprint: false,
+    circuitName: "Circuit Park Zandvoort, Netherlands"
+  },
+  { 
+    id: 'italian-gp', 
+    name: "Italian Grand Prix", 
+    round: 13, 
+    flagCode: "it", 
+    dates: "Sep 4 - 6, 2026",
+    isSprint: false,
+    circuitName: "Autodromo Nazionale Monza, Italy"
+  },
+  { 
+    id: 'us-gp', 
+    name: "United States Grand Prix", 
+    round: 19, 
+    flagCode: "us", 
+    dates: "Oct 23 - 25, 2026",
+    isSprint: true,
+    circuitName: "Circuit of the Americas, Austin, TX"
+  }
+];
+
+// 2. Global Broadcasters with Multi-Race Schedules & Radio Providers
+const broadcasters = [
+  { 
+    id: 'uk-sky',
+    country: 'United Kingdom', 
+    flag: 'gb', 
+    network: 'Sky Sports F1', 
+    app: 'NOW / Sky Go', 
+    url: 'https://www.skysports.com/f1',
+    radio: { name: 'BBC Radio 5 Live / BBC Sounds', url: 'https://www.bbc.co.uk/sounds/play/live:bbc_radio_five_live' },
+    type: 'Live', 
+    f1tvPro: false,
+    timezone: 'BST (UTC+1)',
+    schedules: {
+      'dutch-gp': [
+        { day: 'Friday', session: 'Practice 1', networkOnAir: '11:00', f1tvOnAir: null, start: '11:30', duration: '60 min', utcStart: '2026-08-21T10:30:00Z', utcEnd: '2026-08-21T11:30:00Z' },
+        { day: 'Friday', session: 'Practice 2', networkOnAir: '14:45', f1tvOnAir: null, start: '15:00', duration: '60 min', utcStart: '2026-08-21T14:00:00Z', utcEnd: '2026-08-21T15:00:00Z' },
+        { day: 'Saturday', session: 'Practice 3', networkOnAir: '10:15', f1tvOnAir: null, start: '10:30', duration: '60 min', utcStart: '2026-08-22T09:30:00Z', utcEnd: '2026-08-22T10:30:00Z' },
+        { day: 'Saturday', session: 'Qualifying', networkOnAir: '13:15', f1tvOnAir: null, start: '14:00', duration: '60 min', utcStart: '2026-08-22T13:00:00Z', utcEnd: '2026-08-22T14:00:00Z' },
+        { day: 'Sunday', session: 'Grand Prix', networkOnAir: '12:30', f1tvOnAir: null, start: '14:00', duration: '72 Laps', utcStart: '2026-08-23T13:00:00Z', utcEnd: '2026-08-23T15:00:00Z' },
+      ],
+      'italian-gp': [
+        { day: 'Friday', session: 'Practice 1', networkOnAir: '12:00', f1tvOnAir: null, start: '12:30', duration: '60 min', utcStart: '2026-09-04T11:30:00Z', utcEnd: '2026-09-04T12:30:00Z' },
+        { day: 'Friday', session: 'Practice 2', networkOnAir: '15:45', f1tvOnAir: null, start: '16:00', duration: '60 min', utcStart: '2026-09-04T15:00:00Z', utcEnd: '2026-09-04T16:00:00Z' },
+        { day: 'Saturday', session: 'Practice 3', networkOnAir: '11:15', f1tvOnAir: null, start: '11:30', duration: '60 min', utcStart: '2026-09-05T10:30:00Z', utcEnd: '2026-09-05T11:30:00Z' },
+        { day: 'Saturday', session: 'Qualifying', networkOnAir: '14:00', f1tvOnAir: null, start: '15:00', duration: '60 min', utcStart: '2026-09-05T14:00:00Z', utcEnd: '2026-09-05T15:00:00Z' },
+        { day: 'Sunday', session: 'Grand Prix', networkOnAir: '13:00', f1tvOnAir: null, start: '14:00', duration: '53 Laps', utcStart: '2026-09-06T13:00:00Z', utcEnd: '2026-09-06T15:00:00Z' },
+      ],
+      'us-gp': [
+        { day: 'Friday', session: 'Practice 1', networkOnAir: '18:00', f1tvOnAir: null, start: '18:30', duration: '60 min', utcStart: '2026-10-23T17:30:00Z', utcEnd: '2026-10-23T18:30:00Z' },
+        { day: 'Friday', session: 'Sprint Qualifying', networkOnAir: '22:00', f1tvOnAir: null, start: '22:30', duration: '45 min', utcStart: '2026-10-23T21:30:00Z', utcEnd: '2026-10-23T22:15:00Z' },
+        { day: 'Saturday', session: 'Sprint Race', networkOnAir: '18:30', f1tvOnAir: null, start: '19:00', duration: '19 Laps', utcStart: '2026-10-24T18:00:00Z', utcEnd: '2026-10-24T19:00:00Z' },
+        { day: 'Saturday', session: 'Qualifying', networkOnAir: '22:15', f1tvOnAir: null, start: '23:00', duration: '60 min', utcStart: '2026-10-24T22:00:00Z', utcEnd: '2026-10-24T23:00:00Z' },
+        { day: 'Sunday', session: 'Grand Prix', networkOnAir: '18:30', f1tvOnAir: null, start: '20:00', duration: '56 Laps', utcStart: '2026-10-25T19:00:00Z', utcEnd: '2026-10-25T21:00:00Z' },
+      ]
+    }
+  },
+  { 
+    id: 'uk-c4',
+    country: 'United Kingdom (Highlights)', 
+    flag: 'gb', 
+    network: 'Channel 4', 
+    app: 'Channel 4 Streaming', 
+    url: 'https://www.channel4.com/programmes/formula-1',
+    type: 'Highlights', 
+    f1tvPro: false,
+    timezone: 'BST (UTC+1)',
+    schedules: {
+      'dutch-gp': [
+        { day: 'Saturday', session: 'Qualifying Highlights', networkOnAir: '18:30', f1tvOnAir: null, start: '18:30', duration: '90 min', utcStart: '2026-08-22T17:30:00Z', utcEnd: '2026-08-22T19:00:00Z' },
+        { day: 'Sunday', session: 'Grand Prix Highlights', networkOnAir: '18:30', f1tvOnAir: null, start: '18:30', duration: '120 min', utcStart: '2026-08-23T17:30:00Z', utcEnd: '2026-08-23T19:30:00Z' },
+      ],
+      'italian-gp': [
+        { day: 'Saturday', session: 'Qualifying Highlights', networkOnAir: '19:30', f1tvOnAir: null, start: '19:30', duration: '90 min', utcStart: '2026-09-05T18:30:00Z', utcEnd: '2026-09-05T20:00:00Z' },
+        { day: 'Sunday', session: 'Grand Prix Highlights', networkOnAir: '18:30', f1tvOnAir: null, start: '18:30', duration: '120 min', utcStart: '2026-09-06T17:30:00Z', utcEnd: '2026-09-06T19:30:00Z' },
+      ]
+    }
+  },
+  { 
+    id: 'us-espn',
+    country: 'United States', 
+    flag: 'us', 
+    network: 'ESPN / ABC', 
+    app: 'ESPN+', 
+    url: 'https://plus.espn.com/',
+    radio: { name: 'SiriusXM Ch 81 / ESPN Radio', url: 'https://www.siriusxm.com/sports/formula-1' },
+    type: 'Live', 
+    f1tvPro: true,
+    timezone: 'EDT (UTC-4)',
+    schedules: {
+      'dutch-gp': [
+        { day: 'Friday', session: 'Practice 1', networkOnAir: '06:25', f1tvOnAir: '06:20', start: '06:30', duration: '60 min', utcStart: '2026-08-21T10:30:00Z', utcEnd: '2026-08-21T11:30:00Z' },
+        { day: 'Friday', session: 'Practice 2', networkOnAir: '09:55', f1tvOnAir: '09:50', start: '10:00', duration: '60 min', utcStart: '2026-08-21T14:00:00Z', utcEnd: '2026-08-21T15:00:00Z' },
+        { day: 'Saturday', session: 'Practice 3', networkOnAir: '05:25', f1tvOnAir: '05:20', start: '05:30', duration: '60 min', utcStart: '2026-08-22T09:30:00Z', utcEnd: '2026-08-22T10:30:00Z' },
+        { day: 'Saturday', session: 'Qualifying', networkOnAir: '08:55', f1tvOnAir: '08:30', start: '09:00', duration: '60 min', utcStart: '2026-08-22T13:00:00Z', utcEnd: '2026-08-22T14:00:00Z' },
+        { day: 'Sunday', session: 'Grand Prix', networkOnAir: '07:30', f1tvOnAir: '08:00', start: '09:00', duration: '72 Laps', utcStart: '2026-08-23T13:00:00Z', utcEnd: '2026-08-23T15:00:00Z' },
+      ],
+      'italian-gp': [
+        { day: 'Friday', session: 'Practice 1', networkOnAir: '07:25', f1tvOnAir: '07:20', start: '07:30', duration: '60 min', utcStart: '2026-09-04T11:30:00Z', utcEnd: '2026-09-04T12:30:00Z' },
+        { day: 'Friday', session: 'Practice 2', networkOnAir: '10:55', f1tvOnAir: '10:50', start: '11:00', duration: '60 min', utcStart: '2026-09-04T15:00:00Z', utcEnd: '2026-09-04T16:00:00Z' },
+        { day: 'Saturday', session: 'Practice 3', networkOnAir: '06:25', f1tvOnAir: '06:20', start: '06:30', duration: '60 min', utcStart: '2026-09-05T10:30:00Z', utcEnd: '2026-09-05T11:30:00Z' },
+        { day: 'Saturday', session: 'Qualifying', networkOnAir: '09:55', f1tvOnAir: '09:30', start: '10:00', duration: '60 min', utcStart: '2026-09-05T14:00:00Z', utcEnd: '2026-09-05T15:00:00Z' },
+        { day: 'Sunday', session: 'Grand Prix', networkOnAir: '08:30', f1tvOnAir: '08:00', start: '09:00', duration: '53 Laps', utcStart: '2026-09-06T13:00:00Z', utcEnd: '2026-09-06T15:00:00Z' },
+      ],
+      'us-gp': [
+        { day: 'Friday', session: 'Practice 1', networkOnAir: '13:25', f1tvOnAir: '13:20', start: '13:30', duration: '60 min', utcStart: '2026-10-23T17:30:00Z', utcEnd: '2026-10-23T18:30:00Z' },
+        { day: 'Friday', session: 'Sprint Qualifying', networkOnAir: '17:25', f1tvOnAir: '17:15', start: '17:30', duration: '45 min', utcStart: '2026-10-23T21:30:00Z', utcEnd: '2026-10-23T22:15:00Z' },
+        { day: 'Saturday', session: 'Sprint Race', networkOnAir: '13:30', f1tvOnAir: '13:30', start: '14:00', duration: '19 Laps', utcStart: '2026-10-24T18:00:00Z', utcEnd: '2026-10-24T19:00:00Z' },
+        { day: 'Saturday', session: 'Qualifying', networkOnAir: '17:55', f1tvOnAir: '17:30', start: '18:00', duration: '60 min', utcStart: '2026-10-24T22:00:00Z', utcEnd: '2026-10-24T23:00:00Z' },
+        { day: 'Sunday', session: 'Grand Prix', networkOnAir: '13:30', f1tvOnAir: '14:00', start: '15:00', duration: '56 Laps', utcStart: '2026-10-25T19:00:00Z', utcEnd: '2026-10-25T21:00:00Z' },
+      ]
+    }
+  },
+  { 
+    id: 'ca-tsn',
+    country: 'Canada', 
+    flag: 'ca', 
+    network: 'TSN / RDS', 
+    app: 'TSN+', 
+    url: 'https://www.tsn.ca/auto-racing/f1',
+    type: 'Live', 
+    f1tvPro: true,
+    timezone: 'EDT (UTC-4)',
+    schedules: {
+      'dutch-gp': [
+        { day: 'Friday', session: 'Practice 1', networkOnAir: '06:25', f1tvOnAir: '06:20', start: '06:30', duration: '60 min', utcStart: '2026-08-21T10:30:00Z', utcEnd: '2026-08-21T11:30:00Z' },
+        { day: 'Friday', session: 'Practice 2', networkOnAir: '09:55', f1tvOnAir: '09:50', start: '10:00', duration: '60 min', utcStart: '2026-08-21T14:00:00Z', utcEnd: '2026-08-21T15:00:00Z' },
+        { day: 'Saturday', session: 'Practice 3', networkOnAir: '05:25', f1tvOnAir: '05:20', start: '05:30', duration: '60 min', utcStart: '2026-08-22T09:30:00Z', utcEnd: '2026-08-22T10:30:00Z' },
+        { day: 'Saturday', session: 'Qualifying', networkOnAir: '08:55', f1tvOnAir: '08:30', start: '09:00', duration: '60 min', utcStart: '2026-08-22T13:00:00Z', utcEnd: '2026-08-22T14:00:00Z' },
+        { day: 'Sunday', session: 'Grand Prix', networkOnAir: '08:00', f1tvOnAir: '08:00', start: '09:00', duration: '72 Laps', utcStart: '2026-08-23T13:00:00Z', utcEnd: '2026-08-23T15:00:00Z' },
+      ],
+      'italian-gp': [
+        { day: 'Friday', session: 'Practice 1', networkOnAir: '07:25', f1tvOnAir: '07:20', start: '07:30', duration: '60 min', utcStart: '2026-09-04T11:30:00Z', utcEnd: '2026-09-04T12:30:00Z' },
+        { day: 'Friday', session: 'Practice 2', networkOnAir: '10:55', f1tvOnAir: '10:50', start: '11:00', duration: '60 min', utcStart: '2026-09-04T15:00:00Z', utcEnd: '2026-09-04T16:00:00Z' },
+        { day: 'Saturday', session: 'Practice 3', networkOnAir: '06:25', f1tvOnAir: '06:20', start: '06:30', duration: '60 min', utcStart: '2026-09-05T10:30:00Z', utcEnd: '2026-09-05T11:30:00Z' },
+        { day: 'Saturday', session: 'Qualifying', networkOnAir: '09:55', f1tvOnAir: '09:30', start: '10:00', duration: '60 min', utcStart: '2026-09-05T14:00:00Z', utcEnd: '2026-09-05T15:00:00Z' },
+        { day: 'Sunday', session: 'Grand Prix', networkOnAir: '09:00', f1tvOnAir: '08:00', start: '09:00', duration: '53 Laps', utcStart: '2026-09-06T13:00:00Z', utcEnd: '2026-09-06T15:00:00Z' },
+      ],
+      'us-gp': [
+        { day: 'Friday', session: 'Practice 1', networkOnAir: '13:25', f1tvOnAir: '13:20', start: '13:30', duration: '60 min', utcStart: '2026-10-23T17:30:00Z', utcEnd: '2026-10-23T18:30:00Z' },
+        { day: 'Friday', session: 'Sprint Qualifying', networkOnAir: '17:25', f1tvOnAir: '17:15', start: '17:30', duration: '45 min', utcStart: '2026-10-23T21:30:00Z', utcEnd: '2026-10-23T22:15:00Z' },
+        { day: 'Saturday', session: 'Sprint Race', networkOnAir: '13:30', f1tvOnAir: '13:30', start: '14:00', duration: '19 Laps', utcStart: '2026-10-24T18:00:00Z', utcEnd: '2026-10-24T19:00:00Z' },
+        { day: 'Saturday', session: 'Qualifying', networkOnAir: '17:55', f1tvOnAir: '17:30', start: '18:00', duration: '60 min', utcStart: '2026-10-24T22:00:00Z', utcEnd: '2026-10-24T23:00:00Z' },
+        { day: 'Sunday', session: 'Grand Prix', networkOnAir: '14:00', f1tvOnAir: '14:00', start: '15:00', duration: '56 Laps', utcStart: '2026-10-25T19:00:00Z', utcEnd: '2026-10-25T21:00:00Z' },
+      ]
+    }
+  },
+  { 
+    id: 'au-fox',
+    country: 'Australia', 
+    flag: 'au', 
+    network: 'Fox Sports / Kayo', 
+    app: 'Kayo Sports', 
+    url: 'https://kayosports.com.au/',
+    type: 'Live', 
+    f1tvPro: true,
+    timezone: 'AEST (UTC+10)',
+    schedules: {
+      'dutch-gp': [
+        { day: 'Friday', session: 'Practice 1', networkOnAir: '20:00', f1tvOnAir: '20:20', start: '20:30', duration: '60 min', utcStart: '2026-08-21T10:30:00Z', utcEnd: '2026-08-21T11:30:00Z' },
+        { day: 'Friday', session: 'Practice 2', networkOnAir: '23:45', f1tvOnAir: '23:50', start: '00:00', duration: '60 min', utcStart: '2026-08-21T14:00:00Z', utcEnd: '2026-08-21T15:00:00Z' },
+        { day: 'Saturday', session: 'Practice 3', networkOnAir: '19:15', f1tvOnAir: '19:20', start: '19:30', duration: '60 min', utcStart: '2026-08-22T09:30:00Z', utcEnd: '2026-08-22T10:30:00Z' },
+        { day: 'Saturday', session: 'Qualifying', networkOnAir: '22:15', f1tvOnAir: '22:30', start: '23:00', duration: '60 min', utcStart: '2026-08-22T13:00:00Z', utcEnd: '2026-08-22T14:00:00Z' },
+        { day: 'Sunday', session: 'Grand Prix', networkOnAir: '21:30', f1tvOnAir: '22:00', start: '23:00', duration: '72 Laps', utcStart: '2026-08-23T13:00:00Z', utcEnd: '2026-08-23T15:00:00Z' },
+      ],
+      'italian-gp': [
+        { day: 'Friday', session: 'Practice 1', networkOnAir: '21:00', f1tvOnAir: '21:20', start: '21:30', duration: '60 min', utcStart: '2026-09-04T11:30:00Z', utcEnd: '2026-09-04T12:30:00Z' },
+        { day: 'Saturday', session: 'Practice 2', networkOnAir: '00:45', f1tvOnAir: '00:50', start: '01:00', duration: '60 min', utcStart: '2026-09-04T15:00:00Z', utcEnd: '2026-09-04T16:00:00Z' },
+        { day: 'Saturday', session: 'Practice 3', networkOnAir: '20:15', f1tvOnAir: '20:20', start: '20:30', duration: '60 min', utcStart: '2026-09-05T10:30:00Z', utcEnd: '2026-09-05T11:30:00Z' },
+        { day: 'Saturday', session: 'Qualifying', networkOnAir: '23:15', f1tvOnAir: '23:30', start: '00:00', duration: '60 min', utcStart: '2026-09-05T14:00:00Z', utcEnd: '2026-09-05T15:00:00Z' },
+        { day: 'Sunday', session: 'Grand Prix', networkOnAir: '22:30', f1tvOnAir: '23:00', start: '23:00', duration: '53 Laps', utcStart: '2026-09-06T13:00:00Z', utcEnd: '2026-09-06T15:00:00Z' },
+      ],
+      'us-gp': [
+        { day: 'Saturday', session: 'Practice 1', networkOnAir: '03:00', f1tvOnAir: '03:20', start: '03:30', duration: '60 min', utcStart: '2026-10-23T17:30:00Z', utcEnd: '2026-10-23T18:30:00Z' },
+        { day: 'Saturday', session: 'Sprint Qualifying', networkOnAir: '07:00', f1tvOnAir: '07:15', start: '07:30', duration: '45 min', utcStart: '2026-10-23T21:30:00Z', utcEnd: '2026-10-23T22:15:00Z' },
+        { day: 'Sunday', session: 'Sprint Race', networkOnAir: '03:30', f1tvOnAir: '03:30', start: '04:00', duration: '19 Laps', utcStart: '2026-10-24T18:00:00Z', utcEnd: '2026-10-24T19:00:00Z' },
+        { day: 'Sunday', session: 'Qualifying', networkOnAir: '07:30', f1tvOnAir: '07:30', start: '08:00', duration: '60 min', utcStart: '2026-10-24T22:00:00Z', utcEnd: '2026-10-24T23:00:00Z' },
+        { day: 'Monday', session: 'Grand Prix', networkOnAir: '04:00', f1tvOnAir: '04:00', start: '05:00', duration: '56 Laps', utcStart: '2026-10-25T19:00:00Z', utcEnd: '2026-10-25T21:00:00Z' },
+      ]
+    }
+  },
+  { 
+    id: 'nl-viaplay',
+    country: 'Netherlands', 
+    flag: 'nl', 
+    network: 'Viaplay', 
+    app: 'Viaplay App', 
+    url: 'https://viaplay.com/nl-nl/',
+    radio: { name: 'Grand Prix Radio', url: 'https://grandprixradio.nl/' },
+    type: 'Live', 
+    f1tvPro: true,
+    timezone: 'CEST (UTC+2)',
+    schedules: {
+      'dutch-gp': [
+        { day: 'Friday', session: 'Practice 1', networkOnAir: '12:00', f1tvOnAir: '12:20', start: '12:30', duration: '60 min', utcStart: '2026-08-21T10:30:00Z', utcEnd: '2026-08-21T11:30:00Z' },
+        { day: 'Friday', session: 'Practice 2', networkOnAir: '15:45', f1tvOnAir: '15:50', start: '16:00', duration: '60 min', utcStart: '2026-08-21T14:00:00Z', utcEnd: '2026-08-21T15:00:00Z' },
+        { day: 'Saturday', session: 'Practice 3', networkOnAir: '11:15', f1tvOnAir: '11:20', start: '11:30', duration: '60 min', utcStart: '2026-08-22T09:30:00Z', utcEnd: '2026-08-22T10:30:00Z' },
+        { day: 'Saturday', session: 'Qualifying', networkOnAir: '14:00', f1tvOnAir: '14:30', start: '15:00', duration: '60 min', utcStart: '2026-08-22T13:00:00Z', utcEnd: '2026-08-22T14:00:00Z' },
+        { day: 'Sunday', session: 'Grand Prix', networkOnAir: '13:30', f1tvOnAir: '14:00', start: '15:00', duration: '72 Laps', utcStart: '2026-08-23T13:00:00Z', utcEnd: '2026-08-23T15:00:00Z' },
+      ],
+      'italian-gp': [
+        { day: 'Friday', session: 'Practice 1', networkOnAir: '13:00', f1tvOnAir: '13:20', start: '13:30', duration: '60 min', utcStart: '2026-09-04T11:30:00Z', utcEnd: '2026-09-04T12:30:00Z' },
+        { day: 'Friday', session: 'Practice 2', networkOnAir: '16:45', f1tvOnAir: '16:50', start: '17:00', duration: '60 min', utcStart: '2026-09-04T15:00:00Z', utcEnd: '2026-09-04T16:00:00Z' },
+        { day: 'Saturday', session: 'Practice 3', networkOnAir: '12:15', f1tvOnAir: '12:20', start: '12:30', duration: '60 min', utcStart: '2026-09-05T10:30:00Z', utcEnd: '2026-09-05T11:30:00Z' },
+        { day: 'Saturday', session: 'Qualifying', networkOnAir: '15:00', f1tvOnAir: '15:30', start: '16:00', duration: '60 min', utcStart: '2026-09-05T14:00:00Z', utcEnd: '2026-09-05T15:00:00Z' },
+        { day: 'Sunday', session: 'Grand Prix', networkOnAir: '14:30', f1tvOnAir: '14:00', start: '15:00', duration: '53 Laps', utcStart: '2026-09-06T13:00:00Z', utcEnd: '2026-09-06T15:00:00Z' },
+      ],
+      'us-gp': [
+        { day: 'Friday', session: 'Practice 1', networkOnAir: '19:00', f1tvOnAir: '19:20', start: '19:30', duration: '60 min', utcStart: '2026-10-23T17:30:00Z', utcEnd: '2026-10-23T18:30:00Z' },
+        { day: 'Friday', session: 'Sprint Qualifying', networkOnAir: '23:00', f1tvOnAir: '23:15', start: '23:30', duration: '45 min', utcStart: '2026-10-23T21:30:00Z', utcEnd: '2026-10-23T22:15:00Z' },
+        { day: 'Saturday', session: 'Sprint Race', networkOnAir: '19:30', f1tvOnAir: '19:30', start: '20:00', duration: '19 Laps', utcStart: '2026-10-24T18:00:00Z', utcEnd: '2026-10-24T19:00:00Z' },
+        { day: 'Saturday', session: 'Qualifying', networkOnAir: '23:30', f1tvOnAir: '23:30', start: '00:00', duration: '60 min', utcStart: '2026-10-24T22:00:00Z', utcEnd: '2026-10-24T23:00:00Z' },
+        { day: 'Sunday', session: 'Grand Prix', networkOnAir: '20:00', f1tvOnAir: '20:00', start: '21:00', duration: '56 Laps', utcStart: '2026-10-25T19:00:00Z', utcEnd: '2026-10-25T21:00:00Z' },
+      ]
+    }
+  },
+  { 
+    id: 'de-sky',
+    country: 'Germany', 
+    flag: 'de', 
+    network: 'Sky Deutschland', 
+    app: 'WOW / Sky Go', 
+    url: 'https://sport.sky.de/formel1',
+    type: 'Live', 
+    f1tvPro: false,
+    timezone: 'CEST (UTC+2)',
+    schedules: {
+      'dutch-gp': [
+        { day: 'Friday', session: 'Practice 1', networkOnAir: '12:15', f1tvOnAir: null, start: '12:30', duration: '60 min', utcStart: '2026-08-21T10:30:00Z', utcEnd: '2026-08-21T11:30:00Z' },
+        { day: 'Friday', session: 'Practice 2', networkOnAir: '15:45', f1tvOnAir: null, start: '16:00', duration: '60 min', utcStart: '2026-08-21T14:00:00Z', utcEnd: '2026-08-21T15:00:00Z' },
+        { day: 'Saturday', session: 'Practice 3', networkOnAir: '11:15', f1tvOnAir: null, start: '11:30', duration: '60 min', utcStart: '2026-08-22T09:30:00Z', utcEnd: '2026-08-22T10:30:00Z' },
+        { day: 'Saturday', session: 'Qualifying', networkOnAir: '14:30', f1tvOnAir: null, start: '15:00', duration: '60 min', utcStart: '2026-08-22T13:00:00Z', utcEnd: '2026-08-22T14:00:00Z' },
+        { day: 'Sunday', session: 'Grand Prix', networkOnAir: '13:30', f1tvOnAir: null, start: '15:00', duration: '72 Laps', utcStart: '2026-08-23T13:00:00Z', utcEnd: '2026-08-23T15:00:00Z' },
+      ],
+      'italian-gp': [
+        { day: 'Friday', session: 'Practice 1', networkOnAir: '13:15', f1tvOnAir: null, start: '13:30', duration: '60 min', utcStart: '2026-09-04T11:30:00Z', utcEnd: '2026-09-04T12:30:00Z' },
+        { day: 'Friday', session: 'Practice 2', networkOnAir: '16:45', f1tvOnAir: null, start: '17:00', duration: '60 min', utcStart: '2026-09-04T15:00:00Z', utcEnd: '2026-09-04T16:00:00Z' },
+        { day: 'Saturday', session: 'Practice 3', networkOnAir: '12:15', f1tvOnAir: null, start: '12:30', duration: '60 min', utcStart: '2026-09-05T10:30:00Z', utcEnd: '2026-09-05T11:30:00Z' },
+        { day: 'Saturday', session: 'Qualifying', networkOnAir: '15:30', f1tvOnAir: null, start: '16:00', duration: '60 min', utcStart: '2026-09-05T14:00:00Z', utcEnd: '2026-09-05T15:00:00Z' },
+        { day: 'Sunday', session: 'Grand Prix', networkOnAir: '14:30', f1tvOnAir: null, start: '15:00', duration: '53 Laps', utcStart: '2026-09-06T13:00:00Z', utcEnd: '2026-09-06T15:00:00Z' },
+      ],
+      'us-gp': [
+        { day: 'Friday', session: 'Practice 1', networkOnAir: '19:15', f1tvOnAir: null, start: '19:30', duration: '60 min', utcStart: '2026-10-23T17:30:00Z', utcEnd: '2026-10-23T18:30:00Z' },
+        { day: 'Friday', session: 'Sprint Qualifying', networkOnAir: '23:15', f1tvOnAir: null, start: '23:30', duration: '45 min', utcStart: '2026-10-23T21:30:00Z', utcEnd: '2026-10-23T22:15:00Z' },
+        { day: 'Saturday', session: 'Sprint Race', networkOnAir: '19:30', f1tvOnAir: null, start: '20:00', duration: '19 Laps', utcStart: '2026-10-24T18:00:00Z', utcEnd: '2026-10-24T19:00:00Z' },
+        { day: 'Saturday', session: 'Qualifying', networkOnAir: '23:30', f1tvOnAir: null, start: '00:00', duration: '60 min', utcStart: '2026-10-24T22:00:00Z', utcEnd: '2026-10-24T23:00:00Z' },
+        { day: 'Sunday', session: 'Grand Prix', networkOnAir: '20:00', f1tvOnAir: null, start: '21:00', duration: '56 Laps', utcStart: '2026-10-25T19:00:00Z', utcEnd: '2026-10-25T21:00:00Z' },
+      ]
+    }
+  },
+  { 
+    id: 'it-sky',
+    country: 'Italy', 
+    flag: 'it', 
+    network: 'Sky Italia', 
+    app: 'NOW / Sky Go', 
+    url: 'https://sport.sky.it/formula-1',
+    type: 'Live', 
+    f1tvPro: false,
+    timezone: 'CEST (UTC+2)',
+    schedules: {
+      'dutch-gp': [
+        { day: 'Friday', session: 'Practice 1', networkOnAir: '12:15', f1tvOnAir: null, start: '12:30', duration: '60 min', utcStart: '2026-08-21T10:30:00Z', utcEnd: '2026-08-21T11:30:00Z' },
+        { day: 'Friday', session: 'Practice 2', networkOnAir: '15:45', f1tvOnAir: null, start: '16:00', duration: '60 min', utcStart: '2026-08-21T14:00:00Z', utcEnd: '2026-08-21T15:00:00Z' },
+        { day: 'Saturday', session: 'Practice 3', networkOnAir: '11:15', f1tvOnAir: null, start: '11:30', duration: '60 min', utcStart: '2026-08-22T09:30:00Z', utcEnd: '2026-08-22T10:30:00Z' },
+        { day: 'Saturday', session: 'Qualifying', networkOnAir: '14:00', f1tvOnAir: null, start: '15:00', duration: '60 min', utcStart: '2026-08-22T13:00:00Z', utcEnd: '2026-08-22T14:00:00Z' },
+        { day: 'Sunday', session: 'Grand Prix', networkOnAir: '13:30', f1tvOnAir: null, start: '15:00', duration: '72 Laps', utcStart: '2026-08-23T13:00:00Z', utcEnd: '2026-08-23T15:00:00Z' },
+      ],
+      'italian-gp': [
+        { day: 'Friday', session: 'Practice 1', networkOnAir: '13:15', f1tvOnAir: null, start: '13:30', duration: '60 min', utcStart: '2026-09-04T11:30:00Z', utcEnd: '2026-09-04T12:30:00Z' },
+        { day: 'Friday', session: 'Practice 2', networkOnAir: '16:45', f1tvOnAir: null, start: '17:00', duration: '60 min', utcStart: '2026-09-04T15:00:00Z', utcEnd: '2026-09-04T16:00:00Z' },
+        { day: 'Saturday', session: 'Practice 3', networkOnAir: '12:15', f1tvOnAir: null, start: '12:30', duration: '60 min', utcStart: '2026-09-05T10:30:00Z', utcEnd: '2026-09-05T11:30:00Z' },
+        { day: 'Saturday', session: 'Qualifying', networkOnAir: '15:00', f1tvOnAir: null, start: '16:00', duration: '60 min', utcStart: '2026-09-05T14:00:00Z', utcEnd: '2026-09-05T15:00:00Z' },
+        { day: 'Sunday', session: 'Grand Prix', networkOnAir: '13:30', f1tvOnAir: null, start: '15:00', duration: '53 Laps', utcStart: '2026-09-06T13:00:00Z', utcEnd: '2026-09-06T15:00:00Z' },
+      ],
+      'us-gp': [
+        { day: 'Friday', session: 'Practice 1', networkOnAir: '19:15', f1tvOnAir: null, start: '19:30', duration: '60 min', utcStart: '2026-10-23T17:30:00Z', utcEnd: '2026-10-23T18:30:00Z' },
+        { day: 'Friday', session: 'Sprint Qualifying', networkOnAir: '23:15', f1tvOnAir: null, start: '23:30', duration: '45 min', utcStart: '2026-10-23T21:30:00Z', utcEnd: '2026-10-23T22:15:00Z' },
+        { day: 'Saturday', session: 'Sprint Race', networkOnAir: '19:30', f1tvOnAir: null, start: '20:00', duration: '19 Laps', utcStart: '2026-10-24T18:00:00Z', utcEnd: '2026-10-24T19:00:00Z' },
+        { day: 'Saturday', session: 'Qualifying', networkOnAir: '23:30', f1tvOnAir: null, start: '00:00', duration: '60 min', utcStart: '2026-10-24T22:00:00Z', utcEnd: '2026-10-24T23:00:00Z' },
+        { day: 'Sunday', session: 'Grand Prix', networkOnAir: '20:00', f1tvOnAir: null, start: '21:00', duration: '56 Laps', utcStart: '2026-10-25T19:00:00Z', utcEnd: '2026-10-25T21:00:00Z' },
+      ]
+    }
+  },
+  { 
+    id: 'es-dazn',
+    country: 'Spain', 
+    flag: 'es', 
+    network: 'DAZN F1', 
+    app: 'DAZN App', 
+    url: 'https://www.dazn.com/',
+    type: 'Live', 
+    f1tvPro: false,
+    timezone: 'CEST (UTC+2)',
+    schedules: {
+      'dutch-gp': [
+        { day: 'Friday', session: 'Practice 1', networkOnAir: '12:15', f1tvOnAir: null, start: '12:30', duration: '60 min', utcStart: '2026-08-21T10:30:00Z', utcEnd: '2026-08-21T11:30:00Z' },
+        { day: 'Friday', session: 'Practice 2', networkOnAir: '15:45', f1tvOnAir: null, start: '16:00', duration: '60 min', utcStart: '2026-08-21T14:00:00Z', utcEnd: '2026-08-21T15:00:00Z' },
+        { day: 'Saturday', session: 'Practice 3', networkOnAir: '11:15', f1tvOnAir: null, start: '11:30', duration: '60 min', utcStart: '2026-08-22T09:30:00Z', utcEnd: '2026-08-22T10:30:00Z' },
+        { day: 'Saturday', session: 'Qualifying', networkOnAir: '14:30', f1tvOnAir: null, start: '15:00', duration: '60 min', utcStart: '2026-08-22T13:00:00Z', utcEnd: '2026-08-22T14:00:00Z' },
+        { day: 'Sunday', session: 'Grand Prix', networkOnAir: '13:00', f1tvOnAir: null, start: '15:00', duration: '72 Laps', utcStart: '2026-08-23T13:00:00Z', utcEnd: '2026-08-23T15:00:00Z' },
+      ],
+      'italian-gp': [
+        { day: 'Friday', session: 'Practice 1', networkOnAir: '13:15', f1tvOnAir: null, start: '13:30', duration: '60 min', utcStart: '2026-09-04T11:30:00Z', utcEnd: '2026-09-04T12:30:00Z' },
+        { day: 'Friday', session: 'Practice 2', networkOnAir: '16:45', f1tvOnAir: null, start: '17:00', duration: '60 min', utcStart: '2026-09-04T15:00:00Z', utcEnd: '2026-09-04T16:00:00Z' },
+        { day: 'Saturday', session: 'Practice 3', networkOnAir: '12:15', f1tvOnAir: null, start: '12:30', duration: '60 min', utcStart: '2026-09-05T10:30:00Z', utcEnd: '2026-09-05T11:30:00Z' },
+        { day: 'Saturday', session: 'Qualifying', networkOnAir: '15:30', f1tvOnAir: null, start: '16:00', duration: '60 min', utcStart: '2026-09-05T14:00:00Z', utcEnd: '2026-09-05T15:00:00Z' },
+        { day: 'Sunday', session: 'Grand Prix', networkOnAir: '13:30', f1tvOnAir: null, start: '15:00', duration: '53 Laps', utcStart: '2026-09-06T13:00:00Z', utcEnd: '2026-09-06T15:00:00Z' },
+      ],
+      'us-gp': [
+        { day: 'Friday', session: 'Practice 1', networkOnAir: '19:15', f1tvOnAir: null, start: '19:30', duration: '60 min', utcStart: '2026-10-23T17:30:00Z', utcEnd: '2026-10-23T18:30:00Z' },
+        { day: 'Friday', session: 'Sprint Qualifying', networkOnAir: '23:15', f1tvOnAir: null, start: '23:30', duration: '45 min', utcStart: '2026-10-23T21:30:00Z', utcEnd: '2026-10-23T22:15:00Z' },
+        { day: 'Saturday', session: 'Sprint Race', networkOnAir: '19:30', f1tvOnAir: null, start: '20:00', duration: '19 Laps', utcStart: '2026-10-24T18:00:00Z', utcEnd: '2026-10-24T19:00:00Z' },
+        { day: 'Saturday', session: 'Qualifying', networkOnAir: '23:30', f1tvOnAir: null, start: '00:00', duration: '60 min', utcStart: '2026-10-24T22:00:00Z', utcEnd: '2026-10-24T23:00:00Z' },
+        { day: 'Sunday', session: 'Grand Prix', networkOnAir: '19:30', f1tvOnAir: null, start: '21:00', duration: '56 Laps', utcStart: '2026-10-25T19:00:00Z', utcEnd: '2026-10-25T21:00:00Z' },
+      ]
+    }
+  },
+  { 
+    id: 'fr-canal',
+    country: 'France', 
+    flag: 'fr', 
+    network: 'Canal+', 
+    app: 'MyCanal', 
+    url: 'https://www.canalplus.com/sport/',
+    type: 'Live', 
+    f1tvPro: true,
+    timezone: 'CEST (UTC+2)',
+    schedules: {
+      'dutch-gp': [
+        { day: 'Friday', session: 'Practice 1', networkOnAir: '12:15', f1tvOnAir: '12:20', start: '12:30', duration: '60 min', utcStart: '2026-08-21T10:30:00Z', utcEnd: '2026-08-21T11:30:00Z' },
+        { day: 'Friday', session: 'Practice 2', networkOnAir: '15:45', f1tvOnAir: '15:50', start: '16:00', duration: '60 min', utcStart: '2026-08-21T14:00:00Z', utcEnd: '2026-08-21T15:00:00Z' },
+        { day: 'Saturday', session: 'Practice 3', networkOnAir: '11:15', f1tvOnAir: '11:20', start: '11:30', duration: '60 min', utcStart: '2026-08-22T09:30:00Z', utcEnd: '2026-08-22T10:30:00Z' },
+        { day: 'Saturday', session: 'Qualifying', networkOnAir: '14:40', f1tvOnAir: '14:30', start: '15:00', duration: '60 min', utcStart: '2026-08-22T13:00:00Z', utcEnd: '2026-08-22T14:00:00Z' },
+        { day: 'Sunday', session: 'Grand Prix', networkOnAir: '13:55', f1tvOnAir: '14:00', start: '15:00', duration: '72 Laps', utcStart: '2026-08-23T13:00:00Z', utcEnd: '2026-08-23T15:00:00Z' },
+      ],
+      'italian-gp': [
+        { day: 'Friday', session: 'Practice 1', networkOnAir: '13:15', f1tvOnAir: '13:20', start: '13:30', duration: '60 min', utcStart: '2026-09-04T11:30:00Z', utcEnd: '2026-09-04T12:30:00Z' },
+        { day: 'Friday', session: 'Practice 2', networkOnAir: '16:45', f1tvOnAir: '16:50', start: '17:00', duration: '60 min', utcStart: '2026-09-04T15:00:00Z', utcEnd: '2026-09-04T16:00:00Z' },
+        { day: 'Saturday', session: 'Practice 3', networkOnAir: '12:15', f1tvOnAir: '12:20', start: '12:30', duration: '60 min', utcStart: '2026-09-05T10:30:00Z', utcEnd: '2026-09-05T11:30:00Z' },
+        { day: 'Saturday', session: 'Qualifying', networkOnAir: '15:40', f1tvOnAir: '15:30', start: '16:00', duration: '60 min', utcStart: '2026-09-05T14:00:00Z', utcEnd: '2026-09-05T15:00:00Z' },
+        { day: 'Sunday', session: 'Grand Prix', networkOnAir: '13:55', f1tvOnAir: '14:00', start: '15:00', duration: '53 Laps', utcStart: '2026-09-06T13:00:00Z', utcEnd: '2026-09-06T15:00:00Z' },
+      ],
+      'us-gp': [
+        { day: 'Friday', session: 'Practice 1', networkOnAir: '19:15', f1tvOnAir: '19:20', start: '19:30', duration: '60 min', utcStart: '2026-10-23T17:30:00Z', utcEnd: '2026-10-23T18:30:00Z' },
+        { day: 'Friday', session: 'Sprint Qualifying', networkOnAir: '23:15', f1tvOnAir: '23:15', start: '23:30', duration: '45 min', utcStart: '2026-10-23T21:30:00Z', utcEnd: '2026-10-23T22:15:00Z' },
+        { day: 'Saturday', session: 'Sprint Race', networkOnAir: '19:40', f1tvOnAir: '19:30', start: '20:00', duration: '19 Laps', utcStart: '2026-10-24T18:00:00Z', utcEnd: '2026-10-24T19:00:00Z' },
+        { day: 'Saturday', session: 'Qualifying', networkOnAir: '23:40', f1tvOnAir: '23:30', start: '00:00', duration: '60 min', utcStart: '2026-10-24T22:00:00Z', utcEnd: '2026-10-24T23:00:00Z' },
+        { day: 'Sunday', session: 'Grand Prix', networkOnAir: '19:55', f1tvOnAir: '20:00', start: '21:00', duration: '56 Laps', utcStart: '2026-10-25T19:00:00Z', utcEnd: '2026-10-25T21:00:00Z' },
+      ]
+    }
+  },
+  { 
+    id: 'br-band',
+    country: 'Brazil', 
+    flag: 'br', 
+    network: 'Band / Bandsports', 
+    app: 'Bandplay', 
+    url: 'https://www.band.uol.com.br/esportes/automobilismo/formula-1',
+    type: 'Live', 
+    f1tvPro: true,
+    timezone: 'BRT (UTC-3)',
+    schedules: {
+      'dutch-gp': [
+        { day: 'Friday', session: 'Practice 1', networkOnAir: '07:20', f1tvOnAir: '07:20', start: '07:30', duration: '60 min', utcStart: '2026-08-21T10:30:00Z', utcEnd: '2026-08-21T11:30:00Z' },
+        { day: 'Friday', session: 'Practice 2', networkOnAir: '10:50', f1tvOnAir: '10:50', start: '11:00', duration: '60 min', utcStart: '2026-08-21T14:00:00Z', utcEnd: '2026-08-21T15:00:00Z' },
+        { day: 'Saturday', session: 'Practice 3', networkOnAir: '06:20', f1tvOnAir: '06:20', start: '06:30', duration: '60 min', utcStart: '2026-08-22T09:30:00Z', utcEnd: '2026-08-22T10:30:00Z' },
+        { day: 'Saturday', session: 'Qualifying', networkOnAir: '09:30', f1tvOnAir: '09:30', start: '10:00', duration: '60 min', utcStart: '2026-08-22T13:00:00Z', utcEnd: '2026-08-22T14:00:00Z' },
+        { day: 'Sunday', session: 'Grand Prix', networkOnAir: '09:30', f1tvOnAir: '09:00', start: '10:00', duration: '72 Laps', utcStart: '2026-08-23T13:00:00Z', utcEnd: '2026-08-23T15:00:00Z' },
+      ],
+      'italian-gp': [
+        { day: 'Friday', session: 'Practice 1', networkOnAir: '08:20', f1tvOnAir: '08:20', start: '08:30', duration: '60 min', utcStart: '2026-09-04T11:30:00Z', utcEnd: '2026-09-04T12:30:00Z' },
+        { day: 'Friday', session: 'Practice 2', networkOnAir: '11:50', f1tvOnAir: '11:50', start: '12:00', duration: '60 min', utcStart: '2026-09-04T15:00:00Z', utcEnd: '2026-09-04T16:00:00Z' },
+        { day: 'Saturday', session: 'Practice 3', networkOnAir: '07:20', f1tvOnAir: '07:20', start: '07:30', duration: '60 min', utcStart: '2026-09-05T10:30:00Z', utcEnd: '2026-09-05T11:30:00Z' },
+        { day: 'Saturday', session: 'Qualifying', networkOnAir: '10:30', f1tvOnAir: '10:30', start: '11:00', duration: '60 min', utcStart: '2026-09-05T14:00:00Z', utcEnd: '2026-09-05T15:00:00Z' },
+        { day: 'Sunday', session: 'Grand Prix', networkOnAir: '09:30', f1tvOnAir: '09:00', start: '10:00', duration: '53 Laps', utcStart: '2026-09-06T13:00:00Z', utcEnd: '2026-09-06T15:00:00Z' },
+      ],
+      'us-gp': [
+        { day: 'Friday', session: 'Practice 1', networkOnAir: '14:20', f1tvOnAir: '14:20', start: '14:30', duration: '60 min', utcStart: '2026-10-23T17:30:00Z', utcEnd: '2026-10-23T18:30:00Z' },
+        { day: 'Friday', session: 'Sprint Qualifying', networkOnAir: '18:15', f1tvOnAir: '18:15', start: '18:30', duration: '45 min', utcStart: '2026-10-23T21:30:00Z', utcEnd: '2026-10-23T22:15:00Z' },
+        { day: 'Saturday', session: 'Sprint Race', networkOnAir: '14:30', f1tvOnAir: '14:30', start: '15:00', duration: '19 Laps', utcStart: '2026-10-24T18:00:00Z', utcEnd: '2026-10-24T19:00:00Z' },
+        { day: 'Saturday', session: 'Qualifying', networkOnAir: '18:30', f1tvOnAir: '18:30', start: '19:00', duration: '60 min', utcStart: '2026-10-24T22:00:00Z', utcEnd: '2026-10-24T23:00:00Z' },
+        { day: 'Sunday', session: 'Grand Prix', networkOnAir: '17:30', f1tvOnAir: '17:00', start: '18:00', duration: '56 Laps', utcStart: '2026-10-25T19:00:00Z', utcEnd: '2026-10-25T21:00:00Z' },
+      ]
+    }
+  },
+  { 
+    id: 'mx-fox',
+    country: 'Mexico', 
+    flag: 'mx', 
+    network: 'Fox Sports Mexico', 
+    app: 'Fox Sports App', 
+    url: 'https://www.foxsports.com.mx/',
+    type: 'Live', 
+    f1tvPro: true,
+    timezone: 'CST (UTC-6)',
+    schedules: {
+      'dutch-gp': [
+        { day: 'Friday', session: 'Practice 1', networkOnAir: '04:25', f1tvOnAir: '04:20', start: '04:30', duration: '60 min', utcStart: '2026-08-21T10:30:00Z', utcEnd: '2026-08-21T11:30:00Z' },
+        { day: 'Friday', session: 'Practice 2', networkOnAir: '07:55', f1tvOnAir: '07:50', start: '08:00', duration: '60 min', utcStart: '2026-08-21T14:00:00Z', utcEnd: '2026-08-21T15:00:00Z' },
+        { day: 'Saturday', session: 'Practice 3', networkOnAir: '03:25', f1tvOnAir: '03:20', start: '03:30', duration: '60 min', utcStart: '2026-08-22T09:30:00Z', utcEnd: '2026-08-22T10:30:00Z' },
+        { day: 'Saturday', session: 'Qualifying', networkOnAir: '05:30', f1tvOnAir: '05:30', start: '06:00', duration: '60 min', utcStart: '2026-08-22T13:00:00Z', utcEnd: '2026-08-22T14:00:00Z' },
+        { day: 'Sunday', session: 'Grand Prix', networkOnAir: '05:00', f1tvOnAir: '05:00', start: '06:00', duration: '72 Laps', utcStart: '2026-08-23T13:00:00Z', utcEnd: '2026-08-23T15:00:00Z' },
+      ],
+      'italian-gp': [
+        { day: 'Friday', session: 'Practice 1', networkOnAir: '05:25', f1tvOnAir: '05:20', start: '05:30', duration: '60 min', utcStart: '2026-09-04T11:30:00Z', utcEnd: '2026-09-04T12:30:00Z' },
+        { day: 'Friday', session: 'Practice 2', networkOnAir: '08:55', f1tvOnAir: '08:50', start: '09:00', duration: '60 min', utcStart: '2026-09-04T15:00:00Z', utcEnd: '2026-09-04T16:00:00Z' },
+        { day: 'Saturday', session: 'Practice 3', networkOnAir: '04:25', f1tvOnAir: '04:20', start: '04:30', duration: '60 min', utcStart: '2026-09-05T10:30:00Z', utcEnd: '2026-09-05T11:30:00Z' },
+        { day: 'Saturday', session: 'Qualifying', networkOnAir: '06:30', f1tvOnAir: '06:30', start: '07:00', duration: '60 min', utcStart: '2026-09-05T14:00:00Z', utcEnd: '2026-09-05T15:00:00Z' },
+        { day: 'Sunday', session: 'Grand Prix', networkOnAir: '06:00', f1tvOnAir: '06:00', start: '07:00', duration: '53 Laps', utcStart: '2026-09-06T13:00:00Z', utcEnd: '2026-09-06T15:00:00Z' },
+      ],
+      'us-gp': [
+        { day: 'Friday', session: 'Practice 1', networkOnAir: '11:25', f1tvOnAir: '11:20', start: '11:30', duration: '60 min', utcStart: '2026-10-23T17:30:00Z', utcEnd: '2026-10-23T18:30:00Z' },
+        { day: 'Friday', session: 'Sprint Qualifying', networkOnAir: '15:15', f1tvOnAir: '15:15', start: '15:30', duration: '45 min', utcStart: '2026-10-23T21:30:00Z', utcEnd: '2026-10-23T22:15:00Z' },
+        { day: 'Saturday', session: 'Sprint Race', networkOnAir: '11:30', f1tvOnAir: '11:30', start: '12:00', duration: '19 Laps', utcStart: '2026-10-24T18:00:00Z', utcEnd: '2026-10-24T19:00:00Z' },
+        { day: 'Saturday', session: 'Qualifying', networkOnAir: '15:30', f1tvOnAir: '15:30', start: '16:00', duration: '60 min', utcStart: '2026-10-24T22:00:00Z', utcEnd: '2026-10-24T23:00:00Z' },
+        { day: 'Sunday', session: 'Grand Prix', networkOnAir: '14:00', f1tvOnAir: '14:00', start: '15:00', duration: '56 Laps', utcStart: '2026-10-25T19:00:00Z', utcEnd: '2026-10-25T21:00:00Z' },
+      ]
+    }
+  },
+  { 
+    id: 'jp-dazn',
+    country: 'Japan', 
+    flag: 'jp', 
+    network: 'Fuji TV / DAZN', 
+    app: 'DAZN App', 
+    url: 'https://www.dazn.com/en-JP/competition/Competition:2owzja3d9h1129eq165d63f45',
+    type: 'Live', 
+    f1tvPro: true,
+    timezone: 'JST (UTC+9)',
+    schedules: {
+      'dutch-gp': [
+        { day: 'Friday', session: 'Practice 1', networkOnAir: '19:20', f1tvOnAir: '19:20', start: '19:30', duration: '60 min', utcStart: '2026-08-21T10:30:00Z', utcEnd: '2026-08-21T11:30:00Z' },
+        { day: 'Friday', session: 'Practice 2', networkOnAir: '22:50', f1tvOnAir: '22:50', start: '23:00', duration: '60 min', utcStart: '2026-08-21T14:00:00Z', utcEnd: '2026-08-21T15:00:00Z' },
+        { day: 'Saturday', session: 'Practice 3', networkOnAir: '18:20', f1tvOnAir: '18:20', start: '18:30', duration: '60 min', utcStart: '2026-08-22T09:30:00Z', utcEnd: '2026-08-22T10:30:00Z' },
+        { day: 'Saturday', session: 'Qualifying', networkOnAir: '21:30', f1tvOnAir: '21:30', start: '22:00', duration: '60 min', utcStart: '2026-08-22T13:00:00Z', utcEnd: '2026-08-22T14:00:00Z' },
+        { day: 'Sunday', session: 'Grand Prix', networkOnAir: '21:10', f1tvOnAir: '21:00', start: '22:00', duration: '72 Laps', utcStart: '2026-08-23T13:00:00Z', utcEnd: '2026-08-23T15:00:00Z' },
+      ],
+      'italian-gp': [
+        { day: 'Friday', session: 'Practice 1', networkOnAir: '20:20', f1tvOnAir: '20:20', start: '20:30', duration: '60 min', utcStart: '2026-09-04T11:30:00Z', utcEnd: '2026-09-04T12:30:00Z' },
+        { day: 'Friday', session: 'Practice 2', networkOnAir: '23:50', f1tvOnAir: '23:50', start: '00:00', duration: '60 min', utcStart: '2026-09-04T15:00:00Z', utcEnd: '2026-09-04T16:00:00Z' },
+        { day: 'Saturday', session: 'Practice 3', networkOnAir: '19:20', f1tvOnAir: '19:20', start: '19:30', duration: '60 min', utcStart: '2026-09-05T10:30:00Z', utcEnd: '2026-09-05T11:30:00Z' },
+        { day: 'Saturday', session: 'Qualifying', networkOnAir: '22:30', f1tvOnAir: '22:30', start: '23:00', duration: '60 min', utcStart: '2026-09-05T14:00:00Z', utcEnd: '2026-09-05T15:00:00Z' },
+        { day: 'Sunday', session: 'Grand Prix', networkOnAir: '21:10', f1tvOnAir: '21:00', start: '22:00', duration: '53 Laps', utcStart: '2026-09-06T13:00:00Z', utcEnd: '2026-09-06T15:00:00Z' },
+      ],
+      'us-gp': [
+        { day: 'Saturday', session: 'Practice 1', networkOnAir: '02:20', f1tvOnAir: '02:20', start: '02:30', duration: '60 min', utcStart: '2026-10-23T17:30:00Z', utcEnd: '2026-10-23T18:30:00Z' },
+        { day: 'Saturday', session: 'Sprint Qualifying', networkOnAir: '06:15', f1tvOnAir: '06:15', start: '06:30', duration: '45 min', utcStart: '2026-10-23T21:30:00Z', utcEnd: '2026-10-23T22:15:00Z' },
+        { day: 'Sunday', session: 'Sprint Race', networkOnAir: '02:30', f1tvOnAir: '02:30', start: '03:00', duration: '19 Laps', utcStart: '2026-10-24T18:00:00Z', utcEnd: '2026-10-24T19:00:00Z' },
+        { day: 'Sunday', session: 'Qualifying', networkOnAir: '06:30', f1tvOnAir: '06:30', start: '07:00', duration: '60 min', utcStart: '2026-10-24T22:00:00Z', utcEnd: '2026-10-24T23:00:00Z' },
+        { day: 'Monday', session: 'Grand Prix', networkOnAir: '03:10', f1tvOnAir: '03:00', start: '04:00', duration: '56 Laps', utcStart: '2026-10-25T19:00:00Z', utcEnd: '2026-10-25T21:00:00Z' },
+      ]
+    }
+  },
+  { 
+    id: 'mena-ssc',
+    country: 'Middle East & MENA', 
+    flag: 'ae', 
+    network: 'SSC / beIN Sports', 
+    app: 'TOD App', 
+    url: 'https://www.tod.tv/',
+    type: 'Live', 
+    f1tvPro: true,
+    timezone: 'AST (UTC+4)',
+    schedules: {
+      'dutch-gp': [
+        { day: 'Friday', session: 'Practice 1', networkOnAir: '14:15', f1tvOnAir: '14:20', start: '14:30', duration: '60 min', utcStart: '2026-08-21T10:30:00Z', utcEnd: '2026-08-21T11:30:00Z' },
+        { day: 'Friday', session: 'Practice 2', networkOnAir: '17:45', f1tvOnAir: '17:50', start: '18:00', duration: '60 min', utcStart: '2026-08-21T14:00:00Z', utcEnd: '2026-08-21T15:00:00Z' },
+        { day: 'Saturday', session: 'Practice 3', networkOnAir: '13:15', f1tvOnAir: '13:20', start: '13:30', duration: '60 min', utcStart: '2026-08-22T09:30:00Z', utcEnd: '2026-08-22T10:30:00Z' },
+        { day: 'Saturday', session: 'Qualifying', networkOnAir: '16:30', f1tvOnAir: '16:30', start: '17:00', duration: '60 min', utcStart: '2026-08-22T13:00:00Z', utcEnd: '2026-08-22T14:00:00Z' },
+        { day: 'Sunday', session: 'Grand Prix', networkOnAir: '16:00', f1tvOnAir: '16:00', start: '17:00', duration: '72 Laps', utcStart: '2026-08-23T13:00:00Z', utcEnd: '2026-08-23T15:00:00Z' },
+      ],
+      'italian-gp': [
+        { day: 'Friday', session: 'Practice 1', networkOnAir: '15:15', f1tvOnAir: '15:20', start: '15:30', duration: '60 min', utcStart: '2026-09-04T11:30:00Z', utcEnd: '2026-09-04T12:30:00Z' },
+        { day: 'Friday', session: 'Practice 2', networkOnAir: '18:45', f1tvOnAir: '18:50', start: '19:00', duration: '60 min', utcStart: '2026-09-04T15:00:00Z', utcEnd: '2026-09-04T16:00:00Z' },
+        { day: 'Saturday', session: 'Practice 3', networkOnAir: '14:15', f1tvOnAir: '14:20', start: '14:30', duration: '60 min', utcStart: '2026-09-05T10:30:00Z', utcEnd: '2026-09-05T11:30:00Z' },
+        { day: 'Saturday', session: 'Qualifying', networkOnAir: '17:30', f1tvOnAir: '17:30', start: '18:00', duration: '60 min', utcStart: '2026-09-05T14:00:00Z', utcEnd: '2026-09-05T15:00:00Z' },
+        { day: 'Sunday', session: 'Grand Prix', networkOnAir: '16:00', f1tvOnAir: '16:00', start: '17:00', duration: '53 Laps', utcStart: '2026-09-06T13:00:00Z', utcEnd: '2026-09-06T15:00:00Z' },
+      ],
+      'us-gp': [
+        { day: 'Friday', session: 'Practice 1', networkOnAir: '21:15', f1tvOnAir: '21:20', start: '21:30', duration: '60 min', utcStart: '2026-10-23T17:30:00Z', utcEnd: '2026-10-23T18:30:00Z' },
+        { day: 'Saturday', session: 'Sprint Qualifying', networkOnAir: '01:15', f1tvOnAir: '01:15', start: '01:30', duration: '45 min', utcStart: '2026-10-23T21:30:00Z', utcEnd: '2026-10-23T22:15:00Z' },
+        { day: 'Saturday', session: 'Sprint Race', networkOnAir: '21:30', f1tvOnAir: '21:30', start: '22:00', duration: '19 Laps', utcStart: '2026-10-24T18:00:00Z', utcEnd: '2026-10-24T19:00:00Z' },
+        { day: 'Sunday', session: 'Qualifying', networkOnAir: '01:30', f1tvOnAir: '01:30', start: '02:00', duration: '60 min', utcStart: '2026-10-24T22:00:00Z', utcEnd: '2026-10-24T23:00:00Z' },
+        { day: 'Sunday', session: 'Grand Prix', networkOnAir: '22:00', f1tvOnAir: '22:00', start: '23:00', duration: '56 Laps', utcStart: '2026-10-25T19:00:00Z', utcEnd: '2026-10-25T21:00:00Z' },
+      ]
+    }
+  },
+  { 
+    id: 'nz-sky',
+    country: 'New Zealand', 
+    flag: 'nz', 
+    network: 'Sky Sport NZ', 
+    app: 'Sky Sport Now', 
+    url: 'https://www.skysportnow.co.nz/',
+    type: 'Live', 
+    f1tvPro: true,
+    timezone: 'NZST (UTC+12)',
+    schedules: {
+      'dutch-gp': [
+        { day: 'Friday', session: 'Practice 1', networkOnAir: '22:15', f1tvOnAir: '22:20', start: '22:30', duration: '60 min', utcStart: '2026-08-21T10:30:00Z', utcEnd: '2026-08-21T11:30:00Z' },
+        { day: 'Saturday', session: 'Practice 2', networkOnAir: '01:45', f1tvOnAir: '01:50', start: '02:00', duration: '60 min', utcStart: '2026-08-21T14:00:00Z', utcEnd: '2026-08-21T15:00:00Z' },
+        { day: 'Saturday', session: 'Practice 3', networkOnAir: '21:15', f1tvOnAir: '21:20', start: '21:30', duration: '60 min', utcStart: '2026-08-22T09:30:00Z', utcEnd: '2026-08-22T10:30:00Z' },
+        { day: 'Sunday', session: 'Qualifying', networkOnAir: '00:30', f1tvOnAir: '00:30', start: '01:00', duration: '60 min', utcStart: '2026-08-22T13:00:00Z', utcEnd: '2026-08-22T14:00:00Z' },
+        { day: 'Monday', session: 'Grand Prix', networkOnAir: '00:00', f1tvOnAir: '00:00', start: '01:00', duration: '72 Laps', utcStart: '2026-08-23T13:00:00Z', utcEnd: '2026-08-23T15:00:00Z' },
+      ],
+      'italian-gp': [
+        { day: 'Friday', session: 'Practice 1', networkOnAir: '23:15', f1tvOnAir: '23:20', start: '23:30', duration: '60 min', utcStart: '2026-09-04T11:30:00Z', utcEnd: '2026-09-04T12:30:00Z' },
+        { day: 'Saturday', session: 'Practice 2', networkOnAir: '02:45', f1tvOnAir: '02:50', start: '03:00', duration: '60 min', utcStart: '2026-09-04T15:00:00Z', utcEnd: '2026-09-04T16:00:00Z' },
+        { day: 'Saturday', session: 'Practice 3', networkOnAir: '22:15', f1tvOnAir: '22:20', start: '22:30', duration: '60 min', utcStart: '2026-09-05T10:30:00Z', utcEnd: '2026-09-05T11:30:00Z' },
+        { day: 'Sunday', session: 'Qualifying', networkOnAir: '01:30', f1tvOnAir: '01:30', start: '02:00', duration: '60 min', utcStart: '2026-09-05T14:00:00Z', utcEnd: '2026-09-05T15:00:00Z' },
+        { day: 'Monday', session: 'Grand Prix', networkOnAir: '00:00', f1tvOnAir: '00:00', start: '01:00', duration: '53 Laps', utcStart: '2026-09-06T13:00:00Z', utcEnd: '2026-09-06T15:00:00Z' },
+      ],
+      'us-gp': [
+        { day: 'Saturday', session: 'Practice 1', networkOnAir: '05:15', f1tvOnAir: '05:20', start: '05:30', duration: '60 min', utcStart: '2026-10-23T17:30:00Z', utcEnd: '2026-10-23T18:30:00Z' },
+        { day: 'Saturday', session: 'Sprint Qualifying', networkOnAir: '09:15', f1tvOnAir: '09:15', start: '09:30', duration: '45 min', utcStart: '2026-10-23T21:30:00Z', utcEnd: '2026-10-23T22:15:00Z' },
+        { day: 'Sunday', session: 'Sprint Race', networkOnAir: '05:30', f1tvOnAir: '05:30', start: '06:00', duration: '19 Laps', utcStart: '2026-10-24T18:00:00Z', utcEnd: '2026-10-24T19:00:00Z' },
+        { day: 'Sunday', session: 'Qualifying', networkOnAir: '09:30', f1tvOnAir: '09:30', start: '10:00', duration: '60 min', utcStart: '2026-10-24T22:00:00Z', utcEnd: '2026-10-24T23:00:00Z' },
+        { day: 'Monday', session: 'Grand Prix', networkOnAir: '07:00', f1tvOnAir: '07:00', start: '08:00', duration: '56 Laps', utcStart: '2026-10-25T19:00:00Z', utcEnd: '2026-10-25T21:00:00Z' },
+      ]
+    }
+  },
+  { 
+    id: 'in-fancode',
+    country: 'India', 
+    flag: 'in', 
+    network: 'FanCode', 
+    app: 'FanCode App', 
+    url: 'https://www.fancode.com/',
+    type: 'Live', 
+    f1tvPro: true,
+    timezone: 'IST (UTC+5:30)',
+    schedules: {
+      'dutch-gp': [
+        { day: 'Friday', session: 'Practice 1', networkOnAir: '15:50', f1tvOnAir: '15:50', start: '16:00', duration: '60 min', utcStart: '2026-08-21T10:30:00Z', utcEnd: '2026-08-21T11:30:00Z' },
+        { day: 'Friday', session: 'Practice 2', networkOnAir: '19:20', f1tvOnAir: '19:20', start: '19:30', duration: '60 min', utcStart: '2026-08-21T14:00:00Z', utcEnd: '2026-08-21T15:00:00Z' },
+        { day: 'Saturday', session: 'Practice 3', networkOnAir: '14:50', f1tvOnAir: '14:50', start: '15:00', duration: '60 min', utcStart: '2026-08-22T09:30:00Z', utcEnd: '2026-08-22T10:30:00Z' },
+        { day: 'Saturday', session: 'Qualifying', networkOnAir: '18:00', f1tvOnAir: '18:00', start: '18:30', duration: '60 min', utcStart: '2026-08-22T13:00:00Z', utcEnd: '2026-08-22T14:00:00Z' },
+        { day: 'Sunday', session: 'Grand Prix', networkOnAir: '17:30', f1tvOnAir: '17:30', start: '18:30', duration: '72 Laps', utcStart: '2026-08-23T13:00:00Z', utcEnd: '2026-08-23T15:00:00Z' },
+      ],
+      'italian-gp': [
+        { day: 'Friday', session: 'Practice 1', networkOnAir: '16:50', f1tvOnAir: '16:50', start: '17:00', duration: '60 min', utcStart: '2026-09-04T11:30:00Z', utcEnd: '2026-09-04T12:30:00Z' },
+        { day: 'Friday', session: 'Practice 2', networkOnAir: '20:20', f1tvOnAir: '20:20', start: '20:30', duration: '60 min', utcStart: '2026-09-04T15:00:00Z', utcEnd: '2026-09-04T16:00:00Z' },
+        { day: 'Saturday', session: 'Practice 3', networkOnAir: '15:50', f1tvOnAir: '15:50', start: '16:00', duration: '60 min', utcStart: '2026-09-05T10:30:00Z', utcEnd: '2026-09-05T11:30:00Z' },
+        { day: 'Saturday', session: 'Qualifying', networkOnAir: '19:00', f1tvOnAir: '19:00', start: '19:30', duration: '60 min', utcStart: '2026-09-05T14:00:00Z', utcEnd: '2026-09-05T15:00:00Z' },
+        { day: 'Sunday', session: 'Grand Prix', networkOnAir: '17:30', f1tvOnAir: '17:30', start: '18:30', duration: '53 Laps', utcStart: '2026-09-06T13:00:00Z', utcEnd: '2026-09-06T15:00:00Z' },
+      ],
+      'us-gp': [
+        { day: 'Friday', session: 'Practice 1', networkOnAir: '22:50', f1tvOnAir: '22:50', start: '23:00', duration: '60 min', utcStart: '2026-10-23T17:30:00Z', utcEnd: '2026-10-23T18:30:00Z' },
+        { day: 'Saturday', session: 'Sprint Qualifying', networkOnAir: '02:45', f1tvOnAir: '02:45', start: '03:00', duration: '45 min', utcStart: '2026-10-23T21:30:00Z', utcEnd: '2026-10-23T22:15:00Z' },
+        { day: 'Saturday', session: 'Sprint Race', networkOnAir: '23:00', f1tvOnAir: '23:00', start: '23:30', duration: '19 Laps', utcStart: '2026-10-24T18:00:00Z', utcEnd: '2026-10-24T19:00:00Z' },
+        { day: 'Sunday', session: 'Qualifying', networkOnAir: '03:00', f1tvOnAir: '03:00', start: '03:30', duration: '60 min', utcStart: '2026-10-24T22:00:00Z', utcEnd: '2026-10-24T23:00:00Z' },
+        { day: 'Monday', session: 'Grand Prix', networkOnAir: '00:00', f1tvOnAir: '00:00', start: '00:30', duration: '56 Laps', utcStart: '2026-10-25T19:00:00Z', utcEnd: '2026-10-25T21:00:00Z' },
+      ]
+    }
+  },
+  { 
+    id: 'za-super',
+    country: 'South Africa', 
+    flag: 'za', 
+    network: 'SuperSport', 
+    app: 'DStv Stream', 
+    url: 'https://supersport.com/motorsport',
+    type: 'Live', 
+    f1tvPro: false,
+    timezone: 'SAST (UTC+2)',
+    schedules: {
+      'dutch-gp': [
+        { day: 'Friday', session: 'Practice 1', networkOnAir: '12:15', f1tvOnAir: null, start: '12:30', duration: '60 min', utcStart: '2026-08-21T10:30:00Z', utcEnd: '2026-08-21T11:30:00Z' },
+        { day: 'Friday', session: 'Practice 2', networkOnAir: '15:45', f1tvOnAir: null, start: '16:00', duration: '60 min', utcStart: '2026-08-21T14:00:00Z', utcEnd: '2026-08-21T15:00:00Z' },
+        { day: 'Saturday', session: 'Practice 3', networkOnAir: '11:15', f1tvOnAir: null, start: '11:30', duration: '60 min', utcStart: '2026-08-22T09:30:00Z', utcEnd: '2026-08-22T10:30:00Z' },
+        { day: 'Saturday', session: 'Qualifying', networkOnAir: '14:00', f1tvOnAir: null, start: '15:00', duration: '60 min', utcStart: '2026-08-22T13:00:00Z', utcEnd: '2026-08-22T14:00:00Z' },
+        { day: 'Sunday', session: 'Grand Prix', networkOnAir: '13:30', f1tvOnAir: null, start: '15:00', duration: '72 Laps', utcStart: '2026-08-23T13:00:00Z', utcEnd: '2026-08-23T15:00:00Z' },
+      ],
+      'italian-gp': [
+        { day: 'Friday', session: 'Practice 1', networkOnAir: '13:15', f1tvOnAir: null, start: '13:30', duration: '60 min', utcStart: '2026-09-04T11:30:00Z', utcEnd: '2026-09-04T12:30:00Z' },
+        { day: 'Friday', session: 'Practice 2', networkOnAir: '16:45', f1tvOnAir: null, start: '17:00', duration: '60 min', utcStart: '2026-09-04T15:00:00Z', utcEnd: '2026-09-04T16:00:00Z' },
+        { day: 'Saturday', session: 'Practice 3', networkOnAir: '12:15', f1tvOnAir: null, start: '12:30', duration: '60 min', utcStart: '2026-09-05T10:30:00Z', utcEnd: '2026-09-05T11:30:00Z' },
+        { day: 'Saturday', session: 'Qualifying', networkOnAir: '15:00', f1tvOnAir: null, start: '16:00', duration: '60 min', utcStart: '2026-09-05T14:00:00Z', utcEnd: '2026-09-05T15:00:00Z' },
+        { day: 'Sunday', session: 'Grand Prix', networkOnAir: '14:30', f1tvOnAir: null, start: '15:00', duration: '53 Laps', utcStart: '2026-09-06T13:00:00Z', utcEnd: '2026-09-06T15:00:00Z' },
+      ],
+      'us-gp': [
+        { day: 'Friday', session: 'Practice 1', networkOnAir: '19:15', f1tvOnAir: null, start: '19:30', duration: '60 min', utcStart: '2026-10-23T17:30:00Z', utcEnd: '2026-10-23T18:30:00Z' },
+        { day: 'Friday', session: 'Sprint Qualifying', networkOnAir: '23:15', f1tvOnAir: null, start: '23:30', duration: '45 min', utcStart: '2026-10-23T21:30:00Z', utcEnd: '2026-10-23T22:15:00Z' },
+        { day: 'Saturday', session: 'Sprint Race', networkOnAir: '19:30', f1tvOnAir: null, start: '20:00', duration: '19 Laps', utcStart: '2026-10-24T18:00:00Z', utcEnd: '2026-10-24T19:00:00Z' },
+        { day: 'Saturday', session: 'Qualifying', networkOnAir: '23:30', f1tvOnAir: null, start: '00:00', duration: '60 min', utcStart: '2026-10-24T22:00:00Z', utcEnd: '2026-10-24T23:00:00Z' },
+        { day: 'Sunday', session: 'Grand Prix', networkOnAir: '20:00', f1tvOnAir: null, start: '21:00', duration: '56 Laps', utcStart: '2026-10-25T19:00:00Z', utcEnd: '2026-10-25T21:00:00Z' },
+      ]
+    }
+  }
+].sort((a, b) => a.country.localeCompare(b.country));
+
+const initialRace = races[0];
+const initialBroadcaster = broadcasters.find(b => b.id === 'uk-sky') || broadcasters[0];
+const initialSchedule = initialBroadcaster.schedules[initialRace.id as keyof typeof initialBroadcaster.schedules] || [];
+---
+
+<Layout 
+  title="Global TV Guide, Radio & Programme Start Times | My Grand Prix Hub"
+  description="Live Formula 1 TV and Radio guide. Select your country and race to see local broadcast networks, radio streams, live session indicators, and Add-to-Calendar exports."
+>
+  <div class="tv-guide-wrapper">
+    <main class="page-container">
+      
+      <!-- HERO HEADER -->
+      <header class="hub-header">
+        <span class="badge">Official Broadcasts & Radio</span>
+        <h1>TV & Live Audio Guide</h1>
+        <p class="subtitle">Select your race and country to access local television networks, live streaming apps, official audio streams, and pre-race build-up timings.</p>
+      </header>
+
+      <!-- TWO-COLUMN MAIN CONTENT -->
+      <div class="content-grid">
+        
+        <!-- LEFT COLUMN: Race Programme Schedule -->
+        <section class="schedule-section">
+          
+          <div class="card header-card">
+            
+            <!-- RACE SELECTOR WITH SPRINT BADGE -->
+            <div class="race-selector-box">
+              <label for="race-selector">Select Grand Prix:</label>
+              <select id="race-selector" class="race-dropdown">
+                {races.map(r => (
+                  <option value={r.id}>Round {r.round}: {r.name} {r.isSprint ? '(Sprint Weekend)' : ''}</option>
+                ))}
+              </select>
+            </div>
+
+            <div class="card-title-row">
+              <div class="title-with-flag">
+                <img src={`https://flagcdn.com/w40/${initialRace.flagCode}.png`} alt={initialRace.name} id="schedule-flag" class="race-flag" />
+                <div>
+                  <div class="round-badge-group">
+                    <span class="round-badge" id="schedule-round-dates">Round {initialRace.round} &bull; {initialRace.dates}</span>
+                    <span id="sprint-indicator-badge" class={`sprint-badge ${initialRace.isSprint ? '' : 'hidden'}`}>Sprint Format</span>
+                  </div>
+                  <h2 id="schedule-race-title">{initialRace.name}</h2>
+                </div>
+              </div>
+              <span class="timezone-badge" id="schedule-timezone">{initialBroadcaster.timezone}</span>
+            </div>
+            
+            <div class="selected-broadcaster-banner">
+              <div class="banner-left">
+                <span class="viewing-label">Viewing schedule for:</span>
+                <strong id="active-broadcaster-name" class="active-name">{initialBroadcaster.network} ({initialBroadcaster.country})</strong>
+              </div>
+              
+              <div class="banner-right-actions">
+                <!-- NEW LOCAL TIME TOGGLE -->
+                <div class="local-toggle-wrapper">
+                  <span class="toggle-text">Show in local time</span>
+                  <label class="toggle-switch">
+                    <input type="checkbox" id="local-time-toggle">
+                    <span class="slider"></span>
+                  </label>
+                </div>
+                
+                <a href={initialBroadcaster.url} id="watch-live-btn" target="_blank" rel="noopener noreferrer" class="btn-watch-live">
+                  Open Channel App
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/></svg>
+                </a>
+              </div>
+            </div>
+
+            <p class="helper-text">
+              <span class="pulse-dot"></span>
+              <strong>Build-Up On Air</strong> indicates pre-session studio analysis. Session status updates automatically in real-time.
+            </p>
+          </div>
+
+          <!-- DYNAMIC SCHEDULE LIST -->
+          <div class="schedule-list" id="schedule-list-container">
+            {initialSchedule.map((item) => (
+              <div class={`schedule-row ${item.session.includes('Grand Prix') || item.session.includes('Sprint Race') ? 'highlight-race' : ''}`} data-utc-start={item.utcStart} data-utc-end={item.utcEnd} data-network-onair={item.networkOnAir} data-f1tv-onair={item.f1tvOnAir || ''} data-start-time={item.start}>
+                <div class="session-info">
+                  <div class="session-meta-top">
+                    <span class="day-badge">{item.day}</span>
+                    <span class="live-status-pill pill-upcoming">Upcoming</span>
+                  </div>
+                  <h3>{item.session}</h3>
+                  <span class="duration-text">{item.duration}</span>
+                </div>
+
+                <div class="timings-block">
+                  <div class="time-col on-air">
+                    <span class="time-label">Build-Up On Air</span>
+                    <div class="on-air-providers">
+                      <div class="provider-row">
+                        <span class="prov-name">{initialBroadcaster.network}:</span>
+                        <span class="time-val display-network-onair">{item.networkOnAir}</span>
+                      </div>
+                      {item.f1tvOnAir && (
+                        <div class="provider-row f1tv-row">
+                          <span class="prov-name">F1TV Pro:</span>
+                          <span class="time-val display-f1tv-onair">{item.f1tvOnAir}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div class="timeline-divider">
+                    <span class="circle-dot"></span>
+                    <span class="connect-line"></span>
+                    <span class="circle-dot active"></span>
+                  </div>
+
+                  <div class="time-col track-action">
+                    <span class="time-label">{item.session.includes('Grand Prix') || item.session.includes('Sprint Race') ? 'Lights Out' : 'Green Flag'}</span>
+                    <span class="time-val track-val display-start-time">{item.start}</span>
+                  </div>
+                </div>
+
+                <!-- ADD TO CALENDAR BUTTON -->
+                <div class="cal-actions">
+                  <button type="button" class="btn-cal" data-session={item.session} data-start={item.utcStart} data-end={item.utcEnd} title="Add to Google Calendar">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M12 14v4M10 16h4"/></svg>
+                    +Cal
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <!-- AUDIO & RADIO COVERAGE CARD -->
+          <div class="card radio-card" id="radio-card">
+            <div class="radio-header">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2"><path d="M4.9 19.1C1 15.2 1 8.8 4.9 4.9"/><path d="M7.8 16.2c-2.3-2.3-2.3-6.1 0-8.5"/><circle cx="12" cy="12" r="2"/><path d="M16.2 7.8c2.3 2.3 2.3 6.1 0 8.5"/><path d="M19.1 4.9C23 8.8 23 15.2 19.1 19.1"/></svg>
+              <div>
+                <h3>Live Audio & Radio Commentary</h3>
+                <p id="radio-provider-text">Listen live via <strong>{initialBroadcaster.radio ? initialBroadcaster.radio.name : 'Official F1 App Audio'}</strong></p>
+              </div>
+            </div>
+            <a href={initialBroadcaster.radio ? initialBroadcaster.radio.url : 'https://www.formula1.com/en/f1-live.html'} id="radio-listen-btn" target="_blank" rel="noopener noreferrer" class="btn-radio">
+              Listen Live
+            </a>
+          </div>
+
+          <!-- F1 TV PRO CARD (Hidden if F1 TV Pro is not available) -->
+          <div class="f1tv-promo card" id="f1tv-promo-card" style={`display: ${initialBroadcaster.f1tvPro ? 'flex' : 'none'}`}>
+            <div class="promo-left">
+              <div class="promo-icon">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#e10600" stroke-width="2.5"><rect x="2" y="7" width="20" height="15" rx="2" ry="2"/><polyline points="17 2 12 7 7 2"/></svg>
+              </div>
+              <div class="promo-text">
+                <h3>F1 TV Pro Available</h3>
+                <p>Live onboard feeds, pit lane data, and full race replays are officially supported in your selected country.</p>
+              </div>
+            </div>
+            <a href="https://f1tv.formula1.com/" target="_blank" rel="noopener noreferrer" class="btn-f1tv">Watch on F1 TV</a>
+          </div>
+        </section>
+
+        <!-- RIGHT COLUMN: Searchable Global Broadcasters -->
+        <section class="broadcaster-section">
+          
+          <div class="card search-card">
+            <div class="search-header">
+              <h2>Select Your Country</h2>
+              <span class="channel-count">{broadcasters.length} Regions</span>
+            </div>
+            <p class="search-desc">Click any country card below to view their specific broadcast schedule.</p>
+            
+            <div class="search-wrapper">
+              <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input 
+                type="text" 
+                id="country-search" 
+                placeholder="Search country (e.g. UK, United States, Netherlands)..." 
+                autocomplete="off"
+              />
+            </div>
+          </div>
+
+          <div class="scroll-container-wrapper">
+            <div class="broadcaster-list custom-scrollbar" id="broadcaster-list">
+              {broadcasters.map((b, index) => (
+                <button 
+                  type="button"
+                  class={`broadcaster-item ${index === 0 ? 'is-active' : ''}`} 
+                  data-id={b.id}
+                  data-country={b.country.toLowerCase()}
+                >
+                  <div class="b-left">
+                    <img src={`https://flagcdn.com/w40/${b.flag}.png`} alt={b.country} class="country-flag" />
+                    <div class="text-left">
+                      <h4>{b.country}</h4>
+                      <div class="network-title">{b.network}</div>
+                      <span class="app-sub">{b.app} &bull; <strong class="tz-sub">{b.timezone.split(' ')[0]}</strong></span>
+                    </div>
+                  </div>
+
+                  <div class="b-right">
+                    <span class={`type-pill ${b.type === 'Live' ? 'pill-live' : 'pill-hl'}`}>
+                      {b.type === 'Live' ? '● Live' : 'Highlights'}
+                    </span>
+                    {b.f1tvPro ? (
+                      <span class="f1tv-pill" title="F1 TV Pro available in this country">F1 TV Pro</span>
+                    ) : (
+                      <span class="f1tv-pill unavailable" title="F1 TV Pro live streaming restricted">No F1TV</span>
+                    )}
+                  </div>
+                </button>
+              ))}
+              
+              <div id="no-results" class="no-results hidden">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <p>No broadcasters found for that search.</p>
+              </div>
+            </div>
+
+            <div class="scroll-hint-bar">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 13l5 5 5-5M7 6l5 5 5-5"/></svg>
+              <span>Scroll down to explore all {broadcasters.length} regions</span>
+            </div>
+          </div>
+
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- EMBED DATA FOR CLIENT-SIDE SWITCHING -->
+  <script id="broadcaster-data" type="application/json" set:html={JSON.stringify({ races, broadcasters })}></script>
+</Layout>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const dataElement = document.getElementById('broadcaster-data');
+    if (!dataElement) return;
+    const { races, broadcasters } = JSON.parse(dataElement.textContent || '{}');
+
+    // UI Elements
+    const raceSelector = document.getElementById('race-selector') as HTMLSelectElement;
+    const searchInput = document.getElementById('country-search') as HTMLInputElement;
+    const broadcasterButtons = document.querySelectorAll('.broadcaster-item');
+    const noResults = document.getElementById('no-results');
+    const scheduleListContainer = document.getElementById('schedule-list-container');
+    const scheduleTimezone = document.getElementById('schedule-timezone');
+    const activeBroadcasterName = document.getElementById('active-broadcaster-name');
+    const watchLiveBtn = document.getElementById('watch-live-btn') as HTMLAnchorElement;
+    const f1tvPromoCard = document.getElementById('f1tv-promo-card');
+    const localTimeToggle = document.getElementById('local-time-toggle') as HTMLInputElement;
+    
+    // Header UI Elements for Race Info
+    const scheduleFlag = document.getElementById('schedule-flag') as HTMLImageElement;
+    const scheduleRoundDates = document.getElementById('schedule-round-dates');
+    const scheduleRaceTitle = document.getElementById('schedule-race-title');
+    const sprintIndicatorBadge = document.getElementById('sprint-indicator-badge');
+
+    // Radio UI Elements
+    const radioProviderText = document.getElementById('radio-provider-text');
+    const radioListenBtn = document.getElementById('radio-listen-btn') as HTMLAnchorElement;
+
+    // State
+    let currentRaceId = races[0].id;
+    let currentBroadcasterId = broadcasters[0].id;
+    let isLocalTime = false;
+
+    // --- TIME CONVERSION HELPERS ---
+    const parseTimeOffset = (onAirStr: string, startStr: string) => {
+      const parse = (t: string) => {
+        const [h, m] = t.split(':').map(Number);
+        return h * 60 + m;
+      };
+      let diff = parse(startStr) - parse(onAirStr);
+      if (diff < 0) diff += 24 * 60; // handle midnight crossing
+      return diff;
+    };
+
+    const formatLocalString = (date: Date) => {
+      // Force 24 hour clock format HH:MM
+      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }).replace('24:', '00:');
+    };
+
+    const getLocalDay = (date: Date) => {
+      return date.toLocaleDateString([], { weekday: 'long' });
+    };
+
+    // Add to Google Calendar URL Generator
+    const generateGoogleCalendarUrl = (title: string, sessionName: string, startIso: string, endIso: string, location: string, network: string, f1tv: boolean) => {
+      const formatTime = (iso: string) => iso.replace(/[-:]/g, '').split('.')[0] + 'Z';
+      const eventTitle = encodeURIComponent(`F1: ${title} - ${sessionName}`);
+      const descriptionText = `🏎️ Formula 1: ${title} - ${sessionName}\n📺 Watch live on: ${network}${f1tv ? ' (or F1 TV Pro)' : ''}\n📍 Track: ${location}\n\nView full timings and F1 guides at My Grand Prix Hub.`;
+      const details = encodeURIComponent(descriptionText);
+      const loc = encodeURIComponent(location);
+      const dates = `${formatTime(startIso)}/${formatTime(endIso)}`;
+      return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${eventTitle}&dates=${dates}&details=${details}&location=${loc}`;
+    };
+
+    // Calculate Real-Time Session Status
+    const updateSessionStatuses = () => {
+      const now = new Date().getTime();
+      const rows = document.querySelectorAll('.schedule-row');
+      let foundNext = false;
+
+      rows.forEach((row) => {
+        const startStr = row.getAttribute('data-utc-start');
+        const endStr = row.getAttribute('data-utc-end');
+        const statusPill = row.querySelector('.live-status-pill');
+        if (!startStr || !endStr || !statusPill) return;
+
+        const start = new Date(startStr).getTime();
+        const end = new Date(endStr).getTime();
+
+        if (now >= start && now <= end) {
+          statusPill.className = 'live-status-pill pill-live-now';
+          statusPill.textContent = '● LIVE NOW';
+        } else if (now > end) {
+          statusPill.className = 'live-status-pill pill-completed';
+          statusPill.textContent = '✓ Finished';
+        } else if (now < start && !foundNext) {
+          statusPill.className = 'live-status-pill pill-next';
+          statusPill.textContent = '⏳ UP NEXT';
+          foundNext = true;
+        } else {
+          statusPill.className = 'live-status-pill pill-upcoming';
+          statusPill.textContent = 'Upcoming';
+        }
+      });
+    };
+
+    // Core Render Function
+    const renderSchedule = () => {
+      const selectedRace = races.find((r: any) => r.id === currentRaceId);
+      const selectedBroadcaster = broadcasters.find((b: any) => b.id === currentBroadcasterId);
+      
+      if (!selectedRace || !selectedBroadcaster) return;
+
+      // Update Broadcaster Headers
+      if (scheduleTimezone) {
+        if (isLocalTime) {
+          const tzName = Intl.DateTimeFormat().resolvedOptions().timeZone;
+          scheduleTimezone.textContent = `Your Local Time (${tzName})`;
+          scheduleTimezone.classList.add('local-tz-active');
+        } else {
+          scheduleTimezone.textContent = selectedBroadcaster.timezone;
+          scheduleTimezone.classList.remove('local-tz-active');
+        }
+      }
+
+      if (activeBroadcasterName) activeBroadcasterName.textContent = `${selectedBroadcaster.network} (${selectedBroadcaster.country})`;
+      if (watchLiveBtn) watchLiveBtn.href = selectedBroadcaster.url;
+
+      // Update Radio Coverage Section
+      if (selectedBroadcaster.radio) {
+        if (radioProviderText) radioProviderText.innerHTML = `Listen live via <strong>${selectedBroadcaster.radio.name}</strong>`;
+        if (radioListenBtn) radioListenBtn.href = selectedBroadcaster.radio.url;
+      } else {
+        if (radioProviderText) radioProviderText.innerHTML = `Listen live via <strong>Official F1 Live Audio Commentary</strong>`;
+        if (radioListenBtn) radioListenBtn.href = 'https://www.formula1.com/en/f1-live.html';
+      }
+
+      // Update F1 TV Pro Ad Visibility
+      if (f1tvPromoCard) {
+        f1tvPromoCard.style.display = selectedBroadcaster.f1tvPro ? 'flex' : 'none';
+      }
+
+      // Update Race Headers
+      if (scheduleFlag) scheduleFlag.src = `https://flagcdn.com/w40/${selectedRace.flagCode}.png`;
+      if (scheduleRoundDates) scheduleRoundDates.innerHTML = `Round ${selectedRace.round} &bull; ${selectedRace.dates}`;
+      if (scheduleRaceTitle) scheduleRaceTitle.textContent = selectedRace.name;
+      
+      if (sprintIndicatorBadge) {
+        sprintIndicatorBadge.classList.toggle('hidden', !selectedRace.isSprint);
+      }
+
+      // Render Schedule Blocks
+      const activeSchedule = selectedBroadcaster.schedules[currentRaceId] || [];
+      
+      if (scheduleListContainer) {
+        if (activeSchedule.length === 0) {
+           scheduleListContainer.innerHTML = `<div class="no-schedule">Schedule not yet published for this network.</div>`;
+           return;
+        }
+
+        scheduleListContainer.innerHTML = activeSchedule.map((item: any) => {
+          
+          let displayDay = item.day;
+          let displayStart = item.start;
+          let displayNetworkOnAir = item.networkOnAir;
+          let displayF1tvOnAir = item.f1tvOnAir;
+
+          // Apply Local Time Conversion Math
+          if (isLocalTime && item.utcStart) {
+            const utcStartDate = new Date(item.utcStart);
+            displayDay = getLocalDay(utcStartDate);
+            displayStart = formatLocalString(utcStartDate);
+
+            if (item.networkOnAir) {
+              const networkOffsetMins = parseTimeOffset(item.networkOnAir, item.start);
+              const networkDate = new Date(utcStartDate.getTime() - (networkOffsetMins * 60000));
+              displayNetworkOnAir = formatLocalString(networkDate);
+            }
+
+            if (item.f1tvOnAir) {
+              const f1tvOffsetMins = parseTimeOffset(item.f1tvOnAir, item.start);
+              const f1tvDate = new Date(utcStartDate.getTime() - (f1tvOffsetMins * 60000));
+              displayF1tvOnAir = formatLocalString(f1tvDate);
+            }
+          }
+
+          return `
+            <div class="schedule-row ${item.session.includes('Grand Prix') || item.session.includes('Sprint Race') ? 'highlight-race' : ''}" data-utc-start="${item.utcStart}" data-utc-end="${item.utcEnd}">
+              <div class="session-info">
+                <div class="session-meta-top">
+                  <span class="day-badge ${isLocalTime ? 'day-local' : ''}">${displayDay}</span>
+                  <span class="live-status-pill pill-upcoming">Upcoming</span>
+                </div>
+                <h3>${item.session}</h3>
+                <span class="duration-text">${item.duration}</span>
+              </div>
+
+              <div class="timings-block">
+                <div class="time-col on-air">
+                  <span class="time-label">Build-Up On Air</span>
+                  <div class="on-air-providers">
+                    <div class="provider-row">
+                      <span class="prov-name">${selectedBroadcaster.network}:</span>
+                      <span class="time-val">${displayNetworkOnAir}</span>
+                    </div>
+                    ${displayF1tvOnAir && selectedBroadcaster.f1tvPro ? `
+                      <div class="provider-row f1tv-row">
+                        <span class="prov-name">F1TV Pro:</span>
+                        <span class="time-val">${displayF1tvOnAir}</span>
+                      </div>
+                    ` : ''}
+                  </div>
+                </div>
+
+                <div class="timeline-divider">
+                  <span class="circle-dot"></span>
+                  <span class="connect-line"></span>
+                  <span class="circle-dot active"></span>
+                </div>
+
+                <div class="time-col track-action">
+                  <span class="time-label">${item.session.includes('Grand Prix') || item.session.includes('Sprint Race') ? 'Lights Out' : 'Green Flag'}</span>
+                  <span class="time-val track-val">${displayStart}</span>
+                </div>
+              </div>
+
+              <div class="cal-actions">
+                <button type="button" class="btn-cal" data-session="${item.session}" data-start="${item.utcStart}" data-end="${item.utcEnd}" title="Add to Google Calendar">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M12 14v4M10 16h4"/></svg>
+                  +Cal
+                </button>
+              </div>
+            </div>
+          `
+        }).join('');
+
+        // Re-attach Calendar Click Listeners
+        const calButtons = scheduleListContainer.querySelectorAll('.btn-cal');
+        calButtons.forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const session = btn.getAttribute('data-session') || '';
+            const start = btn.getAttribute('data-start') || '';
+            const end = btn.getAttribute('data-end') || '';
+            const url = generateGoogleCalendarUrl(selectedRace.name, session, start, end, selectedRace.circuitName, selectedBroadcaster.network, selectedBroadcaster.f1tvPro);
+            window.open(url, '_blank');
+          });
+        });
+
+        // Run Real-time Status Evaluation
+        updateSessionStatuses();
+      }
+    };
+
+    // Event Listeners
+    if (localTimeToggle) {
+      localTimeToggle.addEventListener('change', (e) => {
+        isLocalTime = (e.target as HTMLInputElement).checked;
+        renderSchedule();
+      });
+    }
+
+    if (raceSelector) {
+      raceSelector.addEventListener('change', (e) => {
+        currentRaceId = (e.target as HTMLSelectElement).value;
+        renderSchedule();
+      });
+    }
+
+    broadcasterButtons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        currentBroadcasterId = btn.getAttribute('data-id') || broadcasters[0].id;
+        broadcasterButtons.forEach((b) => b.classList.remove('is-active'));
+        btn.classList.add('is-active');
+        renderSchedule();
+      });
+    });
+
+    if (searchInput) {
+      searchInput.addEventListener('input', (e) => {
+        const term = (e.target as HTMLInputElement).value.toLowerCase().trim();
+        let visibleCount = 0;
+
+        broadcasterButtons.forEach((item) => {
+          const el = item as HTMLElement;
+          const country = el.getAttribute('data-country') || '';
+          if (country.includes(term)) {
+            el.style.display = 'flex';
+            visibleCount++;
+          } else {
+            el.style.display = 'none';
+          }
+        });
+
+        if (noResults) {
+          noResults.classList.toggle('hidden', visibleCount !== 0);
+        }
+      });
+    }
+
+    // Initialize Real-time status timer interval
+    setInterval(updateSessionStatuses, 60000);
+  });
+</script>
+
+<style is:global>
+  .tv-guide-wrapper {
+    background-color: #0b0f19;
+    min-height: 100vh;
+    color: #f8fafc;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+
+  .page-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 3.5rem 1.5rem 6rem;
+  }
+
+  .hub-header {
+    text-align: center;
+    margin-bottom: 3.5rem;
+  }
+
+  .badge {
+    display: inline-block;
+    background-color: #e10600;
+    color: #ffffff;
+    font-size: 0.8rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    padding: 0.35rem 0.85rem;
+    border-radius: 4px;
+    letter-spacing: 0.08em;
+    margin-bottom: 1rem;
+  }
+
+  .hub-header h1 {
+    font-size: 3.25rem;
+    margin: 0 0 0.75rem 0;
+    font-weight: 900;
+    color: #ffffff;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+  }
+
+  .subtitle {
+    color: #94a3b8;
+    font-size: 1.15rem;
+    margin: 0 auto;
+    font-weight: 400;
+    max-width: 680px;
+    line-height: 1.6;
+  }
+
+  .content-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 2.5rem;
+    align-items: start;
+  }
+
+  .card {
+    background: #161f30;
+    border: 1px solid #283548;
+    border-radius: 12px;
+    padding: 1.5rem;
+  }
+
+  /* Schedule Column */
+  .schedule-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .header-card {
+    background: linear-gradient(135deg, #1c273c 0%, #111827 100%);
+    border-left: 4px solid #38bdf8;
+  }
+
+  .race-selector-box {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: #0f172a;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    border: 1px solid #334155;
+    margin-bottom: 1.5rem;
+  }
+
+  .race-selector-box label {
+    color: #94a3b8;
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  .race-dropdown {
+    background: transparent;
+    color: #ffffff;
+    border: none;
+    font-weight: 800;
+    font-size: 1rem;
+    cursor: pointer;
+    outline: none;
+    flex-grow: 1;
+  }
+  
+  .race-dropdown option {
+    background: #0f172a;
+    color: #ffffff;
+  }
+
+  .card-title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .title-with-flag {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .race-flag {
+    width: 36px;
+    height: auto;
+    border-radius: 3px;
+    border: 1px solid #334155;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  }
+
+  .round-badge-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.2rem;
+  }
+
+  .round-badge {
+    color: #38bdf8;
+    font-weight: 800;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .sprint-badge {
+    background: #9333ea;
+    color: #ffffff;
+    font-size: 0.68rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    padding: 0.15rem 0.45rem;
+    border-radius: 3px;
+    letter-spacing: 0.05em;
+  }
+
+  .title-with-flag h2 {
+    color: #ffffff;
+    font-size: 1.65rem;
+    font-weight: 900;
+    margin: 0;
+    letter-spacing: -0.01em;
+  }
+
+  .timezone-badge {
+    background: #0b0f19;
+    border: 1px solid #38bdf8;
+    color: #38bdf8;
+    padding: 0.4rem 0.85rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 800;
+    letter-spacing: 0.03em;
+    transition: all 0.3s ease;
+  }
+  
+  .local-tz-active {
+    background: #064e3b;
+    border-color: #34d399;
+    color: #34d399;
+  }
+
+  .selected-broadcaster-banner {
+    background: rgba(15, 23, 42, 0.8);
+    border: 1px solid #283548;
+    padding: 0.75rem 1rem;
+    border-radius: 6px;
+    margin-bottom: 0.85rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .banner-left {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+
+  .viewing-label {
+    color: #94a3b8;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    font-weight: 700;
+  }
+
+  .active-name {
+    color: #ffffff;
+    font-size: 1.1rem;
+  }
+
+  .banner-right-actions {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    flex-wrap: wrap;
+  }
+
+  /* Animated Toggle Switch styling */
+  .local-toggle-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .toggle-text {
+    color: #cbd5e1;
+    font-size: 0.85rem;
+    font-weight: 700;
+  }
+
+  .toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+  }
+
+  .toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #334155;
+    transition: .3s;
+    border-radius: 24px;
+  }
+
+  .slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .3s;
+    border-radius: 50%;
+  }
+
+  input:checked + .slider {
+    background-color: #34d399;
+  }
+
+  input:checked + .slider:before {
+    transform: translateX(20px);
+  }
+
+  .btn-watch-live {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #38bdf8;
+    color: #0b0f19;
+    padding: 0.45rem 0.85rem;
+    border-radius: 4px;
+    font-weight: 800;
+    font-size: 0.85rem;
+    text-decoration: none;
+    transition: background 0.2s ease;
+  }
+
+  .btn-watch-live:hover {
+    background: #7dd3fc;
+  }
+
+  .helper-text {
+    color: #94a3b8;
+    font-size: 0.88rem;
+    margin: 0;
+    line-height: 1.5;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .pulse-dot {
+    width: 8px;
+    height: 8px;
+    background-color: #fbbf24;
+    border-radius: 50%;
+    display: inline-block;
+    box-shadow: 0 0 8px #fbbf24;
+    flex-shrink: 0;
+  }
+
+  .schedule-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .no-schedule {
+    background: #161f30;
+    border: 1px dashed #334155;
+    padding: 2rem;
+    text-align: center;
+    color: #94a3b8;
+    border-radius: 8px;
+  }
+
+  .schedule-row {
+    background: #161f30;
+    border: 1px solid #283548;
+    border-radius: 10px;
+    padding: 1.15rem 1.25rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+    gap: 0.75rem;
+  }
+
+  .schedule-row:hover {
+    transform: translateX(4px);
+    border-color: #38bdf8;
+  }
+
+  .highlight-race {
+    border-left: 4px solid #e10600;
+    background: linear-gradient(90deg, rgba(225, 6, 0, 0.08) 0%, #161f30 60%);
+  }
+
+  .session-info {
+    display: flex;
+    flex-direction: column;
+    min-width: 140px;
+  }
+
+  .session-meta-top {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .day-badge {
+    color: #94a3b8;
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  
+  .day-local {
+    color: #34d399;
+  }
+
+  .live-status-pill {
+    font-size: 0.65rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 0.15rem 0.45rem;
+    border-radius: 3px;
+  }
+
+  .pill-live-now { background: #e10600; color: #ffffff; animation: pulseRed 1.5s infinite; }
+  .pill-next { background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.4); }
+  .pill-completed { background: rgba(148, 163, 184, 0.15); color: #64748b; }
+  .pill-upcoming { background: rgba(148, 163, 184, 0.1); color: #94a3b8; }
+
+  @keyframes pulseRed {
+    0% { opacity: 1; }
+    50% { opacity: 0.6; }
+    100% { opacity: 1; }
+  }
+
+  .session-info h3 {
+    color: #ffffff;
+    font-size: 1.15rem;
+    font-weight: 800;
+    margin: 0.2rem 0;
+  }
+
+  .duration-text {
+    font-size: 0.78rem;
+    color: #64748b;
+    font-weight: 600;
+  }
+
+  .timings-block {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-grow: 1;
+    justify-content: flex-end;
+  }
+
+  .time-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 85px;
+  }
+
+  .time-label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    margin-bottom: 0.4rem;
+  }
+
+  .on-air .time-label { color: #fbbf24; }
+  .track-action .time-label { color: #34d399; }
+
+  .on-air-providers {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    width: 100%;
+  }
+
+  .provider-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem;
+    background: #0b0f19;
+    padding: 0.2rem 0.45rem;
+    border-radius: 4px;
+    border: 1px solid #283548;
+  }
+
+  .f1tv-row {
+    border-color: rgba(225, 6, 0, 0.3);
+  }
+
+  .prov-name {
+    font-size: 0.72rem;
+    color: #94a3b8;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  
+  .f1tv-row .prov-name {
+    color: #e10600;
+  }
+
+  .time-val {
+    color: #ffffff;
+    font-size: 1rem;
+    font-weight: 900;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .track-val {
+    font-size: 1.5rem;
+  }
+
+  .timeline-divider {
+    display: flex;
+    align-items: center;
+    width: 28px;
+  }
+
+  .timeline-divider .connect-line {
+    flex-grow: 1;
+    height: 2px;
+    background: #334155;
+  }
+
+  .timeline-divider .circle-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: #64748b;
+  }
+
+  .timeline-divider .circle-dot.active {
+    width: 7px;
+    height: 7px;
+    background: #34d399;
+    box-shadow: 0 0 6px rgba(52, 211, 153, 0.7);
+  }
+
+  .cal-actions {
+    display: flex;
+    align-items: center;
+  }
+
+  .btn-cal {
+    background: #0f172a;
+    border: 1px solid #334155;
+    color: #cbd5e1;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.4rem 0.6rem;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .btn-cal:hover {
+    background: #38bdf8;
+    color: #0b0f19;
+    border-color: #38bdf8;
+  }
+
+  /* Audio & Radio Card */
+  .radio-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #0f172a;
+    border: 1px solid #283548;
+    padding: 1.25rem 1.5rem;
+    border-radius: 10px;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .radio-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .radio-header h3 {
+    margin: 0 0 0.2rem 0;
+    font-size: 1rem;
+    color: #ffffff;
+    font-weight: 800;
+  }
+
+  .radio-header p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: #94a3b8;
+  }
+
+  .btn-radio {
+    background: #34d399;
+    color: #064e3b;
+    padding: 0.45rem 1rem;
+    border-radius: 4px;
+    font-weight: 800;
+    font-size: 0.85rem;
+    text-decoration: none;
+    transition: background 0.2s ease;
+  }
+
+  .btn-radio:hover {
+    background: #6ee7b7;
+  }
+
+  /* F1 TV Card */
+  .f1tv-promo {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border: 1px dashed #384860;
+    background: #0f172a;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  
+  .promo-left {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+  }
+
+  .promo-icon {
+    background: rgba(225, 6, 0, 0.1);
+    border: 1px solid rgba(225, 6, 0, 0.3);
+    padding: 0.75rem;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .promo-text h3 {
+    color: #ffffff;
+    margin: 0 0 0.25rem 0;
+    font-size: 1.05rem;
+    font-weight: 800;
+  }
+
+  .promo-text p {
+    color: #94a3b8;
+    margin: 0;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    max-width: 300px;
+  }
+  
+  .btn-f1tv {
+    background: #e10600;
+    color: #ffffff;
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    font-weight: 800;
+    transition: background 0.2s;
+  }
+  
+  .btn-f1tv:hover {
+    background: #ff1e16;
+  }
+
+  /* Broadcaster Column */
+  .search-card {
+    margin-bottom: 1.25rem;
+  }
+
+  .search-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.25rem;
+  }
+
+  .search-card h2 {
+    color: #ffffff;
+    margin: 0;
+    font-size: 1.65rem;
+    font-weight: 800;
+  }
+
+  .channel-count {
+    font-size: 0.8rem;
+    background: #0b0f19;
+    color: #38bdf8;
+    padding: 0.25rem 0.6rem;
+    border-radius: 4px;
+    font-weight: 700;
+    border: 1px solid #283548;
+  }
+
+  .search-desc {
+    color: #94a3b8;
+    font-size: 0.9rem;
+    margin: 0 0 1.25rem 0;
+  }
+
+  .search-wrapper {
+    position: relative;
+    width: 100%;
+  }
+
+  .search-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #64748b;
+  }
+
+  #country-search {
+    width: 100%;
+    background: #0b0f19;
+    border: 1px solid #283548;
+    color: #ffffff;
+    padding: 0.9rem 1rem 0.9rem 2.85rem;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-family: inherit;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    box-sizing: border-box;
+  }
+
+  #country-search:focus {
+    outline: none;
+    border-color: #38bdf8;
+    box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15);
+  }
+
+  /* Scrollable Container */
+  .scroll-container-wrapper {
+    border: 1px solid #283548;
+    border-radius: 10px;
+    background: #111827;
+    overflow: hidden;
+  }
+
+  .broadcaster-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    max-height: 540px;
+    overflow-y: scroll;
+    padding: 0.75rem;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: #0b0f19;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #334155;
+    border-radius: 4px;
+    border: 1px solid #1e293b;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #38bdf8;
+  }
+
+  .scroll-hint-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 0.8rem;
+    background: #0b0f19;
+    border-top: 1px solid #283548;
+    color: #94a3b8;
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+
+  .scroll-hint-bar svg {
+    color: #38bdf8;
+    animation: bounce 1.5s infinite;
+  }
+
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(4px); }
+  }
+
+  .broadcaster-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #161f30;
+    border: 1px solid #283548;
+    padding: 1rem 1.25rem;
+    border-radius: 8px;
+    cursor: pointer;
+    text-align: left;
+    width: 100%;
+    transition: all 0.2s ease;
+    font-family: inherit;
+  }
+
+  .broadcaster-item:hover {
+    border-color: #475569;
+    background: #1c273c;
+    transform: translateY(-1px);
+  }
+
+  .broadcaster-item.is-active {
+    border-color: #38bdf8;
+    background: rgba(56, 189, 248, 0.08);
+    box-shadow: 0 0 0 1px #38bdf8;
+  }
+
+  .b-left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .text-left {
+    text-align: left;
+  }
+
+  .country-flag {
+    width: 30px;
+    height: auto;
+    border-radius: 2px;
+    border: 1px solid #334155;
+    flex-shrink: 0;
+  }
+
+  .b-left h4 {
+    color: #ffffff;
+    margin: 0 0 0.15rem 0;
+    font-size: 1.05rem;
+    font-weight: 800;
+  }
+
+  .network-title {
+    color: #38bdf8;
+    font-size: 0.9rem;
+    font-weight: 700;
+  }
+
+  .app-sub {
+    color: #64748b;
+    font-size: 0.78rem;
+    font-weight: 500;
+    display: block;
+    margin-top: 0.15rem;
+  }
+
+  .tz-sub {
+    color: #94a3b8;
+  }
+
+  .b-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.4rem;
+  }
+
+  .type-pill {
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 0.25rem 0.55rem;
+    border-radius: 4px;
+  }
+
+  .pill-live {
+    background: rgba(16, 185, 129, 0.15);
+    color: #34d399;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+  }
+
+  .pill-hl {
+    background: rgba(245, 158, 11, 0.15);
+    color: #fbbf24;
+    border: 1px solid rgba(245, 158, 11, 0.3);
+  }
+
+  .f1tv-pill {
+    background: #e10600;
+    color: #ffffff;
+    font-size: 0.68rem;
+    font-weight: 800;
+    padding: 0.2rem 0.45rem;
+    border-radius: 4px;
+    letter-spacing: 0.03em;
+  }
+
+  .f1tv-pill.unavailable {
+    background: #1e293b;
+    color: #64748b;
+    border: 1px solid #334155;
+  }
+
+  .no-results {
+    padding: 3rem 1.5rem;
+    text-align: center;
+    color: #94a3b8;
+    background: #161f30;
+    border: 1px dashed #283548;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .no-results p {
+    margin: 0;
+    font-size: 0.9rem;
+  }
+
+  .hidden {
+    display: none !important;
+  }
+
+  /* Responsive Adjustments */
+  @media (max-width: 950px) {
+    .content-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .hub-header h1 {
+      font-size: 2.4rem;
+    }
+
+    .schedule-row {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+
+    .timings-block {
+      width: 100%;
+      justify-content: space-between;
+    }
+
+    .timeline-divider {
+      display: none;
+    }
+
+    .time-col {
+      flex-direction: row;
+      align-items: baseline;
+      justify-content: flex-end;
+      gap: 0.5rem;
+      width: 100%;
+    }
+    
+    .on-air-providers {
+      align-items: flex-end;
+    }
+
+    .cal-actions {
+      width: 100%;
+    }
+
+    .btn-cal {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+</style>

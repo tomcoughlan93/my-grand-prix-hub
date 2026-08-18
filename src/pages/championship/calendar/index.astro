@@ -1,0 +1,1391 @@
+---
+// src/pages/championship/calendar.astro
+import Layout from '@/layouts/Layout.astro';
+
+interface Podium {
+  first: string;
+  second: string;
+  third: string;
+}
+
+interface SessionInfo {
+  fp1: string;
+  fp2: string;
+  fp3: string;
+  quali: string;
+  race: string;
+}
+
+interface SessionResults {
+  fp1?: Podium;
+  fp2?: Podium;
+  fp3?: Podium;
+  quali?: Podium;
+  race?: Podium;
+}
+
+interface Weather {
+  temp: number;
+  condition: string;
+  icon: string;
+}
+
+interface Race {
+  season: string;
+  round: string;
+  raceName: string;
+  Circuit: {
+    circuitName: string;
+    Location: {
+      locality: string;
+      country: string;
+      timezone: string;
+      coordinates: { lat: number; lon: number; }; // NEW: Exact coordinates
+    };
+  };
+  date: string;
+  time: string;
+  sessions: SessionInfo;
+  sessionResults?: SessionResults;
+  podium?: Podium;
+  weather?: Weather;
+  isSprint?: boolean;
+  tyresAnnounced?: boolean; 
+  tyres: [string, string, string]; 
+}
+
+// 2026 Calendar with EXACT Latitude & Longitude added
+const CALENDAR: Race[] = [
+  { season: "2026", round: "1", raceName: "Australian Grand Prix", tyresAnnounced: true, tyres: ["C3", "C4", "C5"], Circuit: { circuitName: "Albert Park Grand Prix Circuit", Location: { locality: "Melbourne", country: "Australia", timezone: "Australia/Melbourne", coordinates: { lat: -37.8497, lon: 144.968 } } }, date: "2026-03-08", time: "04:00:00Z", sessions: { fp1: "2026-03-06T01:30:00Z", fp2: "2026-03-06T05:00:00Z", fp3: "2026-03-07T01:30:00Z", quali: "2026-03-07T05:00:00Z", race: "2026-03-08T04:00:00Z" }, podium: { first: "RUS", second: "ANT", third: "LEC" } },
+  { season: "2026", round: "2", raceName: "Chinese Grand Prix", isSprint: true, tyresAnnounced: true, tyres: ["C2", "C3", "C4"], Circuit: { circuitName: "Shanghai International Circuit", Location: { locality: "Shanghai", country: "China", timezone: "Asia/Shanghai", coordinates: { lat: 31.3389, lon: 121.22 } } }, date: "2026-03-15", time: "07:00:00Z", sessions: { fp1: "2026-03-13T03:30:00Z", fp2: "2026-03-13T07:00:00Z", fp3: "2026-03-14T03:30:00Z", quali: "2026-03-14T07:00:00Z", race: "2026-03-15T07:00:00Z" }, podium: { first: "ANT", second: "RUS", third: "HAM" } },
+  { season: "2026", round: "3", raceName: "Japanese Grand Prix", tyresAnnounced: true, tyres: ["C1", "C2", "C3"], Circuit: { circuitName: "Suzuka Circuit", Location: { locality: "Suzuka", country: "Japan", timezone: "Asia/Tokyo", coordinates: { lat: 34.8431, lon: 136.541 } } }, date: "2026-03-29", time: "05:00:00Z", sessions: { fp1: "2026-03-27T02:30:00Z", fp2: "2026-03-27T06:00:00Z", fp3: "2026-03-28T02:30:00Z", quali: "2026-03-28T06:00:00Z", race: "2026-03-29T05:00:00Z" }, podium: { first: "ANT", second: "PIA", third: "LEC" } },
+  { season: "2026", round: "4", raceName: "Miami Grand Prix", isSprint: true, tyresAnnounced: true, tyres: ["C2", "C3", "C4"], Circuit: { circuitName: "Miami International Autodrome", Location: { locality: "Miami", country: "USA", timezone: "America/New_York", coordinates: { lat: 25.9581, lon: -80.2389 } } }, date: "2026-05-03", time: "20:00:00Z", sessions: { fp1: "2026-05-01T16:30:00Z", fp2: "2026-05-01T20:00:00Z", fp3: "2026-05-02T16:30:00Z", quali: "2026-05-02T20:00:00Z", race: "2026-05-03T20:00:00Z" }, podium: { first: "ANT", second: "NOR", third: "PIA" } },
+  { season: "2026", round: "5", raceName: "Canadian Grand Prix", tyresAnnounced: true, tyres: ["C3", "C4", "C5"], Circuit: { circuitName: "Circuit Gilles Villeneuve", Location: { locality: "Montreal", country: "Canada", timezone: "America/Toronto", coordinates: { lat: 45.5, lon: -73.5228 } } }, date: "2026-05-24", time: "18:00:00Z", sessions: { fp1: "2026-05-22T17:30:00Z", fp2: "2026-05-22T21:00:00Z", fp3: "2026-05-23T16:30:00Z", quali: "2026-05-23T20:00:00Z", race: "2026-05-24T18:00:00Z" }, podium: { first: "ANT", second: "HAM", third: "VER" } },
+  { season: "2026", round: "6", raceName: "Monaco Grand Prix", tyresAnnounced: true, tyres: ["C3", "C4", "C5"], Circuit: { circuitName: "Circuit de Monaco", Location: { locality: "Monte-Carlo", country: "Monaco", timezone: "Europe/Monaco", coordinates: { lat: 43.7347, lon: 7.42056 } } }, date: "2026-06-07", time: "13:00:00Z", sessions: { fp1: "2026-06-05T11:30:00Z", fp2: "2026-06-05T15:00:00Z", fp3: "2026-06-06T10:30:00Z", quali: "2026-06-06T14:00:00Z", race: "2026-06-07T13:00:00Z" }, podium: { first: "ANT", second: "HAM", third: "GAS" } },
+  { season: "2026", round: "7", raceName: "Spanish Grand Prix", tyresAnnounced: true, tyres: ["C1", "C2", "C3"], Circuit: { circuitName: "Circuit de Barcelona-Catalunya", Location: { locality: "Montmeló", country: "Spain", timezone: "Europe/Madrid", coordinates: { lat: 41.57, lon: 2.26111 } } }, date: "2026-06-14", time: "13:00:00Z", sessions: { fp1: "2026-06-12T11:30:00Z", fp2: "2026-06-12T15:00:00Z", fp3: "2026-06-13T10:30:00Z", quali: "2026-06-13T14:00:00Z", race: "2026-06-14T13:00:00Z" }, podium: { first: "HAM", second: "RUS", third: "NOR" } },
+  { season: "2026", round: "8", raceName: "Austrian Grand Prix", isSprint: true, tyresAnnounced: true, tyres: ["C3", "C4", "C5"], Circuit: { circuitName: "Red Bull Ring", Location: { locality: "Spielberg", country: "Austria", timezone: "Europe/Vienna", coordinates: { lat: 47.2197, lon: 14.7647 } } }, date: "2026-06-28", time: "13:00:00Z", sessions: { fp1: "2026-06-26T11:30:00Z", fp2: "2026-06-26T15:00:00Z", fp3: "2026-06-27T10:30:00Z", quali: "2026-06-27T14:00:00Z", race: "2026-06-28T13:00:00Z" }, podium: { first: "RUS", second: "VER", third: "ANT" } },
+  { season: "2026", round: "9", raceName: "British Grand Prix", tyresAnnounced: true, tyres: ["C1", "C2", "C3"], Circuit: { circuitName: "Silverstone Circuit", Location: { locality: "Silverstone", country: "UK", timezone: "Europe/London", coordinates: { lat: 52.0786, lon: -1.01694 } } }, date: "2026-07-05", time: "14:00:00Z", sessions: { fp1: "2026-07-03T11:30:00Z", fp2: "2026-07-03T15:00:00Z", fp3: "2026-07-04T10:30:00Z", quali: "2026-07-04T14:00:00Z", race: "2026-07-05T14:00:00Z" }, podium: { first: "LEC", second: "RUS", third: "HAM" } },
+  { season: "2026", round: "10", raceName: "Belgian Grand Prix", tyresAnnounced: true, tyres: ["C2", "C3", "C4"], Circuit: { circuitName: "Circuit de Spa-Francorchamps", Location: { locality: "Spa", country: "Belgium", timezone: "Europe/Brussels", coordinates: { lat: 50.4372, lon: 5.97139 } } }, date: "2026-07-19", time: "13:00:00Z", sessions: { fp1: "2026-07-17T11:30:00Z", fp2: "2026-07-17T15:00:00Z", fp3: "2026-07-18T10:30:00Z", quali: "2026-07-18T14:00:00Z", race: "2026-07-19T13:00:00Z" }, podium: { first: "ANT", second: "LEC", third: "VER" } },
+  { season: "2026", round: "11", raceName: "Hungarian Grand Prix", tyresAnnounced: true, tyres: ["C3", "C4", "C5"], Circuit: { circuitName: "Hungaroring", Location: { locality: "Budapest", country: "Hungary", timezone: "Europe/Budapest", coordinates: { lat: 47.5789, lon: 19.2486 } } }, date: "2026-07-26", time: "13:00:00Z", sessions: { fp1: "2026-07-24T11:30:00Z", fp2: "2026-07-24T15:00:00Z", fp3: "2026-07-25T10:30:00Z", quali: "2026-07-25T14:00:00Z", race: "2026-07-26T13:00:00Z" }, podium: { first: "NOR", second: "VER", third: "ANT" } },
+  { season: "2026", round: "12", raceName: "Dutch Grand Prix", tyresAnnounced: true, tyres: ["C2", "C3", "C4"], Circuit: { circuitName: "Circuit Park Zandvoort", Location: { locality: "Zandvoort", country: "Netherlands", timezone: "Europe/Amsterdam", coordinates: { lat: 52.3888, lon: 4.54092 } } }, date: "2026-08-23", time: "13:00:00Z", sessions: { fp1: "2026-08-21T10:30:00Z", fp2: "2026-08-21T14:00:00Z", fp3: "2026-08-22T09:30:00Z", quali: "2026-08-22T13:00:00Z", race: "2026-08-23T13:00:00Z" } },
+  { season: "2026", round: "13", raceName: "Italian Grand Prix", tyresAnnounced: true, tyres: ["C3", "C4", "C5"], Circuit: { circuitName: "Autodromo Nazionale Monza", Location: { locality: "Monza", country: "Italy", timezone: "Europe/Rome", coordinates: { lat: 45.6156, lon: 9.28111 } } }, date: "2026-09-06", time: "13:00:00Z", sessions: { fp1: "2026-09-04T11:30:00Z", fp2: "2026-09-04T15:00:00Z", fp3: "2026-09-05T10:30:00Z", quali: "2026-09-05T14:00:00Z", race: "2026-09-06T13:00:00Z" } },
+  { season: "2026", round: "14", raceName: "Madrid Grand Prix", tyresAnnounced: true, tyres: ["C2", "C3", "C4"], Circuit: { circuitName: "IFEMA Madrid", Location: { locality: "Madrid", country: "Spain", timezone: "Europe/Madrid", coordinates: { lat: 40.4667, lon: -3.6167 } } }, date: "2026-09-13", time: "13:00:00Z", sessions: { fp1: "2026-09-11T11:30:00Z", fp2: "2026-09-11T15:00:00Z", fp3: "2026-09-12T10:30:00Z", quali: "2026-09-12T14:00:00Z", race: "2026-09-13T13:00:00Z" } },
+  { season: "2026", round: "15", raceName: "Azerbaijan Grand Prix", tyresAnnounced: false, tyres: ["C3", "C4", "C5"], Circuit: { circuitName: "Baku City Circuit", Location: { locality: "Baku", country: "Azerbaijan", timezone: "Asia/Baku", coordinates: { lat: 40.3725, lon: 49.8533 } } }, date: "2026-09-26", time: "11:00:00Z", sessions: { fp1: "2026-09-24T09:30:00Z", fp2: "2026-09-24T13:00:00Z", fp3: "2026-09-25T09:30:00Z", quali: "2026-09-25T13:00:00Z", race: "2026-09-26T11:00:00Z" } },
+  { season: "2026", round: "16", raceName: "Singapore Grand Prix", tyresAnnounced: false, tyres: ["C3", "C4", "C5"], Circuit: { circuitName: "Marina Bay Street Circuit", Location: { locality: "Marina Bay", country: "Singapore", timezone: "Asia/Singapore", coordinates: { lat: 1.2914, lon: 103.864 } } }, date: "2026-10-11", time: "12:00:00Z", sessions: { fp1: "2026-10-09T09:30:00Z", fp2: "2026-10-09T13:00:00Z", fp3: "2026-10-10T09:30:00Z", quali: "2026-10-10T13:00:00Z", race: "2026-10-11T12:00:00Z" } },
+  { season: "2026", round: "17", raceName: "United States Grand Prix", isSprint: true, tyresAnnounced: false, tyres: ["C2", "C3", "C4"], Circuit: { circuitName: "Circuit of the Americas", Location: { locality: "Austin", country: "USA", timezone: "America/Chicago", coordinates: { lat: 30.1328, lon: -97.6411 } } }, date: "2026-10-25", time: "19:00:00Z", sessions: { fp1: "2026-10-23T17:30:00Z", fp2: "2026-10-23T21:00:00Z", fp3: "2026-10-24T18:00:00Z", quali: "2026-10-24T22:00:00Z", race: "2026-10-25T19:00:00Z" } },
+  { season: "2026", round: "18", raceName: "Mexico City Grand Prix", tyresAnnounced: false, tyres: ["C3", "C4", "C5"], Circuit: { circuitName: "Autódromo Hermanos Rodríguez", Location: { locality: "Mexico City", country: "Mexico", timezone: "America/Mexico_City", coordinates: { lat: 19.4042, lon: -99.0907 } } }, date: "2026-11-01", time: "20:00:00Z", sessions: { fp1: "2026-10-30T18:30:00Z", fp2: "2026-10-30T22:00:00Z", fp3: "2026-10-31T17:30:00Z", quali: "2026-10-31T21:00:00Z", race: "2026-11-01T20:00:00Z" } },
+  { season: "2026", round: "19", raceName: "São Paulo Grand Prix", isSprint: true, tyresAnnounced: false, tyres: ["C2", "C3", "C4"], Circuit: { circuitName: "Autódromo José Carlos Pace", Location: { locality: "São Paulo", country: "Brazil", timezone: "America/Sao_Paulo", coordinates: { lat: -23.7036, lon: -46.6997 } } }, date: "2026-11-08", time: "17:00:00Z", sessions: { fp1: "2026-11-06T14:30:00Z", fp2: "2026-11-06T18:00:00Z", fp3: "2026-11-07T14:30:00Z", quali: "2026-11-07T18:00:00Z", race: "2026-11-08T17:00:00Z" } },
+  { season: "2026", round: "20", raceName: "Las Vegas Grand Prix", tyresAnnounced: false, tyres: ["C3", "C4", "C5"], Circuit: { circuitName: "Las Vegas Strip Circuit", Location: { locality: "Las Vegas", country: "USA", timezone: "America/Los_Angeles", coordinates: { lat: 36.1147, lon: -115.173 } } }, date: "2026-11-21", time: "06:00:00Z", sessions: { fp1: "2026-11-19T02:30:00Z", fp2: "2026-11-19T06:00:00Z", fp3: "2026-11-20T02:30:00Z", quali: "2026-11-20T06:00:00Z", race: "2026-11-21T06:00:00Z" } },
+  { season: "2026", round: "21", raceName: "Qatar Grand Prix", isSprint: true, tyresAnnounced: false, tyres: ["C1", "C2", "C3"], Circuit: { circuitName: "Lusail International Circuit", Location: { locality: "Al Daayen", country: "Qatar", timezone: "Asia/Qatar", coordinates: { lat: 25.49, lon: 51.4542 } } }, date: "2026-11-29", time: "17:00:00Z", sessions: { fp1: "2026-11-27T13:30:00Z", fp2: "2026-11-27T17:00:00Z", fp3: "2026-11-28T13:30:00Z", quali: "2026-11-28T17:00:00Z", race: "2026-11-29T17:00:00Z" } },
+  { season: "2026", round: "22", raceName: "Abu Dhabi Grand Prix", tyresAnnounced: false, tyres: ["C3", "C4", "C5"], Circuit: { circuitName: "Yas Marina Circuit", Location: { locality: "Abu Dhabi", country: "UAE", timezone: "Asia/Dubai", coordinates: { lat: 24.4672, lon: 54.6031 } } }, date: "2026-12-06", time: "13:00:00Z", sessions: { fp1: "2026-12-04T09:30:00Z", fp2: "2026-12-04T13:00:00Z", fp3: "2026-12-05T10:30:00Z", quali: "2026-12-05T14:00:00Z", race: "2026-12-06T13:00:00Z" } }
+];
+
+// Split calendar into Upcoming vs Past
+const now = new Date();
+let nextRace: Race | null = null;
+let upcomingRaces: Race[] = [];
+let pastRaces: Race[] = [];
+
+for (const race of CALENDAR) {
+  const raceDateTime = new Date(race.sessions.race);
+  if (raceDateTime > now) {
+    if (!nextRace) nextRace = race;
+    else upcomingRaces.push(race);
+  } else {
+    pastRaces.push(race);
+  }
+}
+
+pastRaces.reverse();
+
+// FETCH LIVE WEATHER FOR NEXT RACE
+// Now using the exact latitude and longitude just like CircuitWeather.astro!
+if (nextRace) {
+  nextRace.weather = {
+    temp: 21,
+    condition: "Partly Cloudy",
+    icon: "⛅"
+  };
+
+  try {
+    const apiKey = import.meta.env.OPENWEATHER_API_KEY;
+    const lat = nextRace.Circuit.Location.coordinates.lat;
+    const lon = nextRace.Circuit.Location.coordinates.lon;
+
+    if (apiKey) {
+      const weatherRes = await fetch(
+        `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`
+      );
+      
+      if (weatherRes.ok) {
+        const weatherData = await weatherRes.json();
+
+        if (weatherData && weatherData.main && weatherData.weather?.length > 0) {
+          const temp = Math.round(weatherData.main.temp);
+          const condition = weatherData.weather[0].main; // e.g. "Clouds", "Rain"
+          const iconCode = weatherData.weather[0].icon;
+
+          const getWeatherEmoji = (icon: string) => {
+            const map: Record<string, string> = {
+              '01d': '☀️', '01n': '🌙',
+              '02d': '⛅', '02n': '☁️',
+              '03d': '☁️', '03n': '☁️',
+              '04d': '☁️', '04n': '☁️',
+              '09d': '🌧️', '09n': '🌧️',
+              '10d': '🌦️', '10n': '🌧️',
+              '11d': '⛈️', '11n': '⛈️',
+              '13d': '⚡', '13n': '⚡',
+              '50d': '🌫️', '50n': '🌫️'
+            };
+            return map[icon] || '🌡️';
+          };
+
+          nextRace.weather = {
+            temp: temp,
+            condition: condition,
+            icon: getWeatherEmoji(iconCode)
+          };
+        }
+      }
+    } else {
+      console.warn("OPENWEATHER_API_KEY is not defined in environment variables.");
+    }
+  } catch (error) {
+    console.error("Failed to fetch OpenWeather data for calendar:", error);
+  }
+}
+
+function formatMonth(dateStr: string) {
+  return new Date(dateStr).toLocaleString('en-US', { month: 'short' }).toUpperCase();
+}
+
+function formatDay(dateStr: string) {
+  return new Date(dateStr).toLocaleString('en-US', { day: '2-digit' });
+}
+
+function getFlagCode(country: string) {
+  const map: Record<string, string> = {
+    'Bahrain': 'bh', 'Saudi Arabia': 'sa', 'Australia': 'au', 'Japan': 'jp', 'China': 'cn',
+    'USA': 'us', 'United States': 'us', 'Italy': 'it', 'Monaco': 'mc', 'Canada': 'ca', 'Spain': 'es',
+    'UK': 'gb', 'Austria': 'at', 'Hungary': 'hu', 'Belgium': 'be', 'Netherlands': 'nl',
+    'Azerbaijan': 'az', 'Singapore': 'sg', 'Mexico': 'mx', 'Brazil': 'br', 'Qatar': 'qa', 'UAE': 'ae'
+  };
+  return map[country] || 'un';
+}
+
+function getGuideSlug(raceName: string) {
+  return `/circuits-live/circuit-guides/${raceName.toLowerCase().replace(/\s+/g, '-')}`;
+}
+
+function getSlug(raceName: string) {
+  return raceName.toLowerCase().replace(/\s+/g, '-');
+}
+
+const targetCountdown = nextRace?.sessions.fp1;
+
+const getSessionArray = (race: Race) => [
+  { id: 'fp1', name: 'Practice 1', utc: race.sessions.fp1, results: race.sessionResults?.fp1 },
+  { id: 'fp2', name: race.isSprint ? 'Sprint Quali' : 'Practice 2', utc: race.sessions.fp2, results: race.sessionResults?.fp2 },
+  { id: 'fp3', name: race.isSprint ? 'Sprint Race' : 'Practice 3', utc: race.sessions.fp3, results: race.sessionResults?.fp3 },
+  { id: 'quali', name: 'Qualifying', utc: race.sessions.quali, results: race.sessionResults?.quali },
+  { id: 'race', name: 'Race', utc: race.sessions.race, results: race.sessionResults?.race }
+];
+---
+
+<Layout 
+  title="F1 Race Calendar | Schedule & Countdown | My Grand Prix Hub"
+  description="Live Formula 1 World Championship race calendar, schedule, and live countdown to Free Practice 1 of the next Grand Prix."
+>
+  <main class="page-container">
+    <header class="section-header">
+      <span class="badge">Race Calendar</span>
+      <h1>World Championship Schedule</h1>
+      <p>The complete 2026 calendar. Track dates, locations, and watch the live countdown to the next session.</p>
+    </header>
+
+    {nextRace && (
+      <section class="next-race-hero">
+        <div class="hero-bg-accent"></div>
+        
+        <!-- Hero Top: Info & Countdown -->
+        <div class="next-race-content">
+          <div class="next-race-meta">
+            <div class="badge-row">
+              <span class="round-pill">Round {nextRace.round} &bull; Up Next</span>
+              {nextRace.isSprint && (
+                <span class="sprint-badge">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                  Sprint Weekend
+                </span>
+              )}
+            </div>
+            
+            <div class="title-row">
+              <img 
+                src={`https://flagcdn.com/w40/${getFlagCode(nextRace.Circuit.Location.country)}.png`}
+                width="32" height="24" alt={nextRace.Circuit.Location.country} class="hero-flag" 
+              />
+              <h2>{nextRace.raceName}</h2>
+            </div>
+            <p class="circuit-name">{nextRace.Circuit.circuitName} &bull; {nextRace.Circuit.Location.locality}, {nextRace.Circuit.Location.country}</p>
+            
+            <!-- Tyres, Links & Weather Row -->
+            <div class="hero-actions-row">
+              <div class="tyres-container" title="Pirelli Tyre Allocation">
+                <span class="tyres-label">Tyres:</span>
+                {nextRace.tyresAnnounced !== false ? (
+                  <>
+                    <div class="tyre-dot tyre-hard">{nextRace.tyres[0]}</div>
+                    <div class="tyre-dot tyre-medium">{nextRace.tyres[1]}</div>
+                    <div class="tyre-dot tyre-soft">{nextRace.tyres[2]}</div>
+                  </>
+                ) : (
+                  <span class="tbc-badge">TBC</span>
+                )}
+              </div>
+
+              <!-- UPDATED BUTTONS -->
+              <a href={getGuideSlug(nextRace.raceName)} class="btn-primary">
+                Circuit Guide 
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              </a>
+              <a href={`/travel-and-tickets/${getSlug(nextRace.raceName)}`} class="btn-secondary">Travel & Tickets</a>
+              <a href="/tv-guides" class="btn-secondary btn-outline">TV Guide</a>
+              
+              {nextRace.weather && (
+                <div class="weather-pill" title="Live Local Forecast">
+                  <span class="weather-icon">{nextRace.weather.icon}</span>
+                  <span class="weather-text">{nextRace.weather.temp}°C &bull; {nextRace.weather.condition}</span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div class="countdown-card">
+            <div class="countdown-header">
+              <span class="pulse-dot"></span>
+              <span>Countdown to Practice 1</span>
+            </div>
+            
+            <div class="timer-grid" id="f1-countdown" data-target={targetCountdown}>
+              <div class="time-box">
+                <span class="time-val" id="cd-days">00</span>
+                <span class="time-label">Days</span>
+              </div>
+              <span class="time-sep">:</span>
+              <div class="time-box">
+                <span class="time-val" id="cd-hours">00</span>
+                <span class="time-label">Hrs</span>
+              </div>
+              <span class="time-sep">:</span>
+              <div class="time-box">
+                <span class="time-val" id="cd-mins">00</span>
+                <span class="time-label">Min</span>
+              </div>
+              <span class="time-sep">:</span>
+              <div class="time-box">
+                <span class="time-val" id="cd-secs">00</span>
+                <span class="time-label">Sec</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Hero Bottom: Full Weekend Schedule & Top 3 Results -->
+        <div class="hero-schedule-footer">
+          <h3 class="hero-sched-title">Weekend Schedule & Live Results</h3>
+          <div class="hero-sched-grid">
+            {getSessionArray(nextRace).map(session => (
+              <div class="hero-session-card js-session-card" data-utc={session.utc} data-tz={nextRace!.Circuit.Location.timezone}>
+                <div class="h-sess-header">
+                  <span class="h-sess-name">{session.name}</span>
+                </div>
+                <div class="h-sess-times">
+                  <div class="t-row">
+                    <span class="t-label">Track:</span>
+                    <span class="t-val js-track-time">--:--</span>
+                  </div>
+                  <div class="t-row t-local">
+                    <span class="t-label">Local:</span>
+                    <span class="t-val js-local-time">--:--</span>
+                  </div>
+                </div>
+                
+                <div class="h-sess-results js-sess-results">
+                  {session.results ? (
+                    <div class="mini-podium">
+                      <span class="m-step m-1" title="1st Place">🥇 {session.results.first}</span>
+                      <span class="m-step m-2" title="2nd Place">🥈 {session.results.second}</span>
+                      <span class="m-step m-3" title="3rd Place">🥉 {session.results.third}</span>
+                    </div>
+                  ) : (
+                    <span class="pending-results js-pending" style="display:none;">Awaiting Results...</span>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+    )}
+
+    <div class="calendar-split">
+      <!-- Upcoming Races -->
+      <section class="calendar-list-section">
+        <h3 class="list-heading">Upcoming Races</h3>
+        <div class="races-stack">
+          {upcomingRaces.map((race) => (
+            <div class="race-card-wrapper upcoming-wrapper">
+              <div class="race-card-header">
+                <div class="date-block">
+                  <span class="date-month">{formatMonth(race.date)}</span>
+                  <span class="date-day">{formatDay(race.date)}</span>
+                </div>
+                
+                <div class="race-info">
+                  <div class="card-meta">
+                    <span class="round-text">Round {race.round}</span>
+                    {race.isSprint && (
+                      <span class="sprint-badge list-sprint-badge">
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                        Sprint
+                      </span>
+                    )}
+                    <img src={`https://flagcdn.com/w20/${getFlagCode(race.Circuit.Location.country)}.png`} width="16" height="12" alt={race.Circuit.Location.country} class="card-flag" />
+                  </div>
+                  <h4>{race.raceName}</h4>
+                  
+                  <div class="circuit-meta-row">
+                    <span class="circuit-text">{race.Circuit.circuitName}</span>
+                    <div class="tyres-container">
+                      {race.tyresAnnounced !== false ? (
+                        <>
+                          <div class="tyre-dot tyre-hard">{race.tyres[0]}</div>
+                          <div class="tyre-dot tyre-medium">{race.tyres[1]}</div>
+                          <div class="tyre-dot tyre-soft">{race.tyres[2]}</div>
+                        </>
+                      ) : (
+                        <span class="tbc-badge">TBC</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="action-stack">
+                  <!-- UPDATED BUTTONS -->
+                  <div class="card-buttons">
+                    <a href={getGuideSlug(race.raceName)} class="btn-primary btn-sm" title="Circuit Guide">Guide</a>
+                    <a href={`/travel-and-tickets/${getSlug(race.raceName)}`} class="btn-secondary btn-sm" title="Travel & Tickets">Tickets</a>
+                    <a href="/tv-guides" class="btn-secondary btn-outline btn-sm" title="TV Guide">TV</a>
+                  </div>
+                  <button class="expand-btn" aria-expanded="false" data-target={`schedule-${race.round}`}>
+                    <span>Schedule</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="chevron"><path d="M6 9l6 6 6-6"/></svg>
+                  </button>
+                </div>
+              </div>
+
+              <div class="race-schedule-details" id={`schedule-${race.round}`}>
+                <div class="schedule-table">
+                  <div class="schedule-thead">
+                    <div class="th-session">Session</div>
+                    <div class="th-track">Track Time</div>
+                    <div class="th-local">Your Time</div>
+                  </div>
+                  {getSessionArray(race).map(session => (
+                    <div class="schedule-row js-schedule-row" data-utc={session.utc} data-tz={race.Circuit.Location.timezone}>
+                      <div class="td-session">{session.name}</div>
+                      <div class="td-track js-track-td">--:--</div>
+                      <div class="td-local js-local-td">--:--</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ))}
+          {upcomingRaces.length === 0 && <div class="empty-state">No upcoming races scheduled.</div>}
+        </div>
+      </section>
+
+      <!-- Past Races -->
+      <section class="calendar-list-section mt-8">
+        <h3 class="list-heading past-heading">Completed Races</h3>
+        <div class="races-stack past-stack">
+          {pastRaces.map(race => (
+            <div class="race-card-wrapper past-wrapper">
+              <div class="race-card-header">
+                <div class="date-block">
+                  <span class="date-month">{formatMonth(race.date)}</span>
+                  <span class="date-day">{formatDay(race.date)}</span>
+                </div>
+                
+                <div class="race-info">
+                  <div class="card-meta">
+                    <span class="round-text">Round {race.round}</span>
+                    {race.isSprint && (
+                      <span class="sprint-badge past-sprint">
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                        Sprint
+                      </span>
+                    )}
+                    <img src={`https://flagcdn.com/w20/${getFlagCode(race.Circuit.Location.country)}.png`} width="16" height="12" alt={race.Circuit.Location.country} class="card-flag" />
+                  </div>
+                  <h4>{race.raceName}</h4>
+                  
+                  <div class="circuit-meta-row">
+                    <span class="circuit-text">{race.Circuit.circuitName}</span>
+                    <div class="tyres-container">
+                      {race.tyresAnnounced !== false ? (
+                        <>
+                          <div class="tyre-dot tyre-hard">{race.tyres[0]}</div>
+                          <div class="tyre-dot tyre-medium">{race.tyres[1]}</div>
+                          <div class="tyre-dot tyre-soft">{race.tyres[2]}</div>
+                        </>
+                      ) : (
+                        <span class="tbc-badge">TBC</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="action-stack">
+                  <!-- UPDATED BUTTONS FOR PAST RACES -->
+                  <div class="card-buttons" style="margin-bottom: 0.5rem;">
+                    <a href={getGuideSlug(race.raceName)} class="btn-primary btn-sm">Guide</a>
+                    <a href={`/travel-and-tickets/${getSlug(race.raceName)}`} class="btn-secondary btn-outline btn-sm">Reviews</a>
+                  </div>
+                  <span class="completed-badge">Completed</span>
+                  <button class="expand-btn" aria-expanded="false" data-target={`podium-${race.round}`} style="margin-top: 0.5rem;">
+                    <span>Race Podium</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="chevron"><path d="M6 9l6 6 6-6"/></svg>
+                  </button>
+                </div>
+              </div>
+
+              <div class="race-schedule-details" id={`podium-${race.round}`}>
+                {race.podium ? (
+                  <div class="podium-banner">
+                    <div class="podium-grid">
+                      <div class="podium-step step-2">
+                        <span class="medal">🥈</span>
+                        <span class="driver-code">{race.podium.second}</span>
+                      </div>
+                      <div class="podium-step step-1">
+                        <span class="medal">🥇</span>
+                        <span class="driver-code">{race.podium.first}</span>
+                      </div>
+                      <div class="podium-step step-3">
+                        <span class="medal">🥉</span>
+                        <span class="driver-code">{race.podium.third}</span>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div class="empty-state" style="padding: 1.5rem; text-align: center;">Official classification pending.</div>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+    </div>
+  </main>
+</Layout>
+
+<script is:inline>
+  function formatSessionTimes() {
+    const rows = document.querySelectorAll('.js-schedule-row');
+    rows.forEach(row => {
+      const utcStr = row.getAttribute('data-utc');
+      const trackTz = row.getAttribute('data-tz');
+      if (!utcStr || !trackTz) return;
+
+      const dateObj = new Date(utcStr);
+      
+      const trackFormatter = new Intl.DateTimeFormat('en-US', {
+        timeZone: trackTz, weekday: 'short', hour: '2-digit', minute: '2-digit', hour12: false
+      });
+      const localFormatter = new Intl.DateTimeFormat('en-US', {
+        weekday: 'short', hour: '2-digit', minute: '2-digit', hour12: false
+      });
+
+      const tdTrack = row.querySelector('.js-track-td');
+      const tdLocal = row.querySelector('.js-local-td');
+      
+      if(tdTrack) tdTrack.textContent = trackFormatter.format(dateObj);
+      if(tdLocal) tdLocal.textContent = localFormatter.format(dateObj);
+    });
+  }
+
+  function formatHeroSchedule() {
+    const cards = document.querySelectorAll('.js-session-card');
+    const now = new Date().getTime();
+
+    cards.forEach(card => {
+      const utcStr = card.getAttribute('data-utc');
+      const trackTz = card.getAttribute('data-tz');
+      if (!utcStr || !trackTz) return;
+
+      const dateObj = new Date(utcStr);
+      const sessionEndTime = dateObj.getTime() + (2 * 60 * 60 * 1000); 
+
+      const trackFormatter = new Intl.DateTimeFormat('en-US', {
+        timeZone: trackTz, weekday: 'short', hour: '2-digit', minute: '2-digit', hour12: false
+      });
+      const localFormatter = new Intl.DateTimeFormat('en-US', {
+        weekday: 'short', hour: '2-digit', minute: '2-digit', hour12: false
+      });
+
+      const trackSpan = card.querySelector('.js-track-time');
+      const localSpan = card.querySelector('.js-local-time');
+      
+      if(trackSpan) trackSpan.textContent = trackFormatter.format(dateObj);
+      if(localSpan) localSpan.textContent = localFormatter.format(dateObj);
+
+      const pendingSpan = card.querySelector('.js-pending');
+      if (pendingSpan) {
+        if (now > sessionEndTime) {
+          pendingSpan.style.display = 'inline-block';
+        } else {
+          pendingSpan.style.display = 'none';
+        }
+      }
+    });
+  }
+
+  function setupAccordions() {
+    const btns = document.querySelectorAll('.expand-btn');
+    btns.forEach(btn => {
+      const newBtn = btn.cloneNode(true);
+      btn.parentNode.replaceChild(newBtn, btn);
+      
+      newBtn.addEventListener('click', () => {
+        const targetId = newBtn.getAttribute('data-target');
+        const targetDiv = document.getElementById(targetId);
+        if (!targetDiv) return;
+
+        const isExpanded = newBtn.getAttribute('aria-expanded') === 'true';
+        newBtn.setAttribute('aria-expanded', !isExpanded);
+        
+        if (isExpanded) {
+          targetDiv.style.maxHeight = null;
+          targetDiv.classList.remove('open');
+        } else {
+          targetDiv.classList.add('open');
+          targetDiv.style.maxHeight = targetDiv.scrollHeight + 100 + "px";
+        }
+      });
+    });
+  }
+
+  function initCountdown() {
+    const timerElement = document.getElementById('f1-countdown');
+    if (!timerElement) return;
+
+    const targetDateStr = timerElement.getAttribute('data-target');
+    if (!targetDateStr) return;
+
+    const targetDate = new Date(targetDateStr).getTime();
+    
+    const daysEl = document.getElementById('cd-days');
+    const hoursEl = document.getElementById('cd-hours');
+    const minsEl = document.getElementById('cd-mins');
+    const secsEl = document.getElementById('cd-secs');
+
+    const updateTimer = () => {
+      const now = new Date().getTime();
+      const distance = targetDate - now;
+
+      if (distance < 0) {
+        if(daysEl) daysEl.innerText = "00";
+        if(hoursEl) hoursEl.innerText = "00";
+        if(minsEl) minsEl.innerText = "00";
+        if(secsEl) secsEl.innerText = "00";
+        return;
+      }
+
+      const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+      if(daysEl) daysEl.innerText = days.toString().padStart(2, '0');
+      if(hoursEl) hoursEl.innerText = hours.toString().padStart(2, '0');
+      if(minsEl) minsEl.innerText = minutes.toString().padStart(2, '0');
+      if(secsEl) secsEl.innerText = seconds.toString().padStart(2, '0');
+    };
+
+    updateTimer(); 
+    setInterval(updateTimer, 1000); 
+  }
+
+  function runAllScripts() {
+    formatSessionTimes();
+    formatHeroSchedule();
+    setupAccordions();
+    initCountdown();
+  }
+
+  document.addEventListener('DOMContentLoaded', runAllScripts);
+  document.addEventListener('astro:page-load', runAllScripts);
+</script>
+
+<style>
+  .page-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 3rem 1.5rem 5rem;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .section-header {
+    margin-bottom: 3rem;
+  }
+
+  .badge {
+    display: inline-block;
+    background-color: var(--color-primary, #e10600);
+    color: #ffffff;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 0.25rem 0.6rem;
+    border-radius: 4px;
+    letter-spacing: 0.05em;
+  }
+
+  h1 {
+    font-size: 2.5rem;
+    margin: 0.75rem 0 0.5rem 0;
+    font-weight: 800;
+    color: #f8fafc;
+  }
+
+  .section-header p {
+    color: var(--color-muted, #94a3b8);
+    font-size: 1.15rem;
+    margin: 0;
+  }
+
+  /* Hero Section (Next Race) */
+  .next-race-hero {
+    position: relative;
+    background: #0f172a;
+    border: 1px solid #334155;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 4rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  }
+
+  .hero-bg-accent {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(90deg, #e10600, #ff4d4d);
+  }
+
+  .next-race-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 2.5rem;
+    flex-wrap: wrap;
+    gap: 2rem;
+  }
+
+  .next-race-meta {
+    flex: 1;
+    min-width: 300px;
+  }
+  
+  .badge-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+
+  .round-pill {
+    display: inline-block;
+    background: #1e293b;
+    color: #38bdf8;
+    font-size: 0.8rem;
+    font-weight: 800;
+    padding: 0.35rem 0.75rem;
+    border-radius: 9999px;
+    border: 1px solid #334155;
+  }
+
+  /* Sprint Badges */
+  .sprint-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    background: linear-gradient(135deg, #9333ea, #db2777);
+    color: #ffffff;
+    font-size: 0.75rem;
+    font-weight: 800;
+    padding: 0.35rem 0.75rem;
+    border-radius: 9999px;
+    margin-left: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    box-shadow: 0 2px 10px rgba(147, 51, 234, 0.4);
+  }
+
+  .list-sprint-badge {
+    font-size: 0.65rem;
+    padding: 0.25rem 0.6rem;
+    box-shadow: none;
+  }
+
+  .past-sprint {
+    background: #334155;
+    color: #94a3b8;
+    box-shadow: none;
+  }
+
+  .title-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .hero-flag {
+    border-radius: 3px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+  }
+
+  .title-row h2 {
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin: 0;
+  }
+
+  .circuit-name {
+    font-size: 1.1rem;
+    color: #94a3b8;
+    margin: 0 0 1.5rem 0;
+  }
+
+  /* Tyres */
+  .circuit-meta-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .tyres-container {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: #0f172a;
+    border: 1px solid #334155;
+    padding: 0.3rem 0.6rem;
+    border-radius: 9999px;
+  }
+
+  .tyres-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    margin-right: 0.2rem;
+  }
+
+  .tyre-dot {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    font-size: 0.6rem;
+    font-weight: 900;
+    border: 2px solid;
+    box-sizing: border-box;
+  }
+
+  .tyre-hard { background: #ffffff; border-color: #cbd5e1; color: #0f172a; }
+  .tyre-medium { background: #fbbf24; border-color: #d97706; color: #0f172a; }
+  .tyre-soft { background: #ef4444; border-color: #b91c1c; color: #ffffff; }
+
+  .tbc-badge {
+    background: #1e293b;
+    color: #cbd5e1;
+    border: 1px dashed #475569;
+    padding: 0.2rem 0.6rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 700;
+  }
+
+  /* Hero Actions Row */
+  .hero-actions-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  /* Buttons */
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    background: #e10600;
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 0.9rem;
+    padding: 0.6rem 1.25rem;
+    border-radius: 6px;
+    text-decoration: none;
+    transition: background 0.2s ease;
+  }
+  .btn-primary:hover { background: #ff1a1a; }
+
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #1e293b;
+    color: #f8fafc;
+    border: 1px solid #334155;
+    font-weight: 600;
+    font-size: 0.9rem;
+    padding: 0.6rem 1.25rem;
+    border-radius: 6px;
+    text-decoration: none;
+    transition: background 0.2s ease;
+  }
+  .btn-secondary:hover { background: #334155; }
+
+  .btn-outline {
+    background: transparent;
+    border-color: #475569;
+    color: #cbd5e1;
+  }
+  .btn-outline:hover {
+    background: #1e293b;
+    color: #ffffff;
+    border-color: #94a3b8;
+  }
+
+  .btn-sm {
+    font-size: 0.75rem;
+    padding: 0.45rem 0.85rem;
+  }
+
+  .weather-pill {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #0f172a;
+    border: 1px solid #334155;
+    padding: 0.5rem 1rem;
+    border-radius: 9999px;
+  }
+
+  .weather-icon {
+    font-size: 1.1rem;
+  }
+
+  .weather-text {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #94a3b8;
+  }
+
+  /* Countdown Timer */
+  .countdown-card {
+    background: #1e293b;
+    padding: 1.5rem;
+    border-radius: 8px;
+    border: 1px solid #334155;
+  }
+
+  .countdown-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    color: #e2e8f0;
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .pulse-dot {
+    width: 8px;
+    height: 8px;
+    background: #e10600;
+    border-radius: 50%;
+    box-shadow: 0 0 8px #e10600;
+    animation: pulse 1.5s infinite;
+  }
+
+  @keyframes pulse {
+    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(225, 6, 0, 0.7); }
+    70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(225, 6, 0, 0); }
+    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(225, 6, 0, 0); }
+  }
+
+  .timer-grid {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .time-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: #0f172a;
+    padding: 0.75rem;
+    border-radius: 6px;
+    min-width: 65px;
+    border: 1px solid #334155;
+  }
+
+  .time-val {
+    font-size: 1.85rem;
+    font-weight: 900;
+    color: #ffffff;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.1;
+  }
+
+  .time-label {
+    font-size: 0.7rem;
+    color: #64748b;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-top: 0.25rem;
+  }
+
+  .time-sep {
+    font-size: 1.85rem;
+    font-weight: 900;
+    color: #475569;
+    margin-top: -15px;
+  }
+
+  /* Hero Bottom Full Schedule */
+  .hero-schedule-footer {
+    background: #1e293b;
+    border-top: 1px solid #334155;
+    padding: 1.5rem 2.5rem 2.5rem;
+  }
+
+  .hero-sched-title {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin: 0 0 1.5rem 0;
+  }
+
+  .hero-sched-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 1rem;
+  }
+
+  .hero-session-card {
+    background: #0f172a;
+    border: 1px solid #334155;
+    border-radius: 6px;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .h-sess-header {
+    border-bottom: 1px solid #1e293b;
+    padding-bottom: 0.5rem;
+  }
+
+  .h-sess-name {
+    font-size: 0.85rem;
+    font-weight: 800;
+    color: #38bdf8;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .h-sess-times {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .t-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.85rem;
+  }
+
+  .t-label {
+    color: #64748b;
+    font-weight: 600;
+  }
+
+  .t-val {
+    color: #f8fafc;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .t-local .t-val {
+    color: #e2e8f0;
+  }
+
+  .h-sess-results {
+    margin-top: 0.5rem;
+    padding-top: 0.75rem;
+    border-top: 1px dashed #334155;
+    min-height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .pending-results {
+    font-size: 0.7rem;
+    color: #94a3b8;
+    font-weight: 700;
+    text-transform: uppercase;
+    background: #1e293b;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    letter-spacing: 0.05em;
+  }
+
+  .mini-podium {
+    display: flex;
+    gap: 0.5rem;
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .m-step {
+    font-size: 0.7rem;
+    font-weight: 800;
+    color: #ffffff;
+    background: #1e293b;
+    padding: 0.2rem 0.4rem;
+    border-radius: 4px;
+    border: 1px solid #334155;
+  }
+
+  /* List & Cards */
+  .list-heading {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin: 0 0 1.5rem 0;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #334155;
+  }
+
+  .past-heading {
+    color: #94a3b8;
+  }
+
+  .mt-8 {
+    margin-top: 4rem;
+  }
+
+  .races-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .race-card-wrapper {
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .upcoming-wrapper {
+    transition: border-color 0.2s ease;
+  }
+  .upcoming-wrapper:hover {
+    border-color: #475569;
+  }
+
+  .past-wrapper {
+    opacity: 0.8;
+  }
+
+  .race-card-header {
+    display: flex;
+    align-items: stretch;
+    background: #0f172a;
+  }
+
+  .date-block {
+    background: #1e293b;
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-right: 1px solid #334155;
+    min-width: 60px;
+  }
+
+  .date-month {
+    font-size: 0.8rem;
+    font-weight: 800;
+    color: #e10600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .date-day {
+    font-size: 1.65rem;
+    font-weight: 900;
+    color: #ffffff;
+  }
+
+  .race-info {
+    padding: 1.25rem 1.5rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .card-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.35rem;
+  }
+
+  .round-text {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .card-flag {
+    border-radius: 2px;
+  }
+
+  .race-info h4 {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin: 0 0 0.25rem 0;
+  }
+
+  .circuit-text {
+    font-size: 0.9rem;
+    color: #94a3b8;
+  }
+
+  /* Actions & Accordion in List */
+  .action-stack {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-end;
+    gap: 0.85rem;
+    padding: 1rem 1.5rem;
+    border-left: 1px solid transparent;
+  }
+
+  .card-buttons {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .completed-badge {
+    background: rgba(148, 163, 184, 0.15);
+    color: #94a3b8;
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    border: 1px solid rgba(148, 163, 184, 0.3);
+  }
+
+  .expand-btn {
+    background: transparent;
+    border: none;
+    color: #38bdf8;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0;
+    transition: color 0.15s ease;
+  }
+
+  .expand-btn:hover {
+    color: #7dd3fc;
+  }
+
+  .chevron {
+    transition: transform 0.2s ease;
+  }
+
+  .expand-btn[aria-expanded="true"] .chevron {
+    transform: rotate(180deg);
+  }
+
+  /* Dropdown Details */
+  .race-schedule-details {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+    background: #0f172a;
+    border-top: 1px solid transparent;
+  }
+
+  .race-schedule-details.open {
+    border-top: 1px solid #334155;
+  }
+
+  .podium-banner {
+    padding: 1.5rem;
+  }
+
+  .podium-grid {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    gap: 1.5rem;
+  }
+
+  .podium-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 8px;
+    padding: 0.75rem;
+    width: 80px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+  }
+
+  .step-1 { border-color: #fbbf24; transform: translateY(-10px); }
+  .step-2 { border-color: #94a3b8; }
+  .step-3 { border-color: #b45309; }
+
+  .medal {
+    font-size: 1.5rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .driver-code {
+    font-weight: 900;
+    color: #ffffff;
+    font-size: 1.1rem;
+  }
+
+  /* Timetable */
+  .schedule-table {
+    padding: 1.5rem;
+  }
+
+  .schedule-thead {
+    display: flex;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #334155;
+    margin-bottom: 0.75rem;
+    color: #64748b;
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .schedule-row {
+    display: flex;
+    padding: 0.75rem 0;
+    border-bottom: 1px dashed #1e293b;
+    color: #e2e8f0;
+    font-size: 0.95rem;
+    font-weight: 600;
+  }
+
+  .schedule-row:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  .th-session, .td-session { flex: 2; font-weight: 700; color: #ffffff; }
+  .th-track, .td-track { flex: 1.5; color: #94a3b8; font-variant-numeric: tabular-nums;}
+  .th-local, .td-local { flex: 1.5; font-variant-numeric: tabular-nums;}
+
+  .td-local {
+    color: #38bdf8;
+  }
+
+  /* Responsive Mobile Overrides */
+  @media (max-width: 768px) {
+    .page-container { padding: 2rem 1rem 4rem; }
+    h1 { font-size: 2rem; }
+    
+    .next-race-content { padding: 1.5rem; }
+    .hero-schedule-footer { padding: 1.5rem; }
+    .timer-grid { gap: 0.25rem; }
+    .time-box { min-width: 55px; padding: 0.5rem; }
+    .time-val { font-size: 1.4rem; }
+    .time-sep { margin-top: -10px; }
+    
+    .race-card-header {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    
+    .date-block {
+      flex-direction: row;
+      gap: 1rem;
+      border-right: none;
+      border-bottom: 1px solid #334155;
+      padding: 0.75rem 1.5rem;
+      justify-content: flex-start;
+    }
+
+    .race-info {
+      padding-bottom: 1rem;
+    }
+
+    .action-stack {
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 1.5rem;
+      border-left: none;
+      border-top: 1px solid #1e293b;
+    }
+
+    .expand-btn {
+      margin-right: 0;
+    }
+    
+    .th-track, .td-track { display: none; }
+    .hero-actions-row { margin-top: 1rem; }
+  }
+</style>

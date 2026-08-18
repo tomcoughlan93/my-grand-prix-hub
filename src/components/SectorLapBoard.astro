@@ -1,0 +1,196 @@
+---
+// src/components/SectorLapBoard.astro
+export {}; // Isolates scope
+
+interface OpenF1Session { session_key: number; }
+interface OpenF1Driver { driver_number: number; name_acronym: string; last_name: string; team_colour: string; }
+interface OpenF1Lap { driver_number: number; duration_sector_1: number; duration_sector_2: number; duration_sector_3: number; lap_duration: number; date_start: string; }
+interface DisplayLap { driver: string; color: string; s1: { time: number; status: string }; s2: { time: number; status: string }; s3: { time: number; status: string }; lap: { time: number; status: string }; }
+
+let latestLaps: DisplayLap[] = [];
+let isLive = false;
+
+const formatTime = (seconds: number): string => {
+  if (!seconds || seconds > 900) return 'OUT LAP';
+  if (seconds < 60) return seconds.toFixed(3);
+  const mins = Math.floor(seconds / 60);
+  const secs = (seconds % 60).toFixed(3).padStart(6, '0');
+  return `${mins}:${secs}`;
+};
+
+const safeMin = (arr: number[]): number => arr.length > 0 ? Math.min(...arr) : 9999;
+
+try {
+  const sessionRes = await fetch('https://api.openf1.org/v1/sessions?session_key=latest');
+  const sessions = (await sessionRes.json()) as OpenF1Session[];
+
+  if (sessions && sessions.length > 0) {
+    const sessionKey = sessions[0].session_key;
+
+    const [lapsRes, driversRes] = await Promise.all([
+      fetch(`https://api.openf1.org/v1/laps?session_key=${sessionKey}`),
+      fetch(`https://api.openf1.org/v1/drivers?session_key=${sessionKey}`)
+    ]);
+
+    const laps = (await lapsRes.json()) as OpenF1Lap[];
+    const drivers = (await driversRes.json()) as OpenF1Driver[];
+
+    if (laps.length > 0 && drivers.length > 0) {
+      isLive = true;
+      const validLaps = laps.filter(l => l.lap_duration != null);
+      const sessionBestS1 = safeMin(validLaps.map(l => l.duration_sector_1).filter(v => v > 0));
+      const sessionBestS2 = safeMin(validLaps.map(l => l.duration_sector_2).filter(v => v > 0));
+      const sessionBestS3 = safeMin(validLaps.map(l => l.duration_sector_3).filter(v => v > 0));
+      const sessionBestLap = safeMin(validLaps.map(l => l.lap_duration).filter(v => v > 0));
+
+      const personalBests: Record<number, any> = {};
+      drivers.forEach(d => {
+        const dLaps = validLaps.filter(l => l.driver_number === d.driver_number);
+        personalBests[d.driver_number] = {
+          s1: safeMin(dLaps.map(l => l.duration_sector_1).filter(v => v > 0)),
+          s2: safeMin(dLaps.map(l => l.duration_sector_2).filter(v => v > 0)),
+          s3: safeMin(dLaps.map(l => l.duration_sector_3).filter(v => v > 0)),
+          lap: safeMin(dLaps.map(l => l.lap_duration).filter(v => v > 0))
+        };
+      });
+
+      const getStatus = (val: number, sessionBest: number, personalBest: number) => {
+        if (!val) return 'status-yellow';
+        if (val <= sessionBest + 0.001) return 'status-purple';
+        if (val <= personalBest + 0.001) return 'status-green';
+        return 'status-yellow';
+      };
+
+      validLaps.sort((a, b) => new Date(b.date_start).getTime() - new Date(a.date_start).getTime());
+      
+      const recentUniqueLaps: OpenF1Lap[] = [];
+      const seenDrivers = new Set();
+      
+      for (const lap of validLaps) {
+        if (!seenDrivers.has(lap.driver_number)) {
+          recentUniqueLaps.push(lap);
+          seenDrivers.add(lap.driver_number);
+        }
+        if (recentUniqueLaps.length >= 8) break;
+      }
+
+      latestLaps = recentUniqueLaps.map(lap => {
+        const driver = drivers.find(d => d.driver_number === lap.driver_number);
+        const pb = personalBests[lap.driver_number];
+        
+        return {
+          driver: driver ? (driver.name_acronym || driver.last_name.substring(0,3).toUpperCase()) : 'UNK',
+          color: driver && driver.team_colour ? `#${driver.team_colour}` : '#ffffff',
+          s1: { time: lap.duration_sector_1, status: getStatus(lap.duration_sector_1, sessionBestS1, pb.s1) },
+          s2: { time: lap.duration_sector_2, status: getStatus(lap.duration_sector_2, sessionBestS2, pb.s2) },
+          s3: { time: lap.duration_sector_3, status: getStatus(lap.duration_sector_3, sessionBestS3, pb.s3) },
+          lap: { time: lap.lap_duration, status: getStatus(lap.lap_duration, sessionBestLap, pb.lap) }
+        };
+      });
+    }
+  }
+} catch (error) {
+  console.error("Failed to build Sector Board:", error);
+}
+
+if (!isLive || latestLaps.length === 0) {
+  latestLaps = [
+    { driver: 'NOR', color: '#FF8000', s1: { time: 25.102, status: 'status-purple' }, s2: { time: 25.431, status: 'status-green' }, s3: { time: 22.100, status: 'status-green' }, lap: { time: 72.633, status: 'status-purple' } },
+    { driver: 'VER', color: '#3671C6', s1: { time: 25.155, status: 'status-green' }, s2: { time: 25.390, status: 'status-purple' }, s3: { time: 22.145, status: 'status-yellow' }, lap: { time: 72.690, status: 'status-green' } },
+    { driver: 'LEC', color: '#E80020', s1: { time: 25.210, status: 'status-green' }, s2: { time: 25.602, status: 'status-yellow' }, s3: { time: 22.205, status: 'status-green' }, lap: { time: 73.017, status: 'status-green' } },
+    { driver: 'HAM', color: '#E80020', s1: { time: 25.300, status: 'status-yellow' }, s2: { time: 25.501, status: 'status-yellow' }, s3: { time: 22.050, status: 'status-purple' }, lap: { time: 73.151, status: 'status-yellow' } },
+    { driver: 'RUS', color: '#27F4D2', s1: { time: 25.405, status: 'status-yellow' }, s2: { time: 25.711, status: 'status-yellow' }, s3: { time: 22.315, status: 'status-yellow' }, lap: { time: 73.431, status: 'status-yellow' } },
+    { driver: 'SAI', color: '#64C4FF', s1: { time: 25.350, status: 'status-green' }, s2: { time: 25.655, status: 'status-green' }, s3: { time: 22.400, status: 'status-yellow' }, lap: { time: 73.405, status: 'status-green' } },
+  ];
+}
+---
+
+<div class="sector-board-widget">
+  <div class="widget-header">
+    <div class="header-flex">
+      <h2>⏱️ Latest Sector Times</h2>
+      {isLive && <span class="live-indicator">LIVE API</span>}
+    </div>
+  </div>
+
+  <div class="board-headers">
+    <span class="h-driver">DRIVER</span>
+    <span class="h-sec">SECTOR 1</span>
+    <span class="h-sec">SECTOR 2</span>
+    <span class="h-sec">SECTOR 3</span>
+    <span class="h-lap">LAP TIME</span>
+  </div>
+
+  <ul class="board-list">
+    {latestLaps.map((lap: DisplayLap) => (
+      <li class="board-row">
+        <span class="r-driver" style={`border-left: 3px solid ${lap.color};`}>
+          {lap.driver}
+        </span>
+        <span class={`r-sec ${lap.s1.status}`}>{formatTime(lap.s1.time)}</span>
+        <span class={`r-sec ${lap.s2.status}`}>{formatTime(lap.s2.time)}</span>
+        <span class={`r-sec ${lap.s3.status}`}>{formatTime(lap.s3.time)}</span>
+        <span class={`r-lap ${lap.lap.status}`}>{formatTime(lap.lap.time)}</span>
+      </li>
+    ))}
+  </ul>
+</div>
+
+<style>
+.sector-board-widget {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0; /* CRITICAL */
+    background: transparent;
+    border-radius: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+
+  .widget-header { background: #1e293b; padding: 0.75rem 1rem; border-bottom: 1px solid #334155; }
+  .header-flex { display: flex; justify-content: space-between; align-items: center; }
+  .widget-header h2 { color: #ffffff; font-size: 0.9rem; font-weight: 800; margin: 0; text-transform: uppercase; letter-spacing: 0.05em; }
+  .live-indicator { background: rgba(52, 211, 153, 0.15); color: #34d399; font-size: 0.65rem; font-weight: 800; padding: 0.2rem 0.5rem; border-radius: 4px; }
+
+  .board-headers {
+    display: flex;
+    padding: 0.5rem 1rem;
+    background: #0b0f19;
+    border-bottom: 1px solid #334155;
+    color: #64748b;
+    font-size: 0.7rem;
+    font-weight: 800;
+  }
+
+.board-list {
+    list-style: none; margin: 0; padding: 0;
+    display: flex; flex-direction: column;
+    flex: 1 1 0%; /* CRITICAL FIX: Replaces flex-grow: 1 */
+    overflow-y: auto;
+    min-height: 0; /* CRITICAL */
+  }
+
+  .board-row {
+    display: flex; align-items: center; padding: 0.6rem 1rem;
+    border-bottom: 1px solid #1e293b;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 0.9rem; font-weight: 700;
+    background: #0f172a;
+  }
+
+  /* Grid Alignments */
+  .h-driver, .r-driver { width: 60px; padding-left: 0.5rem; color: #ffffff;}
+  .r-driver { padding-left: 0.5rem; margin-left: -1rem; }
+  
+  .h-sec, .r-sec { flex-grow: 1; text-align: center; padding: 0.25rem 0; margin: 0 0.25rem; border-radius: 4px; }
+  
+  /* Widen the lap time column from 75px to 95px to prevent squashing */
+  .h-lap, .r-lap { width: 95px; text-align: right; padding: 0.25rem 0.5rem 0.25rem 0; margin-left: 0.25rem; border-radius: 4px; }
+
+  /* F1 Color Coding Styles - High Contrast Broadcast Look */
+  .status-purple { background-color: #c026d3; color: #ffffff; font-weight: 900; }
+  .status-green { background-color: #22c55e; color: #022c22; font-weight: 900; }
+  
+  /* Added solid background and dark text for Yellow */
+  .status-yellow { background-color: #facc15; color: #422006; font-weight: 900; }
+</style>

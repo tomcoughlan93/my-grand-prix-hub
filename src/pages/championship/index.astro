@@ -1,0 +1,155 @@
+---
+// src/pages/championship/index.astro
+import Layout from '@/layouts/Layout.astro';
+import { getCollection } from 'astro:content';
+
+// Safely retrieve collection arrays with fallback defaults
+const driversCollection = (await getCollection('drivers')) || [];
+const teamsCollection = (await getCollection('teams')) || [];
+
+const driverCount = driversCollection.length;
+const teamCount = teamsCollection.length;
+---
+
+<Layout 
+  title="F1 Championship Hub | My Grand Prix Hub"
+  description="Explore Formula 1 driver profiles, constructor team overviews, and live championship standings."
+>
+  <main class="page-container">
+    <header class="section-header">
+      <span class="badge">Formula 1 Season</span>
+      <h1>Championship Hub</h1>
+      <p>Your central destination for Formula 1 standings, team technical breakdowns, and driver profiles.</p>
+    </header>
+
+    <div class="hub-grid">
+      {/* 1. STANDINGS CARD */}
+      <div class="hub-card">
+        <div class="card-badge">🏆 Championship Points</div>
+        <h2>Driver & Team Standings</h2>
+        <p>View full points breakdowns and current position leaderboards for both the Drivers' and Constructors' World Championships.</p>
+        <a href="/championship/standings" class="hub-btn primary-btn">View Standings →</a>
+      </div>
+
+      {/* 2. TEAMS & DRIVERS CARD */}
+      <div class="hub-card">
+        <div class="card-badge">🏎️ Constructors & Grid</div>
+        <h2>Teams & Drivers</h2>
+        <p>In-depth team specification profiles, power unit details, car chassis models, and career biographies for every driver on the grid.</p>
+        <div class="card-meta">{teamCount} Teams • {driverCount} Drivers</div>
+        <a href="/championship/teams-drivers" class="hub-btn primary-btn">Explore Teams & Drivers →</a>
+      </div>
+    </div>
+  </main>
+</Layout>
+
+<style>
+  .page-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 3rem 1.5rem 4rem 1.5rem;
+    width: 100%;
+  }
+
+  .section-header {
+    margin-bottom: 3rem;
+  }
+
+  .badge {
+    display: inline-block;
+    background-color: var(--color-primary, #e10600);
+    color: #ffffff;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 0.25rem 0.6rem;
+    border-radius: 4px;
+    letter-spacing: 0.05em;
+  }
+
+  h1 {
+    font-size: 2.75rem;
+    margin: 0.75rem 0 0.5rem 0;
+    font-weight: 800;
+    color: #f8fafc;
+  }
+
+  .section-header p {
+    color: var(--color-muted, #94a3b8);
+    font-size: 1.15rem;
+    margin: 0;
+    max-width: 700px;
+    line-height: 1.6;
+  }
+
+  .hub-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.75rem;
+  }
+
+  .hub-card {
+    background: var(--color-card, #1e293b);
+    border: 1px solid var(--color-border, #334155);
+    border-radius: 8px;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+  }
+
+  .hub-card:hover {
+    transform: translateY(-4px);
+    border-color: #e10600;
+  }
+
+  .card-badge {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #38bdf8;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.75rem;
+  }
+
+  .hub-card h2 {
+    font-size: 1.6rem;
+    color: #f8fafc;
+    margin: 0 0 0.75rem 0;
+    font-weight: 700;
+  }
+
+  .hub-card p {
+    color: #94a3b8;
+    font-size: 0.98rem;
+    line-height: 1.6;
+    margin: 0 0 1.5rem 0;
+    flex-grow: 1;
+  }
+
+  .card-meta {
+    font-size: 0.8rem;
+    color: #64748b;
+    font-weight: 600;
+    margin-bottom: 1.25rem;
+  }
+
+  .hub-btn {
+    display: block;
+    text-align: center;
+    padding: 0.75rem 1rem;
+    border-radius: 6px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background-color 0.15s ease;
+  }
+
+  .primary-btn {
+    background-color: var(--color-primary, #e10600);
+    color: #ffffff;
+  }
+
+  .primary-btn:hover {
+    background-color: #b80500;
+  }
+</style>

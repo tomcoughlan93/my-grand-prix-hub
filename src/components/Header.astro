@@ -1,0 +1,182 @@
+---
+// src/components/Header.astro
+---
+
+<header class="site-header">
+  <div class="header-container">
+    <!-- Brand Logo -->
+    <a href="/" class="logo">
+      <span class="logo-accent">MY GRAND PRIX</span> HUB
+    </a>
+
+    <!-- Navigation Menu -->
+    <nav class="nav-menu">
+      <a href="/" class="nav-link">Home</a>
+      <a href="/latest-news" class="nav-link">Latest News</a>
+
+      <!-- Circuits & Live Dropdown -->
+      <div class="dropdown">
+        <a href="/circuits-live" class="nav-link">Circuits & Live <span class="arrow">▾</span></a>
+        <div class="dropdown-menu">
+          <a href="/circuits-live/circuit-guides">Circuit Guides</a>
+          <a href="/circuits-live/grandstands">Grandstand Reviews</a>
+          <a href="/circuits-live/city-guides">City & Fan Guides</a>
+        </div>
+      </div>
+
+      <!-- Championship Dropdown -->
+      <div class="dropdown">
+        <a href="/championship" class="nav-link">Championship <span class="arrow">▾</span></a>
+        <div class="dropdown-menu">
+          <a href="/championship/standings">Current Standings</a>
+          <a href="/championship/teams-drivers">Teams & Drivers</a>
+          <a href="/championship/calendar">2026 Calendar</a>
+        </div>
+      </div>
+
+      <!-- Other Pillars -->
+      <a href="/travel-and-tickets" class="nav-link">Travel & Tickets</a>
+      <a href="/tv-guides" class="nav-link">Where to Watch</a>
+      <a href="/creators" class="nav-link">Creators</a>
+      <a href="/live" class="nav-live-link">
+  <span class="nav-live-pulse"></span>
+  LIVE
+</a>
+    </nav>
+  </div>
+</header>
+
+<style>
+  .site-header {
+    background-color: #111827;
+    color: #ffffff;
+    padding: 1rem 1.5rem;
+    border-bottom: 3px solid #e10600; /* F1 Red border */
+    position: relative;
+    z-index: 50;
+  }
+
+  .header-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .logo {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #ffffff;
+    text-decoration: none;
+    letter-spacing: -0.02em;
+  }
+
+  .logo-accent {
+    color: #e10600;
+  }
+
+  .nav-menu {
+    display: flex;
+    gap: 1.75rem;
+    align-items: center;
+  }
+
+  .nav-link {
+    color: #e5e7eb;
+    text-decoration: none;
+    font-size: 0.95rem;
+    font-weight: 600;
+    padding: 0.5rem 0;
+    transition: color 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .nav-link:hover {
+    color: #ffffff;
+  }
+
+  .arrow {
+    font-size: 0.75rem;
+    color: #9ca3af;
+  }
+
+  /* Dropdown styling */
+  .dropdown {
+    position: relative;
+    display: inline-block;
+  }
+
+  .dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background-color: #1f2937;
+    min-width: 220px;
+    box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.4);
+    border: 1px solid #374151;
+    border-radius: 6px;
+    padding: 0.5rem 0;
+    z-index: 100;
+  }
+
+  .dropdown-menu a {
+    color: #d1d5db;
+    padding: 0.65rem 1.2rem;
+    text-decoration: none;
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: background-color 0.15s ease, color 0.15s ease;
+  }
+
+  .dropdown-menu a:hover {
+    background-color: #374151;
+    color: #ffffff;
+  }
+
+  /* Hover state to show dropdown menu */
+  .dropdown:hover .dropdown-menu {
+    display: block;
+  }
+  .nav-live-link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(239, 68, 68, 0.15); /* Semi-transparent red */
+    border: 1px solid rgba(239, 68, 68, 0.4);
+    color: #ef4444; /* Bright red text */
+    padding: 0.4rem 0.85rem;
+    border-radius: 6px;
+    font-weight: 800;
+    text-decoration: none;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.05em;
+    transition: all 0.2s ease;
+  }
+
+  .nav-live-link:hover {
+    background: rgba(239, 68, 68, 0.25);
+    color: #f87171;
+    border-color: rgba(239, 68, 68, 0.6);
+  }
+
+  .nav-live-pulse {
+    width: 8px;
+    height: 8px;
+    background: #ef4444;
+    border-radius: 50%;
+    box-shadow: 0 0 8px #ef4444;
+    animation: navPulse 1.5s infinite;
+  }
+
+  @keyframes navPulse {
+    0% { transform: scale(0.95); opacity: 1; }
+    50% { transform: scale(1.2); opacity: 0.5; }
+    100% { transform: scale(0.95); opacity: 1; }
+  }
+</style>
