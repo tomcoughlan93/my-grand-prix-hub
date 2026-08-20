@@ -66,16 +66,59 @@ const creators = [
     ]
   },
   {
-    name: "Up to Speed",
+    name: "Up To Speed",
     type: "Podcast",
-    categories: ["Podcast"],
-    host: "F1 Creators",
-    description: "Your quick, easily digestible recap of everything happening in the fast-paced world of Formula 1. Perfect for catching up on the go.",
-    tags: ["Recap", "News", "Accessible"],
-    socials: null,
+    categories: ["Podcast", "YouTube"],
+    host: "Will Buxton, Naomi Schiff, David Coulthard & Jolie Sharpe",
+    description: "Step inside sport's greatest soap opera. This powerhouse lineup offers razor-sharp reaction, behind-the-scenes insight, and blockbuster interviews, providing an unfiltered look at paddock gossip.",
+    tags: ["Expert", "News", "Paddock"],
+    socials: { instagram: "https://instagram.com/uptospeedshow" },
     links: [
-      { name: "Apple", url: "https://podcasts.apple.com/search?term=Up%20to%20Speed%20F1", style: "pod" },
-      { name: "Spotify", url: "https://open.spotify.com/search/Up%20to%20Speed%20F1/podcasts", style: "spot" }
+      { name: "YouTube", url: "https://www.youtube.com/@uptospeedshow", style: "yt" },
+      { name: "Apple", url: "https://podcasts.apple.com/gb/podcast/up-to-speed/id1875990109", style: "pod" },
+      { name: "Global", url: "https://global.com/podcast/up-to-speed/", style: "default" }
+    ]
+  },
+  {
+    name: "The Fast and The Curious",
+    type: "Podcast",
+    categories: ["Podcast", "YouTube"],
+    host: "Greg James, Betty Glover & Christian Hewgill",
+    description: "A highly entertaining, fan-first podcast that takes you inside the fascinating world of Formula 1. Less about deep technical analysis and more about the human side of the sport, bringing out driver personalities with brilliant humor.",
+    tags: ["Entertainment", "Interviews", "Humor"],
+    socials: { twitter: "https://twitter.com/fastcuriouspod", instagram: "https://instagram.com/fastcuriouspod" },
+    links: [
+      { name: "YouTube", url: "https://www.youtube.com/@fastcuriouspod", style: "yt" },
+      { name: "Apple", url: "https://podcasts.apple.com/gb/podcast/the-fast-and-the-curious/id1672650209", style: "pod" },
+      { name: "Spotify", url: "https://open.spotify.com/show/2vF69zJOhZz4pU3vjTqL5B", style: "spot" }
+    ]
+  },
+  {
+    name: "The Red Flags Podcast",
+    type: "Podcast",
+    categories: ["Podcast", "YouTube"],
+    host: "Brian Muller & Matt Elisofon",
+    description: "A uniquely American, highly comedic take on F1. Brian and Matt dive into the drama, the memes, and the absurdity of the sport. Perfect for fans who love the Drive to Survive reality-TV aspect of F1.",
+    tags: ["Comedy", "Culture", "Entertainment"],
+    socials: { twitter: "https://twitter.com/TheRedFlagsPod", instagram: "https://instagram.com/theredflagspod" },
+    links: [
+      { name: "YouTube", url: "https://www.youtube.com/@theredflagspod", style: "yt" },
+      { name: "Apple", url: "https://podcasts.apple.com/us/podcast/the-red-flags-podcast/id1588691515", style: "pod" },
+      { name: "Spotify", url: "https://open.spotify.com/show/065Z62Y137J6Yg7NnOq2kF", style: "spot" }
+    ]
+  },
+  {
+    name: "Pitstop",
+    type: "Podcast",
+    categories: ["Podcast", "YouTube"],
+    host: "Jake Boys & Fabio Bocca",
+    description: "Bringing incredible energy and a casual 'chat with your mates' vibe. Jake and Fabio have taken the F1 world by storm, scoring interviews with team principals and drivers while keeping things incredibly fun and accessible.",
+    tags: ["Accessible", "Culture", "Fun"],
+    socials: { twitter: "https://twitter.com/pitstop", instagram: "https://instagram.com/pitstop" },
+    links: [
+      { name: "YouTube", url: "https://www.youtube.com/@PitstopPodcast", style: "yt" },
+      { name: "Apple", url: "https://podcasts.apple.com/gb/podcast/pitstop/id1608933256", style: "pod" },
+      { name: "Spotify", url: "https://open.spotify.com/show/3u48UqjHnS1gV7hAxyyG8N", style: "spot" }
     ]
   },
   {
@@ -126,7 +169,7 @@ const creators = [
     tags: ["Independent", "Debate", "Fun"],
     socials: { twitter: "https://twitter.com/MissedApexF1", instagram: "https://instagram.com/missedapexf1" },
     links: [
-      { name: "YouTube", url: "https://www.youtube.com/@MissedApexPodcast", style: "yt" },
+      { name: "YouTube", url: "https://www.youtube.com/@missedapexf1", style: "yt" },
       { name: "Apple", url: "https://podcasts.apple.com/us/podcast/missed-apex-f1-podcast/id1156681023", style: "pod" },
       { name: "Spotify", url: "https://open.spotify.com/show/4zM4YXXNtc9wA4P2a3j0b1", style: "spot" }
     ]
@@ -335,23 +378,23 @@ const creators = [
                     {link.name}
                   </a>
                 ))}
-                
-                <!-- SOCIAL ICONS -->
-                {creator.socials && (
-                  <div class="social-icons">
-                    {creator.socials.twitter && (
-                      <a href={creator.socials.twitter} target="_blank" title="Twitter / X" class="icon-link">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-                      </a>
-                    )}
-                    {creator.socials.instagram && (
-                      <a href={creator.socials.instagram} target="_blank" title="Instagram" class="icon-link">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
-                      </a>
-                    )}
-                  </div>
-                )}
               </div>
+              
+              <!-- SOCIAL ICONS -->
+              {creator.socials && (
+                <div class="social-icons">
+                  {creator.socials.twitter && (
+                    <a href={creator.socials.twitter} target="_blank" title="Twitter / X" class="icon-link">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                    </a>
+                  )}
+                  {creator.socials.instagram && (
+                    <a href={creator.socials.instagram} target="_blank" title="Instagram" class="icon-link">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+                    </a>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         ))}
@@ -757,13 +800,16 @@ const creators = [
     border-top: 1px solid #334155; 
     background: rgba(15, 23, 42, 0.3);
     border-radius: 0 0 12px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
   }
   
   .links-row { 
     display: flex; 
     gap: 0.75rem; 
     flex-wrap: wrap; 
-    align-items: center;
+    width: 100%;
   }
   
   .btn-link { 
@@ -792,7 +838,8 @@ const creators = [
   .social-icons {
     display: flex;
     gap: 0.5rem;
-    margin-left: auto;
+    justify-content: flex-end;
+    width: 100%;
   }
 
   .icon-link {

@@ -81,8 +81,8 @@ const getStatusColor = (status: string) => {
           <div class="currency-switcher">
             <label for="currency-select">Currency:</label>
             <select id="currency-select" class="currency-dropdown">
-              <option value="EUR">EUR (€)</option>
               <option value="GBP">GBP (£)</option>
+              <option value="EUR">EUR (€)</option>
               <option value="USD">USD ($)</option>
             </select>
           </div>
@@ -103,7 +103,7 @@ const getStatusColor = (status: string) => {
                   data-gbp={tier.priceFromGBP} 
                   data-usd={tier.priceFromUSD}
                 >
-                  €{tier.priceFromEUR}
+                  £{tier.priceFromGBP}
                 </strong>
               </div>
               <p class="tier-desc">{tier.description}</p>
