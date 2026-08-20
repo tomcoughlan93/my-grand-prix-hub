@@ -8,7 +8,7 @@ async function generateRacePreview() {
   try {
     // 1. The System Instruction: This sets the strict brand guidelines
     const model = genAI.getGenerativeModel({ 
-      model: "gemini-3.5-flash",
+      model: "gemini-2.5-flash",
       systemInstruction: `You are the lead editorial voice for 'My Grand Prix Hub' and expert of all things Formula 1 and motor racing.. 
       TONE OF VOICE RULES:
       - Conversational, energetic, and welcoming. Write like a passionate fan speaking to other fans.
