@@ -1,0 +1,38 @@
+name: Generate Monday Race Review
+
+on:
+  schedule:
+    # Runs at 08:00 UTC every Monday (1)
+    - cron: '0 8 * * 1'
+  workflow_dispatch:
+
+jobs:
+  write-and-publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write 
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Run AI Review Generator
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: node generate-review.js
+
+      - name: Commit and Push Article
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add src/content/news/
+          git commit -m "Editorial: Add Automated Monday Race Review" || echo "No changes to commit"
+          git push
