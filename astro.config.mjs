@@ -4,7 +4,8 @@ import { defineConfig } from 'astro/config';
 
 export default defineConfig({
   // 2. Change this from 'server' to 'static'
-  output: 'static', 
+ site: 'https://my-grand-prix-hub.pages.dev',
+ output: 'static', 
   
   // 3. Delete the adapter line completely
   

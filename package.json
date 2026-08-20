@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@astrojs/cloudflare": "^14.2.2",
+    "@google/generative-ai": "^0.24.1",
     "@tinacms/astro": "^0.6.1",
     "astro": "^7.2.1",
     "fast-xml-parser": "^5.10.1",

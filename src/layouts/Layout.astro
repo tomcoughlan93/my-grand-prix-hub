@@ -6,13 +6,22 @@ import Header from '../components/Header.astro';
 interface Props {
   title?: string;
   description?: string;
+  image?: string;
+  type?: 'website' | 'article';
 }
 
 // 2. Destructure Props with Fallback Default Strings
 const { 
   title = "My Grand Prix Hub | F1 Circuit, Travel & Viewing Guides", 
-  description = "Your ultimate fan guide for F1 travel logistics, grandstand reviews, trackside city guides, and broadcast options." 
+  description = "Your ultimate fan guide for F1 travel logistics, grandstand reviews, trackside city guides, and broadcast options.",
+  image = "/default-og-image.jpg",
+  type = "website"
 } = Astro.props;
+
+// 3. Construct Absolute URLs for SEO and Social Sharing
+// This ensures platforms like X and WhatsApp can properly fetch the images
+const canonicalURL = new URL(Astro.url.pathname, Astro.site || Astro.url.origin);
+const socialImageURL = new URL(image, Astro.site || Astro.url.origin);
 ---
 
 <!DOCTYPE html>
@@ -20,9 +29,28 @@ const {
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content={description} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="generator" content={Astro.generator} />
+    
+    <!-- Primary Meta Tags -->
     <title>{title}</title>
+    <meta name="title" content={title} />
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalURL} />
+
+    <!-- Open Graph / Facebook / WhatsApp -->
+    <meta property="og:type" content={type} />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={socialImageURL} />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content={canonicalURL} />
+    <meta property="twitter:title" content={title} />
+    <meta property="twitter:description" content={description} />
+    <meta property="twitter:image" content={socialImageURL} />
   </head>
   <body>
     <!-- Persistent Site Header -->

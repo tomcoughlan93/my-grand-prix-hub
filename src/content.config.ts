@@ -91,6 +91,17 @@ const teams = defineCollection({
   }),
 });
 
+// 9. AI News & Previews Collection
+const news = defineCollection({
+  loader: glob({ pattern: '**/[^_]*.{md,mdx}', base: './src/content/news' }),
+  schema: z.object({
+    title: z.string(),
+    description: z.string(),
+    date: z.string().or(z.date()),
+    author: z.string().default('AI Desk'),
+  }),
+});
+
 // EXPORT ALL COLLECTIONS TOGETHER
 export const collections = {
   circuits,
@@ -101,4 +112,5 @@ export const collections = {
   creators,
   drivers,
   teams,
+  news, // <-- Added here!
 };

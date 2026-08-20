@@ -5,12 +5,30 @@
 <header class="site-header">
   <div class="header-container">
     <!-- Brand Logo -->
-    <a href="/" class="logo">
-      <span class="logo-accent">MY GRAND PRIX</span> HUB
-    </a>
+<a href="/" class="logo-container">
+  <svg width="32" height="24" viewBox="0 0 32 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <!-- Red Forward Slash -->
+    <path d="M10 2L2 22H10L18 2H10Z" fill="#e10600"/>
+    <!-- Gray/White Slashes -->
+    <path d="M20 2L14 14H20L26 2H20Z" fill="#e5e7eb"/>
+    <path d="M28 2L24 10H30L34 2H28Z" fill="#94a3b8"/>
+  </svg>
+  <span class="logo-text italic-shift">
+    <span class="logo-accent">MY GRAND PRIX</span> HUB
+  </span>
+</a>
+
+    <!-- Mobile Menu Toggle Button -->
+    <button id="mobile-menu-toggle" class="mobile-toggle" aria-label="Toggle navigation menu">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="3" y1="12" x2="21" y2="12"></line>
+        <line x1="3" y1="6" x2="21" y2="6"></line>
+        <line x1="3" y1="18" x2="21" y2="18"></line>
+      </svg>
+    </button>
 
     <!-- Navigation Menu -->
-    <nav class="nav-menu">
+    <nav id="nav-menu" class="nav-menu">
       <a href="/" class="nav-link">Home</a>
       <a href="/latest-news" class="nav-link">Latest News</a>
 
@@ -39,12 +57,36 @@
       <a href="/tv-guides" class="nav-link">Where to Watch</a>
       <a href="/creators" class="nav-link">Creators</a>
       <a href="/live" class="nav-live-link">
-  <span class="nav-live-pulse"></span>
-  LIVE
-</a>
+        <span class="nav-live-pulse"></span>
+        LIVE
+      </a>
     </nav>
   </div>
 </header>
+
+<script is:inline>
+  function setupMobileMenu() {
+    const toggle = document.getElementById('mobile-menu-toggle');
+    const menu = document.getElementById('nav-menu');
+    
+    if (toggle && menu) {
+      // Clone and replace to prevent duplicate event listeners across Astro view transitions
+      const newToggle = toggle.cloneNode(true);
+      toggle.parentNode.replaceChild(newToggle, toggle);
+      
+      newToggle.addEventListener('click', () => {
+        menu.classList.toggle('is-open');
+        
+        // Optional: Animate the hamburger to an 'X' (by toggling a class)
+        newToggle.classList.toggle('menu-active');
+      });
+    }
+  }
+
+  // Run on initial load and when navigating between pages
+  document.addEventListener('DOMContentLoaded', setupMobileMenu);
+  document.addEventListener('astro:page-load', setupMobileMenu);
+</script>
 
 <style>
   .site-header {
@@ -64,16 +106,41 @@
     align-items: center;
   }
 
-  .logo {
-    font-size: 1.25rem;
-    font-weight: 800;
-    color: #ffffff;
+.logo-container {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem; /* Space between the SVG icon and the text */
     text-decoration: none;
-    letter-spacing: -0.02em;
+  }
+
+  .logo-text {
+    font-size: 1.25rem;
+    font-weight: 900;
+    color: #ffffff;
+    letter-spacing: -0.03em;
+    display: flex;
+    gap: 0.3rem;
   }
 
   .logo-accent {
     color: #e10600;
+  }
+
+  /* Only needed if you chose Option 2 */
+  .italic-shift {
+    font-style: italic;
+    transform: skewX(-5deg);
+  }
+
+  /* Hamburger Button - Hidden on Desktop */
+  .mobile-toggle {
+    display: none;
+    background: transparent;
+    border: none;
+    color: #ffffff;
+    cursor: pointer;
+    padding: 0.25rem;
+    z-index: 60; /* Keeps it above the menu */
   }
 
   .nav-menu {
@@ -103,7 +170,7 @@
     color: #9ca3af;
   }
 
-  /* Dropdown styling */
+  /* Dropdown styling (Desktop) */
   .dropdown {
     position: relative;
     display: inline-block;
@@ -142,6 +209,7 @@
   .dropdown:hover .dropdown-menu {
     display: block;
   }
+
   .nav-live-link {
     display: flex;
     align-items: center;
@@ -178,5 +246,72 @@
     0% { transform: scale(0.95); opacity: 1; }
     50% { transform: scale(1.2); opacity: 0.5; }
     100% { transform: scale(0.95); opacity: 1; }
+  }
+
+  /* ========================================================
+     MOBILE RESPONSIVE STYLES
+     Triggers at 1024px (Tablets & Phones) to prevent crowding
+     ======================================================== */
+  @media (max-width: 1024px) {
+    .mobile-toggle {
+      display: block; /* Show hamburger icon */
+    }
+
+    .nav-menu {
+      /* Hide by default, setup for absolute positioning */
+      display: none; 
+      position: absolute;
+      top: 100%;
+      left: 0;
+      width: 100%;
+      background-color: #111827;
+      flex-direction: column;
+      align-items: flex-start;
+      padding: 1.5rem;
+      gap: 1.25rem;
+      border-bottom: 3px solid #e10600;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Class applied by JavaScript when toggle is clicked */
+    .nav-menu.is-open {
+      display: flex;
+    }
+
+    .nav-link {
+      font-size: 1.1rem;
+      padding: 0;
+    }
+
+    .dropdown {
+      width: 100%;
+    }
+
+    /* On mobile, instead of hovering, display dropdown items indented beneath the main link */
+    .dropdown-menu {
+      position: static;
+      display: block; /* Always visible beneath parent on mobile */
+      background: transparent;
+      box-shadow: none;
+      border: none;
+      border-left: 2px solid #374151; /* Nice indented line effect */
+      margin-top: 0.75rem;
+      margin-left: 0.5rem;
+      padding: 0;
+      border-radius: 0;
+    }
+    
+    .dropdown-menu a {
+      padding: 0.5rem 1rem;
+      font-size: 0.95rem;
+    }
+
+    .arrow {
+      display: none; /* Hide the arrow since it's always open on mobile */
+    }
+
+    .nav-live-link {
+      margin-top: 0.5rem;
+    }
   }
 </style>
