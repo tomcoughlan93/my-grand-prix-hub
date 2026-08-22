@@ -3,5 +3,10 @@
     "first": "RUS",
     "second": "LEC",
     "third": "NOR"
+  },
+  "Session4": {
+    "first": "NOR",
+    "second": "RUS",
+    "third": "ANT"
   }
 }
