@@ -132,21 +132,39 @@ if (nextRace) {
   }
 }
 
-// INJECT AUTOMATED FASTF1 RESULTS FROM GITHUB ACTIONS
+// INJECT AUTOMATED FASTF1 RESULTS (Time-Gated to Completed Sessions Only)
 if (nextRace) {
   nextRace.sessionResults = nextRace.sessionResults || {};
   
-  // Map FastF1's official shortcodes ('FP1', 'SQ', 'S', etc.) to our Hub keys
-  nextRace.sessionResults.fp1 = liveResults['FP1'] || nextRace.sessionResults.fp1;
-  
-  // FP2 is 'SQ' (Sprint Quali) on sprint weekends, or 'FP2' on normal weekends
-  nextRace.sessionResults.fp2 = liveResults['SQ'] || liveResults['FP2'] || nextRace.sessionResults.fp2;
-  
-  // FP3 is 'S' (Sprint Race) on sprint weekends, or 'FP3' on normal weekends
-  nextRace.sessionResults.fp3 = liveResults['S'] || liveResults['FP3'] || nextRace.sessionResults.fp3;
-  
-  nextRace.sessionResults.quali = liveResults['Q'] || nextRace.sessionResults.quali;
-  nextRace.sessionResults.race = liveResults['R'] || nextRace.sessionResults.race;
+  const hasSessionFinished = (isoString) => {
+    // Adds a 1-hour buffer to the start time before looking for results
+    return (new Date(isoString).getTime() + (60 * 60 * 1000)) < now.getTime();
+  };
+
+  // Session 1: FP1
+  if (hasSessionFinished(nextRace.sessions.fp1)) {
+    nextRace.sessionResults.fp1 = liveResults['Session1'] || nextRace.sessionResults.fp1;
+  }
+
+  // Session 2: Sprint Quali (or FP2)
+  if (hasSessionFinished(nextRace.sessions.fp2)) {
+    nextRace.sessionResults.fp2 = liveResults['Session2'] || nextRace.sessionResults.fp2;
+  }
+
+  // Session 3: Sprint Race (or FP3)
+  if (hasSessionFinished(nextRace.sessions.fp3)) {
+    nextRace.sessionResults.fp3 = liveResults['Session3'] || nextRace.sessionResults.fp3;
+  }
+
+  // Session 4: Qualifying
+  if (hasSessionFinished(nextRace.sessions.quali)) {
+    nextRace.sessionResults.quali = liveResults['Session4'] || nextRace.sessionResults.quali;
+  }
+
+  // Session 5: Grand Prix Race
+  if (hasSessionFinished(nextRace.sessions.race)) {
+    nextRace.sessionResults.race = liveResults['Session5'] || nextRace.sessionResults.race;
+  }
 }
 
 // FETCH LIVE WEATHER FOR NEXT RACE

@@ -4,10 +4,10 @@ import os
 
 fastf1.Cache.enable_cache('cache') 
 
-def get_top_3(year, location, session_code):
+def get_top_3(year, location, session_num):
     try:
-        # FastF1 requires exact codes: FP1, FP2, FP3, SQ (Sprint Quali), S (Sprint), Q, R
-        session = fastf1.get_session(year, location, session_code)
+        # Requesting by chronological number (1-5) avoids all Sprint naming mismatches
+        session = fastf1.get_session(year, location, session_num)
         session.load(telemetry=False, weather=False, messages=False)
         
         results = session.results.head(3)['Abbreviation'].tolist()
@@ -15,25 +15,23 @@ def get_top_3(year, location, session_code):
         if len(results) == 3:
             return {"first": results[0], "second": results[1], "third": results[2]}
     except Exception:
-        # Fails silently if the session hasn't happened yet or doesn't exist
+        # Fails silently if the session hasn't happened yet
         pass
     
     return None
 
 def update_results():
-    year = 2024 # Target 2024 for testing - update to 2026 later!
+    year = 2026
     location = 'Zandvoort'
     
     live_results = {}
     
-    # We check ALL possible sessions. If they exist, they get added!
-    sessions_to_check = ['FP1', 'FP2', 'FP3', 'SQ', 'S', 'Q', 'R']
-    
-    for sess in sessions_to_check:
-        podium = get_top_3(year, location, sess)
+    # 1=FP1, 2=FP2/SQ, 3=FP3/Sprint, 4=Quali, 5=Race
+    for i in range(1, 6):
+        podium = get_top_3(year, location, i)
         if podium:
-            live_results[sess] = podium
-            print(f"✅ Added {sess}: {podium}")
+            live_results[f"Session{i}"] = podium
+            print(f"✅ Added Session {i}: {podium}")
 
     output_path = 'src/data/liveResults.json'
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
