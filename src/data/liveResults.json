@@ -1,7 +1,27 @@
 {
-  "Sprint": {
-    "first": "RUS",
-    "second": "LEC",
-    "third": "NOR"
+  "FP1": {
+    "first": "NOR",
+    "second": "VER",
+    "third": "LEC"
+  },
+  "FP2": {
+    "first": "NOR",
+    "second": "VER",
+    "third": "LEC"
+  },
+  "FP3": {
+    "first": "NOR",
+    "second": "VER",
+    "third": "LEC"
+  },
+  "Q": {
+    "first": "NOR",
+    "second": "VER",
+    "third": "PIA"
+  },
+  "R": {
+    "first": "NOR",
+    "second": "VER",
+    "third": "LEC"
   }
 }
