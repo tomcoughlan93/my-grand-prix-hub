@@ -136,10 +136,15 @@ if (nextRace) {
 if (nextRace) {
   nextRace.sessionResults = nextRace.sessionResults || {};
   
-  // Maps the Python JSON output keys to the active race object safely
+  // Map FastF1's official shortcodes ('FP1', 'SQ', 'S', etc.) to our Hub keys
   nextRace.sessionResults.fp1 = liveResults['FP1'] || nextRace.sessionResults.fp1;
-  nextRace.sessionResults.fp2 = liveResults['Sprint Qualifying'] || liveResults['Practice 2'] || nextRace.sessionResults.fp2;
-  nextRace.sessionResults.fp3 = liveResults['Sprint'] || liveResults['Practice 3'] || nextRace.sessionResults.fp3;
+  
+  // FP2 is 'SQ' (Sprint Quali) on sprint weekends, or 'FP2' on normal weekends
+  nextRace.sessionResults.fp2 = liveResults['SQ'] || liveResults['FP2'] || nextRace.sessionResults.fp2;
+  
+  // FP3 is 'S' (Sprint Race) on sprint weekends, or 'FP3' on normal weekends
+  nextRace.sessionResults.fp3 = liveResults['S'] || liveResults['FP3'] || nextRace.sessionResults.fp3;
+  
   nextRace.sessionResults.quali = liveResults['Q'] || nextRace.sessionResults.quali;
   nextRace.sessionResults.race = liveResults['R'] || nextRace.sessionResults.race;
 }
