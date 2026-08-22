@@ -1,6 +1,10 @@
 ---
 // src/pages/championship/calendar.astro
 import Layout from '@/layouts/Layout.astro';
+import liveResultsData from '@/data/liveResults.json';
+
+// Tell TypeScript to expect dynamic string keys in this JSON file
+const liveResults = liveResultsData as Record<string, any>;
 
 interface Podium {
   first: string;
@@ -40,7 +44,7 @@ interface Race {
       locality: string;
       country: string;
       timezone: string;
-      coordinates: { lat: number; lon: number; }; // NEW: Exact coordinates
+      coordinates: { lat: number; lon: number; }; 
     };
   };
   date: string;
@@ -67,11 +71,17 @@ const CALENDAR: Race[] = [
   { season: "2026", round: "9", raceName: "British Grand Prix", tyresAnnounced: true, tyres: ["C1", "C2", "C3"], Circuit: { circuitName: "Silverstone Circuit", Location: { locality: "Silverstone", country: "UK", timezone: "Europe/London", coordinates: { lat: 52.0786, lon: -1.01694 } } }, date: "2026-07-05", time: "14:00:00Z", sessions: { fp1: "2026-07-03T11:30:00Z", fp2: "2026-07-03T15:00:00Z", fp3: "2026-07-04T10:30:00Z", quali: "2026-07-04T14:00:00Z", race: "2026-07-05T14:00:00Z" }, podium: { first: "LEC", second: "RUS", third: "HAM" } },
   { season: "2026", round: "10", raceName: "Belgian Grand Prix", tyresAnnounced: true, tyres: ["C2", "C3", "C4"], Circuit: { circuitName: "Circuit de Spa-Francorchamps", Location: { locality: "Spa", country: "Belgium", timezone: "Europe/Brussels", coordinates: { lat: 50.4372, lon: 5.97139 } } }, date: "2026-07-19", time: "13:00:00Z", sessions: { fp1: "2026-07-17T11:30:00Z", fp2: "2026-07-17T15:00:00Z", fp3: "2026-07-18T10:30:00Z", quali: "2026-07-18T14:00:00Z", race: "2026-07-19T13:00:00Z" }, podium: { first: "ANT", second: "LEC", third: "VER" } },
   { season: "2026", round: "11", raceName: "Hungarian Grand Prix", tyresAnnounced: true, tyres: ["C3", "C4", "C5"], Circuit: { circuitName: "Hungaroring", Location: { locality: "Budapest", country: "Hungary", timezone: "Europe/Budapest", coordinates: { lat: 47.5789, lon: 19.2486 } } }, date: "2026-07-26", time: "13:00:00Z", sessions: { fp1: "2026-07-24T11:30:00Z", fp2: "2026-07-24T15:00:00Z", fp3: "2026-07-25T10:30:00Z", quali: "2026-07-25T14:00:00Z", race: "2026-07-26T13:00:00Z" }, podium: { first: "NOR", second: "VER", third: "ANT" } },
-  { season: "2026", round: "12", raceName: "Dutch Grand Prix", tyresAnnounced: true, tyres: ["C2", "C3", "C4"], Circuit: { circuitName: "Circuit Park Zandvoort", Location: { locality: "Zandvoort", country: "Netherlands", timezone: "Europe/Amsterdam", coordinates: { lat: 52.3888, lon: 4.54092 } } }, date: "2026-08-23", time: "13:00:00Z", sessions: { fp1: "2026-08-21T10:30:00Z", fp2: "2026-08-21T14:00:00Z", fp3: "2026-08-22T09:30:00Z", quali: "2026-08-22T13:00:00Z", race: "2026-08-23T13:00:00Z" } },
-  { season: "2026", round: "13", raceName: "Italian Grand Prix", tyresAnnounced: true, tyres: ["C3", "C4", "C5"], Circuit: { circuitName: "Autodromo Nazionale Monza", Location: { locality: "Monza", country: "Italy", timezone: "Europe/Rome", coordinates: { lat: 45.6156, lon: 9.28111 } } }, date: "2026-09-06", time: "13:00:00Z", sessions: { fp1: "2026-09-04T11:30:00Z", fp2: "2026-09-04T15:00:00Z", fp3: "2026-09-05T10:30:00Z", quali: "2026-09-05T14:00:00Z", race: "2026-09-06T13:00:00Z" } },
-  { season: "2026", round: "14", raceName: "Madrid Grand Prix", tyresAnnounced: true, tyres: ["C2", "C3", "C4"], Circuit: { circuitName: "IFEMA Madrid", Location: { locality: "Madrid", country: "Spain", timezone: "Europe/Madrid", coordinates: { lat: 40.4667, lon: -3.6167 } } }, date: "2026-09-13", time: "13:00:00Z", sessions: { fp1: "2026-09-11T11:30:00Z", fp2: "2026-09-11T15:00:00Z", fp3: "2026-09-12T10:30:00Z", quali: "2026-09-12T14:00:00Z", race: "2026-09-13T13:00:00Z" } },
-  { season: "2026", round: "15", raceName: "Azerbaijan Grand Prix", tyresAnnounced: false, tyres: ["C3", "C4", "C5"], Circuit: { circuitName: "Baku City Circuit", Location: { locality: "Baku", country: "Azerbaijan", timezone: "Asia/Baku", coordinates: { lat: 40.3725, lon: 49.8533 } } }, date: "2026-09-26", time: "11:00:00Z", sessions: { fp1: "2026-09-24T09:30:00Z", fp2: "2026-09-24T13:00:00Z", fp3: "2026-09-25T09:30:00Z", quali: "2026-09-25T13:00:00Z", race: "2026-09-26T11:00:00Z" } },
-  { season: "2026", round: "16", raceName: "Singapore Grand Prix", tyresAnnounced: false, tyres: ["C3", "C4", "C5"], Circuit: { circuitName: "Marina Bay Street Circuit", Location: { locality: "Marina Bay", country: "Singapore", timezone: "Asia/Singapore", coordinates: { lat: 1.2914, lon: 103.864 } } }, date: "2026-10-11", time: "12:00:00Z", sessions: { fp1: "2026-10-09T09:30:00Z", fp2: "2026-10-09T13:00:00Z", fp3: "2026-10-10T09:30:00Z", quali: "2026-10-10T13:00:00Z", race: "2026-10-11T12:00:00Z" } },
+  
+  // Dutch GP - Sprint Toggled, explicit offsets
+  { season: "2026", round: "12", raceName: "Dutch Grand Prix", isSprint: true, tyresAnnounced: true, tyres: ["C2", "C3", "C4"], Circuit: { circuitName: "Circuit Park Zandvoort", Location: { locality: "Zandvoort", country: "Netherlands", timezone: "Europe/Amsterdam", coordinates: { lat: 52.3888, lon: 4.54092 } } }, date: "2026-08-23", time: "15:00:00+02:00", sessions: { fp1: "2026-08-21T12:30:00+02:00", fp2: "2026-08-21T16:00:00+02:00", fp3: "2026-08-22T11:30:00+02:00", quali: "2026-08-22T16:00:00+02:00", race: "2026-08-23T15:00:00+02:00" } },
+  
+  { season: "2026", round: "13", raceName: "Italian Grand Prix", tyresAnnounced: true, tyres: ["C3", "C4", "C5"], Circuit: { circuitName: "Autodromo Nazionale Monza", Location: { locality: "Monza", country: "Italy", timezone: "Europe/Rome", coordinates: { lat: 45.6156, lon: 9.28111 } } }, date: "2026-09-06", time: "15:00:00+02:00", sessions: { fp1: "2026-09-04T13:30:00+02:00", fp2: "2026-09-04T17:00:00+02:00", fp3: "2026-09-05T12:30:00+02:00", quali: "2026-09-05T16:00:00+02:00", race: "2026-09-06T15:00:00+02:00" } },
+  { season: "2026", round: "14", raceName: "Madrid Grand Prix", tyresAnnounced: true, tyres: ["C2", "C3", "C4"], Circuit: { circuitName: "IFEMA Madrid", Location: { locality: "Madrid", country: "Spain", timezone: "Europe/Madrid", coordinates: { lat: 40.4667, lon: -3.6167 } } }, date: "2026-09-13", time: "15:00:00+02:00", sessions: { fp1: "2026-09-11T13:30:00+02:00", fp2: "2026-09-11T17:00:00+02:00", fp3: "2026-09-12T12:30:00+02:00", quali: "2026-09-12T16:00:00+02:00", race: "2026-09-13T15:00:00+02:00" } },
+  { season: "2026", round: "15", raceName: "Azerbaijan Grand Prix", tyresAnnounced: false, tyres: ["C3", "C4", "C5"], Circuit: { circuitName: "Baku City Circuit", Location: { locality: "Baku", country: "Azerbaijan", timezone: "Asia/Baku", coordinates: { lat: 40.3725, lon: 49.8533 } } }, date: "2026-09-26", time: "15:00:00+04:00", sessions: { fp1: "2026-09-24T13:30:00+04:00", fp2: "2026-09-24T17:00:00+04:00", fp3: "2026-09-25T12:30:00+04:00", quali: "2026-09-25T16:00:00+04:00", race: "2026-09-26T15:00:00+04:00" } },
+  
+  // Singapore GP - Sprint Toggled, explicit offsets
+  { season: "2026", round: "16", raceName: "Singapore Grand Prix", isSprint: true, tyresAnnounced: false, tyres: ["C3", "C4", "C5"], Circuit: { circuitName: "Marina Bay Street Circuit", Location: { locality: "Marina Bay", country: "Singapore", timezone: "Asia/Singapore", coordinates: { lat: 1.2914, lon: 103.864 } } }, date: "2026-10-11", time: "20:00:00+08:00", sessions: { fp1: "2026-10-09T17:30:00+08:00", fp2: "2026-10-09T21:30:00+08:00", fp3: "2026-10-10T17:30:00+08:00", quali: "2026-10-10T21:00:00+08:00", race: "2026-10-11T20:00:00+08:00" } },
+  
   { season: "2026", round: "17", raceName: "United States Grand Prix", isSprint: true, tyresAnnounced: false, tyres: ["C2", "C3", "C4"], Circuit: { circuitName: "Circuit of the Americas", Location: { locality: "Austin", country: "USA", timezone: "America/Chicago", coordinates: { lat: 30.1328, lon: -97.6411 } } }, date: "2026-10-25", time: "19:00:00Z", sessions: { fp1: "2026-10-23T17:30:00Z", fp2: "2026-10-23T21:00:00Z", fp3: "2026-10-24T18:00:00Z", quali: "2026-10-24T22:00:00Z", race: "2026-10-25T19:00:00Z" } },
   { season: "2026", round: "18", raceName: "Mexico City Grand Prix", tyresAnnounced: false, tyres: ["C3", "C4", "C5"], Circuit: { circuitName: "Autódromo Hermanos Rodríguez", Location: { locality: "Mexico City", country: "Mexico", timezone: "America/Mexico_City", coordinates: { lat: 19.4042, lon: -99.0907 } } }, date: "2026-11-01", time: "20:00:00Z", sessions: { fp1: "2026-10-30T18:30:00Z", fp2: "2026-10-30T22:00:00Z", fp3: "2026-10-31T17:30:00Z", quali: "2026-10-31T21:00:00Z", race: "2026-11-01T20:00:00Z" } },
   { season: "2026", round: "19", raceName: "São Paulo Grand Prix", isSprint: true, tyresAnnounced: false, tyres: ["C2", "C3", "C4"], Circuit: { circuitName: "Autódromo José Carlos Pace", Location: { locality: "São Paulo", country: "Brazil", timezone: "America/Sao_Paulo", coordinates: { lat: -23.7036, lon: -46.6997 } } }, date: "2026-11-08", time: "17:00:00Z", sessions: { fp1: "2026-11-06T14:30:00Z", fp2: "2026-11-06T18:00:00Z", fp3: "2026-11-07T14:30:00Z", quali: "2026-11-07T18:00:00Z", race: "2026-11-08T17:00:00Z" } },
@@ -98,8 +108,43 @@ for (const race of CALENDAR) {
 
 pastRaces.reverse();
 
+// DYNAMIC NEXT SESSION COUNTDOWN
+let targetCountdown = "";
+let targetSessionName = "Next Session";
+
+if (nextRace) {
+  const sessionsList = [
+    { id: 'fp1', name: 'Practice 1', time: new Date(nextRace.sessions.fp1) },
+    { id: 'fp2', name: nextRace.isSprint ? 'Sprint Quali' : 'Practice 2', time: new Date(nextRace.sessions.fp2) },
+    { id: 'fp3', name: nextRace.isSprint ? 'Sprint Race' : 'Practice 3', time: new Date(nextRace.sessions.fp3) },
+    { id: 'quali', name: 'Qualifying', time: new Date(nextRace.sessions.quali) },
+    { id: 'race', name: 'Race', time: new Date(nextRace.sessions.race) }
+  ];
+
+  for (const session of sessionsList) {
+    // 1-hour buffer so a live session stays active on the timer
+    const sessionEndTime = new Date(session.time.getTime() + (60 * 60 * 1000)); 
+    if (sessionEndTime > now) {
+      targetCountdown = session.time.toISOString();
+      targetSessionName = session.name;
+      break;
+    }
+  }
+}
+
+// INJECT AUTOMATED FASTF1 RESULTS FROM GITHUB ACTIONS
+if (nextRace) {
+  nextRace.sessionResults = nextRace.sessionResults || {};
+  
+  // Maps the Python JSON output keys to the active race object safely
+  nextRace.sessionResults.fp1 = liveResults['FP1'] || nextRace.sessionResults.fp1;
+  nextRace.sessionResults.fp2 = liveResults['Sprint Qualifying'] || liveResults['Practice 2'] || nextRace.sessionResults.fp2;
+  nextRace.sessionResults.fp3 = liveResults['Sprint'] || liveResults['Practice 3'] || nextRace.sessionResults.fp3;
+  nextRace.sessionResults.quali = liveResults['Q'] || nextRace.sessionResults.quali;
+  nextRace.sessionResults.race = liveResults['R'] || nextRace.sessionResults.race;
+}
+
 // FETCH LIVE WEATHER FOR NEXT RACE
-// Now using the exact latitude and longitude just like CircuitWeather.astro!
 if (nextRace) {
   nextRace.weather = {
     temp: 21,
@@ -122,7 +167,7 @@ if (nextRace) {
 
         if (weatherData && weatherData.main && weatherData.weather?.length > 0) {
           const temp = Math.round(weatherData.main.temp);
-          const condition = weatherData.weather[0].main; // e.g. "Clouds", "Rain"
+          const condition = weatherData.weather[0].main; 
           const iconCode = weatherData.weather[0].icon;
 
           const getWeatherEmoji = (icon: string) => {
@@ -181,8 +226,6 @@ function getSlug(raceName: string) {
   return raceName.toLowerCase().replace(/\s+/g, '-');
 }
 
-const targetCountdown = nextRace?.sessions.fp1;
-
 const getSessionArray = (race: Race) => [
   { id: 'fp1', name: 'Practice 1', utc: race.sessions.fp1, results: race.sessionResults?.fp1 },
   { id: 'fp2', name: race.isSprint ? 'Sprint Quali' : 'Practice 2', utc: race.sessions.fp2, results: race.sessionResults?.fp2 },
@@ -194,7 +237,7 @@ const getSessionArray = (race: Race) => [
 
 <Layout 
   title="F1 Race Calendar | Schedule & Countdown | My Grand Prix Hub"
-  description="Live Formula 1 World Championship race calendar, schedule, and live countdown to Free Practice 1 of the next Grand Prix."
+  description="Live Formula 1 World Championship race calendar, schedule, and live countdown to the next Grand Prix session."
 >
   <main class="page-container">
     <header class="section-header">
@@ -244,7 +287,6 @@ const getSessionArray = (race: Race) => [
                 )}
               </div>
 
-              <!-- UPDATED BUTTONS -->
               <a href={getGuideSlug(nextRace.raceName)} class="btn-primary">
                 Circuit Guide 
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
@@ -264,7 +306,8 @@ const getSessionArray = (race: Race) => [
           <div class="countdown-card">
             <div class="countdown-header">
               <span class="pulse-dot"></span>
-              <span>Countdown to Practice 1</span>
+              <!-- Now strictly dynamic based on the active session -->
+              <span>Countdown to {targetSessionName}</span>
             </div>
             
             <div class="timer-grid" id="f1-countdown" data-target={targetCountdown}>
@@ -291,7 +334,7 @@ const getSessionArray = (race: Race) => [
           </div>
         </div>
 
-        <!-- Hero Bottom: Full Weekend Schedule & Top 3 Results -->
+        <!-- Hero Bottom: Full Weekend Schedule & Live Results -->
         <div class="hero-schedule-footer">
           <h3 class="hero-sched-title">Weekend Schedule & Live Results</h3>
           <div class="hero-sched-grid">
@@ -372,7 +415,6 @@ const getSessionArray = (race: Race) => [
                 </div>
                 
                 <div class="action-stack">
-                  <!-- UPDATED BUTTONS -->
                   <div class="card-buttons">
                     <a href={getGuideSlug(race.raceName)} class="btn-primary btn-sm" title="Circuit Guide">Guide</a>
                     <a href={`/travel-and-tickets/${getSlug(race.raceName)}`} class="btn-secondary btn-sm" title="Travel & Tickets">Tickets</a>
@@ -449,7 +491,6 @@ const getSessionArray = (race: Race) => [
                 </div>
                 
                 <div class="action-stack">
-                  <!-- UPDATED BUTTONS FOR PAST RACES -->
                   <div class="card-buttons" style="margin-bottom: 0.5rem;">
                     <a href={getGuideSlug(race.raceName)} class="btn-primary btn-sm">Guide</a>
                     <a href={`/travel-and-tickets/${getSlug(race.raceName)}`} class="btn-secondary btn-outline btn-sm">Reviews</a>
