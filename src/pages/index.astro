@@ -2,6 +2,7 @@
 // src/pages/index.astro
 import Layout from '@/layouts/Layout.astro';
 import { getCollection } from 'astro:content';
+import tinaResults from '@/content/results/current.json';
 
 const circuits = (await getCollection('circuits')) || [];
 
@@ -26,20 +27,22 @@ const structuredData = {
   ]
 };
 
-// Condensed 2026 Calendar using explicit local track time and offsets
+// Condensed 2026 Calendar with explicit track times & offsets
 const TICKER_RACES = [
   { 
+    id: "dutch-gp",
     raceName: "Dutch Grand Prix", 
     isSprint: true, 
     sessions: { 
       fp1: "2026-08-21T12:30:00+02:00", 
-      fp2: "2026-08-21T16:00:00+02:00", // Sprint Quali
-      fp3: "2026-08-22T11:30:00+02:00", // Sprint Race
+      fp2: "2026-08-21T16:00:00+02:00",
+      fp3: "2026-08-22T11:30:00+02:00",
       quali: "2026-08-22T16:00:00+02:00", 
       race: "2026-08-23T15:00:00+02:00" 
     } 
   },
   { 
+    id: "italian-gp",
     raceName: "Italian Grand Prix", 
     isSprint: false, 
     sessions: { 
@@ -51,6 +54,7 @@ const TICKER_RACES = [
     } 
   },
   { 
+    id: "madrid-gp",
     raceName: "Madrid Grand Prix", 
     isSprint: false, 
     sessions: { 
@@ -62,6 +66,7 @@ const TICKER_RACES = [
     } 
   },
   { 
+    id: "azerbaijan-gp",
     raceName: "Azerbaijan Grand Prix", 
     isSprint: false, 
     sessions: { 
@@ -73,12 +78,13 @@ const TICKER_RACES = [
     } 
   },
   { 
+    id: "singapore-gp",
     raceName: "Singapore Grand Prix", 
     isSprint: true, 
     sessions: { 
-      fp1: "2026-10-09T17:30:00+08:00", // Shifted to Night Race times
-      fp2: "2026-10-09T21:30:00+08:00", // Sprint Quali
-      fp3: "2026-10-10T17:30:00+08:00", // Sprint Race
+      fp1: "2026-10-09T17:30:00+08:00", 
+      fp2: "2026-10-09T21:30:00+08:00", 
+      fp3: "2026-10-10T17:30:00+08:00", 
       quali: "2026-10-10T21:00:00+08:00", 
       race: "2026-10-11T20:00:00+08:00" 
     } 
@@ -86,31 +92,86 @@ const TICKER_RACES = [
 ];
 
 const now = new Date();
-let nextSession = null;
+let nextSession: any = null;
+let recentFinishedRace: any = null;
 
-// Determine the very next active session
+// Helper to calculate the Monday 00:00 cutoff immediately following a Sunday race
+function getMondayCutoff(raceDate: Date) {
+  const d = new Date(raceDate);
+  // Roll to Monday 00:00:00
+  d.setDate(d.getDate() + (1 + 7 - d.getDay()) % 7 || 1);
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+
+// 1. Check if the current race has recently concluded and has results
+const currentRaceObj = TICKER_RACES[0];
+const currentRaceStartTime = new Date(currentRaceObj.sessions.race);
+const currentMondayCutoff = getMondayCutoff(currentRaceStartTime);
+
+const hasRaceResults = Boolean(tinaResults?.race?.first);
+
+if (now >= currentRaceStartTime) {
+  recentFinishedRace = {
+    raceName: currentRaceObj.raceName,
+    podium: tinaResults?.race,
+    hasResults: hasRaceResults
+  };
+}
+
+// 2. Determine whether to show Sunday post-race banner OR roll to next race
 for (const race of TICKER_RACES) {
+  const raceStartTime = new Date(race.sessions.race);
+  const mondayCutoff = getMondayCutoff(raceStartTime);
+
   const sessions = [
-    { id: 'FP1', name: 'Practice 1', time: new Date(race.sessions.fp1) },
-    { id: 'FP2', name: race.isSprint ? 'Sprint Quali' : 'Practice 2', time: new Date(race.sessions.fp2) },
-    { id: 'FP3', name: race.isSprint ? 'Sprint Race' : 'Practice 3', time: new Date(race.sessions.fp3) },
-    { id: 'QUALI', name: 'Qualifying', time: new Date(race.sessions.quali) },
-    { id: 'RACE', name: 'Race', time: new Date(race.sessions.race) }
+    { id: 'FP1', name: 'Practice 1', time: new Date(race.sessions.fp1), durationHours: 1 },
+    { id: 'FP2', name: race.isSprint ? 'Sprint Quali' : 'Practice 2', time: new Date(race.sessions.fp2), durationHours: 1 },
+    { id: 'FP3', name: race.isSprint ? 'Sprint Race' : 'Practice 3', time: new Date(race.sessions.fp3), durationHours: 1 },
+    { id: 'QUALI', name: 'Qualifying', time: new Date(race.sessions.quali), durationHours: 1 },
+    { id: 'RACE', name: 'Race', time: raceStartTime, durationHours: 2 }
   ];
 
-  for (const session of sessions) {
-    // Check if the session is still happening (adds a 1-hour buffer after start time)
-    const sessionEndTime = new Date(session.time.getTime() + (60 * 60 * 1000));
-    
-    if (sessionEndTime > now) {
-      nextSession = { 
-        race: race.raceName, 
-        name: session.name, 
-        utcTime: session.time.toISOString() 
+  // If we are before Monday 00:00 post-race, keep active weekend in focus
+  if (now < mondayCutoff) {
+    for (const session of sessions) {
+      const sessionStart = session.time.getTime();
+      const sessionEnd = sessionStart + (session.durationHours * 60 * 60 * 1000);
+
+      if (now.getTime() < sessionStart) {
+        nextSession = {
+          race: race.raceName,
+          name: session.name,
+          utcTime: session.time.toISOString(),
+          utcEndTime: new Date(sessionEnd).toISOString(),
+          state: 'UPCOMING'
+        };
+        break;
+      } else if (now.getTime() >= sessionStart && now.getTime() <= sessionEnd) {
+        nextSession = {
+          race: race.raceName,
+          name: session.name,
+          utcTime: session.time.toISOString(),
+          utcEndTime: new Date(sessionEnd).toISOString(),
+          state: 'LIVE'
+        };
+        break;
+      }
+    }
+
+    // Race is finished, but we haven't reached Monday yet
+    if (!nextSession && now.getTime() > raceStartTime.getTime()) {
+      nextSession = {
+        race: race.raceName,
+        name: 'Grand Prix Race',
+        utcTime: raceStartTime.toISOString(),
+        utcEndTime: new Date(raceStartTime.getTime() + (2 * 60 * 60 * 1000)).toISOString(),
+        state: hasRaceResults ? 'SHOW_RESULTS' : 'AWAITING_RESULTS',
+        podium: tinaResults?.race
       };
-      break;
     }
   }
+
   if (nextSession) break;
 }
 ---
@@ -137,6 +198,9 @@ for (const race of TICKER_RACES) {
         <a href="/circuits-live/grandstands" class="btn secondary-btn">
           Grandstand Reviews 💺
         </a>
+        <a href="/tv-guides" class="btn secondary-btn">
+          Where to Watch   📺
+        </a>
       </div>
     </div>
   </section>
@@ -146,28 +210,82 @@ for (const race of TICKER_RACES) {
     <div class="session-ticker-wrapper">
       <div class="session-ticker">
         <div class="ticker-left">
-          <span class="ticker-badge">NEXT SESSION</span>
+          <span 
+            class={`ticker-badge ${nextSession.state === 'LIVE' ? 'badge-live' : nextSession.state === 'SHOW_RESULTS' || nextSession.state === 'AWAITING_RESULTS' ? 'badge-awaiting' : ''}`} 
+            id="ticker-badge-el"
+          >
+            {nextSession.state === 'LIVE' ? '● LIVE NOW' : nextSession.state === 'SHOW_RESULTS' || nextSession.state === 'AWAITING_RESULTS' ? '🏁 RACE COMPLETED' : 'NEXT SESSION'}
+          </span>
           <span class="ticker-race">{nextSession.race} <span class="divider">|</span> {nextSession.name}</span>
         </div>
-        <div class="ticker-right">
-          <!-- The Countdown Timer -->
-          <div class="ticker-countdown js-ticker-countdown">
-            <span class="cd-section"><span class="cd-val js-cd-d">00</span><span class="cd-lbl">D</span></span>
-            <span class="cd-sep">:</span>
-            <span class="cd-section"><span class="cd-val js-cd-h">00</span><span class="cd-lbl">H</span></span>
-            <span class="cd-sep">:</span>
-            <span class="cd-section"><span class="cd-val js-cd-m">00</span><span class="cd-lbl">M</span></span>
-            <span class="cd-sep">:</span>
-            <span class="cd-section"><span class="cd-val js-cd-s">00</span><span class="cd-lbl">S</span></span>
-          </div>
 
-          <!-- Local Time -->
-          <div class="ticker-local">
-            <span class="ticker-label">Local Time:</span>
-            <span class="ticker-time js-ticker-time" data-utc={nextSession.utcTime}>Loading...</span>
-          </div>
+        <div class="ticker-right">
+          {nextSession.state === 'SHOW_RESULTS' ? (
+            <div class="spoiler-results-wrapper">
+              <button type="button" class="btn-reveal js-btn-reveal">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                <span>Reveal Results</span>
+              </button>
+              <div class="spoiler-podium js-spoiler-podium hidden">
+                <span class="pod-step">🥇 {nextSession.podium.first}</span>
+                <span class="pod-step">🥈 {nextSession.podium.second}</span>
+                <span class="pod-step">🥉 {nextSession.podium.third}</span>
+              </div>
+            </div>
+          ) : nextSession.state === 'AWAITING_RESULTS' ? (
+            <div class="ticker-awaiting-indicator">
+              <span>Awaiting Official Results...</span>
+            </div>
+          ) : (
+            <>
+              <!-- The Countdown Timer -->
+              <div 
+                class="ticker-countdown js-ticker-countdown" 
+                data-utc={nextSession.utcTime} 
+                data-utc-end={nextSession.utcEndTime} 
+                data-state={nextSession.state}
+              >
+                <span class="cd-section"><span class="cd-val js-cd-d">00</span><span class="cd-lbl">D</span></span>
+                <span class="cd-sep">:</span>
+                <span class="cd-section"><span class="cd-val js-cd-h">00</span><span class="cd-lbl">H</span></span>
+                <span class="cd-sep">:</span>
+                <span class="cd-section"><span class="cd-val js-cd-m">00</span><span class="cd-lbl">M</span></span>
+                <span class="cd-sep">:</span>
+                <span class="cd-section"><span class="cd-val js-cd-s">00</span><span class="cd-lbl">S</span></span>
+              </div>
+
+              <!-- Local Time -->
+              <div class="ticker-local">
+                <span class="ticker-label">Local Time:</span>
+                <span class="ticker-time js-ticker-time" data-utc={nextSession.utcTime}>Loading...</span>
+              </div>
+            </>
+          )}
         </div>
       </div>
+
+      <!-- MONDAY ONWARDS RECENT RESULTS SPOILER SUB-BANNER -->
+      {now >= currentMondayCutoff && recentFinishedRace?.hasResults && (
+        <div class="sub-recent-banner">
+          <div class="sub-recent-inner">
+            <div class="sub-left">
+              <span class="sub-badge">LATEST GP</span>
+              <span class="sub-text"><strong>{recentFinishedRace.raceName}</strong> Podium</span>
+            </div>
+            <div class="spoiler-results-wrapper">
+              <button type="button" class="btn-reveal js-btn-reveal">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                <span>Reveal Results</span>
+              </button>
+              <div class="spoiler-podium js-spoiler-podium hidden">
+                <span class="pod-step">🥇 {recentFinishedRace.podium.first}</span>
+                <span class="pod-step">🥈 {recentFinishedRace.podium.second}</span>
+                <span class="pod-step">🥉 {recentFinishedRace.podium.third}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )}
 
@@ -226,7 +344,7 @@ for (const race of TICKER_RACES) {
         <a href="/tv-guides" class="pillar-card">
           <div class="pillar-icon">📺</div>
           <h3>Where to Watch</h3>
-          <p>Worldwide TV broadcaster directories, F1 TV Pro availability, streaming options, and weekend schedules.</p>
+          <p>Worldwide TV broadcaster directories, streaming options, and weekend broadcast schedules.</p>
           <span class="pillar-link">Find Broadcasters &rarr;</span>
         </a>
 
@@ -239,7 +357,7 @@ for (const race of TICKER_RACES) {
         </a>
 
         <!-- 8. LATEST NEWS & EDITORIALS -->
-        <a href="/latest-news" class="pillar-card highlight-card">
+        <a href="/latest-news" class="pillar-card">
           <div class="card-badge-row">
             <span class="pillar-icon">📰</span>
           </div>
@@ -254,7 +372,7 @@ for (const race of TICKER_RACES) {
     <section class="seo-intro-block">
       <h2>Built by Fans, Designed for the Ultimate F1 Experience</h2>
       <p>
-        <strong>My Grand Prix Hub</strong> is an independent spectator resource built for Formula 1 fans attending races in person or streaming from home. Whether you are searching for the best grandstand seat at Silverstone, organizing travel to Spa-Francorchamps, checking live session timing for the Dutch Grand Prix, or looking for local broadcaster listings, we provide comprehensive, unbiased advice to make every race weekend unforgettable.
+        <strong>My Grand Prix Hub</strong> is an independent spectator resource built for Formula 1 fans attending races in person or streaming from home. Whether you are searching for the best grandstand seat at Silverstone, organizing travel to Spa-Francorchamps, or checking local broadcaster listings, we provide comprehensive, unbiased advice to make every race weekend unforgettable.
       </p>
     </section>
 
@@ -271,16 +389,13 @@ for (const race of TICKER_RACES) {
 </Layout>
 
 <script is:inline>
-  document.addEventListener('DOMContentLoaded', () => {
+  function setupHomepageTicker() {
+    // 1. Timezone conversion
     const timeEl = document.querySelector('.js-ticker-time');
-    const countdownEl = document.querySelector('.js-ticker-countdown');
-    let targetDate = null;
-
-    // 1. Timezone Conversion
     if (timeEl) {
       const utcStr = timeEl.getAttribute('data-utc');
       if (utcStr) {
-        targetDate = new Date(utcStr);
+        const targetDate = new Date(utcStr);
         const formatter = new Intl.DateTimeFormat('en-US', {
           weekday: 'short', month: 'short', day: 'numeric', 
           hour: '2-digit', minute: '2-digit', hour12: true
@@ -289,40 +404,89 @@ for (const race of TICKER_RACES) {
       }
     }
 
-    // 2. Countdown Timer Initialization
-    if (countdownEl && targetDate) {
-      const elDays = countdownEl.querySelector('.js-cd-d');
-      const elHours = countdownEl.querySelector('.js-cd-h');
-      const elMins = countdownEl.querySelector('.js-cd-m');
-      const elSecs = countdownEl.querySelector('.js-cd-s');
+    // 2. Countdown Timer
+    const countdownEl = document.querySelector('.js-ticker-countdown');
+    const badgeEl = document.getElementById('ticker-badge-el');
 
-      function updateCountdown() {
-        const now = new Date().getTime();
-        const distance = targetDate.getTime() - now;
+    if (countdownEl) {
+      const startStr = countdownEl.getAttribute('data-utc');
+      const endStr = countdownEl.getAttribute('data-utc-end');
+      if (startStr && endStr) {
+        const startDate = new Date(startStr).getTime();
+        const endDate = new Date(endStr).getTime();
 
-        if (distance < 0) {
-          if (elDays) elDays.textContent = "00";
-          if (elHours) elHours.textContent = "00";
-          if (elMins) elMins.textContent = "00";
-          if (elSecs) elSecs.textContent = "00";
-          return;
+        const elDays = countdownEl.querySelector('.js-cd-d');
+        const elHours = countdownEl.querySelector('.js-cd-h');
+        const elMins = countdownEl.querySelector('.js-cd-m');
+        const elSecs = countdownEl.querySelector('.js-cd-s');
+
+        function updateCountdown() {
+          const now = new Date().getTime();
+
+          if (now >= startDate && now <= endDate) {
+            if (badgeEl) {
+              badgeEl.className = 'ticker-badge badge-live';
+              badgeEl.textContent = '● LIVE NOW';
+            }
+            countdownEl.innerHTML = `
+              <div class="ticker-live-indicator">
+                <div style="display:flex; align-items:center; gap:0.5rem;">
+                  <span class="ticker-live-dot"></span>
+                  <span class="ticker-live-text">ON TRACK NOW</span>
+                </div>
+                <span class="ticker-live-sub">Live session in progress</span>
+              </div>
+            `;
+            return;
+          }
+
+          if (now > endDate) {
+            if (badgeEl) {
+              badgeEl.className = 'ticker-badge badge-awaiting';
+              badgeEl.textContent = '🏁 RACE COMPLETED';
+            }
+            countdownEl.innerHTML = `
+              <div class="ticker-awaiting-indicator">
+                <span>Awaiting Results...</span>
+              </div>
+            `;
+            return;
+          }
+
+          const distance = startDate - now;
+          const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+          const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+          const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+          const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+          if (elDays) elDays.textContent = String(days).padStart(2, '0');
+          if (elHours) elHours.textContent = String(hours).padStart(2, '0');
+          if (elMins) elMins.textContent = String(minutes).padStart(2, '0');
+          if (elSecs) elSecs.textContent = String(seconds).padStart(2, '0');
         }
 
-        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-        if (elDays) elDays.textContent = String(days).padStart(2, '0');
-        if (elHours) elHours.textContent = String(hours).padStart(2, '0');
-        if (elMins) elMins.textContent = String(minutes).padStart(2, '0');
-        if (elSecs) elSecs.textContent = String(seconds).padStart(2, '0');
+        updateCountdown();
+        setInterval(updateCountdown, 1000);
       }
-
-      updateCountdown(); // Run immediately so there's no delay
-      setInterval(updateCountdown, 1000); // Tick every second
     }
-  });
+
+    // 3. Spoiler Reveal Buttons
+    const revealBtns = document.querySelectorAll('.js-btn-reveal');
+    revealBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const parent = btn.closest('.spoiler-results-wrapper');
+        if (!parent) return;
+        const podium = parent.querySelector('.js-spoiler-podium');
+        if (podium) {
+          btn.classList.add('hidden');
+          podium.classList.remove('hidden');
+        }
+      });
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', setupHomepageTicker);
+  document.addEventListener('astro:page-load', setupHomepageTicker);
 </script>
 
 <style>
@@ -451,7 +615,6 @@ for (const race of TICKER_RACES) {
   .ticker-badge {
     display: inline-flex;
     align-items: center;
-    gap: 0.4rem;
     background-color: #facc15;
     color: #000000;
     font-size: 0.75rem;
@@ -463,20 +626,23 @@ for (const race of TICKER_RACES) {
     box-shadow: 0 0 12px rgba(250, 204, 21, 0.3);
   }
 
-  .ticker-badge::before {
-    content: '';
-    display: block;
-    width: 6px;
-    height: 6px;
-    background: #000000;
-    border-radius: 50%;
-    animation: tickerPulse 1.5s infinite;
+  .badge-live {
+    background-color: #e10600 !important;
+    color: #ffffff !important;
+    box-shadow: 0 0 15px rgba(225, 6, 0, 0.5) !important;
+    animation: livePulse 1.5s infinite;
   }
 
-  @keyframes tickerPulse {
-    0% { transform: scale(0.9); opacity: 1; }
-    50% { transform: scale(1.3); opacity: 0.5; }
-    100% { transform: scale(0.9); opacity: 1; }
+  .badge-awaiting {
+    background-color: #334155 !important;
+    color: #e2e8f0 !important;
+    box-shadow: none !important;
+  }
+
+  @keyframes livePulse {
+    0% { transform: scale(0.98); opacity: 1; }
+    50% { transform: scale(1.02); opacity: 0.85; }
+    100% { transform: scale(0.98); opacity: 1; }
   }
 
   .ticker-race {
@@ -493,14 +659,176 @@ for (const race of TICKER_RACES) {
     font-weight: 300;
   }
 
-  /* Right Side layout: Countdown + Local Time */
   .ticker-right {
     display: flex;
     align-items: center;
     gap: 1.25rem;
   }
 
-  /* Countdown Module */
+  /* Spoiler Protected Results */
+  .spoiler-results-wrapper {
+    display: flex;
+    align-items: center;
+  }
+
+  .btn-reveal {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    background: #0f172a;
+    border: 1px solid #38bdf8;
+    color: #38bdf8;
+    padding: 0.4rem 0.85rem;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 800;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    transition: all 0.2s ease;
+  }
+
+  .btn-reveal:hover {
+    background: #38bdf8;
+    color: #0f172a;
+  }
+
+  .spoiler-podium {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    animation: fadeIn 0.3s ease;
+  }
+
+  .pod-step {
+    background: #0f172a;
+    border: 1px solid #334155;
+    padding: 0.35rem 0.65rem;
+    border-radius: 4px;
+    color: #ffffff;
+    font-size: 0.85rem;
+    font-weight: 900;
+    letter-spacing: 0.05em;
+  }
+
+  .hidden {
+    display: none !important;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Sub Recent Banner (For Monday onwards) */
+  .sub-recent-banner {
+    background: #0f172a;
+    border-top: 1px solid #1e293b;
+    padding: 0.5rem 1.5rem;
+  }
+
+  .sub-recent-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .sub-left {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .sub-badge {
+    background: #1e293b;
+    color: #94a3b8;
+    font-size: 0.65rem;
+    font-weight: 800;
+    padding: 0.2rem 0.45rem;
+    border-radius: 3px;
+    border: 1px solid #334155;
+  }
+
+  .sub-text {
+    color: #cbd5e1;
+    font-size: 0.85rem;
+  }
+
+    /* Live Indicator Box (Resized for better proportions) */
+  :global(.ticker-live-indicator) {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(225, 6, 0, 0.15) !important;
+    border: 1px solid #e10600 !important; /* Thinned from 2px to 1px */
+    padding: 0.4rem 1.2rem !important; /* Tightened padding */
+    border-radius: 6px !important;
+    box-shadow: 0 0 15px rgba(225, 6, 0, 0.3), inset 0 0 8px rgba(225, 6, 0, 0.15) !important;
+    animation: liveGlow 2s infinite alternate !important;
+  }
+
+  :global(.ticker-live-dot) {
+    width: 8px !important; /* Scaled down from 12px */
+    height: 8px !important;
+    background: #ffffff !important;
+    border-radius: 50% !important;
+    box-shadow: 0 0 8px #ffffff !important;
+    animation: liveBlink 1s infinite alternate !important;
+  }
+
+  :global(.ticker-live-text) {
+    color: #ffffff !important;
+    font-weight: 900 !important;
+    font-size: 1.1rem !important; /* Scaled down from 1.6rem */
+    letter-spacing: 0.05em !important;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5) !important;
+    margin: 0 !important;
+  }
+  
+  :global(.ticker-live-sub) {
+    color: #f87171 !important;
+    font-size: 0.7rem !important; /* Scaled down from 0.85rem */
+    font-weight: 800 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.08em !important;
+    margin-top: 0.15rem !important;
+  }
+
+  @keyframes liveGlow {
+    from { box-shadow: 0 0 10px rgba(225, 6, 0, 0.2), inset 0 0 5px rgba(225, 6, 0, 0.1); }
+    to { box-shadow: 0 0 20px rgba(225, 6, 0, 0.5), inset 0 0 10px rgba(225, 6, 0, 0.2); }
+  }
+
+  @keyframes liveBlink {
+    from { opacity: 1; transform: scale(1); }
+    to { opacity: 0.5; transform: scale(0.8); }
+  }
+
+  @keyframes liveGlow {
+    from { box-shadow: 0 0 15px rgba(225, 6, 0, 0.3), inset 0 0 10px rgba(225, 6, 0, 0.1); }
+    to { box-shadow: 0 0 25px rgba(225, 6, 0, 0.6), inset 0 0 15px rgba(225, 6, 0, 0.3); }
+  }
+
+  @keyframes liveBlink {
+    from { opacity: 1; transform: scale(1); }
+    to { opacity: 0.5; transform: scale(0.8); }
+  }
+
+  .ticker-awaiting-indicator {
+    background: #0f172a;
+    border: 1px solid #334155;
+    padding: 0.4rem 0.85rem;
+    border-radius: 4px;
+    color: #94a3b8;
+    font-weight: 800;
+    font-size: 0.8rem;
+    letter-spacing: 0.05em;
+  }
+
+  /* Countdown Component */
   .ticker-countdown {
     display: flex;
     align-items: center;
@@ -531,7 +859,7 @@ for (const race of TICKER_RACES) {
   .cd-lbl {
     font-size: 0.6rem;
     font-weight: 800;
-    color: #e10600; /* F1 Red accent */
+    color: #e10600;
     margin-top: 0.25rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
@@ -542,10 +870,9 @@ for (const race of TICKER_RACES) {
     font-weight: 900;
     font-size: 1.25rem;
     line-height: 1;
-    margin-top: -0.75rem; /* Visually aligns the colon with the numbers, ignoring the labels */
+    margin-top: -0.75rem;
   }
 
-  /* Local Time Module */
   .ticker-local {
     background: #0f172a;
     border: 1px solid #334155;
@@ -573,34 +900,16 @@ for (const race of TICKER_RACES) {
   }
 
   @media (max-width: 900px) {
-    .ticker-right {
-      flex-wrap: wrap;
-    }
+    .ticker-right { flex-wrap: wrap; }
   }
   
   @media (max-width: 768px) {
-    .session-ticker {
-      flex-direction: column;
-      align-items: stretch;
-      gap: 1rem;
-    }
-    
-    .ticker-right {
-      flex-direction: column;
-      align-items: stretch;
-      gap: 0.75rem;
-    }
-
-    .ticker-countdown {
-      justify-content: center;
-      padding: 0.5rem;
-    }
-
-    .ticker-local {
-      justify-content: space-between;
-    }
+    .session-ticker { flex-direction: column; align-items: stretch; gap: 1rem; }
+    .ticker-right { flex-direction: column; align-items: stretch; gap: 0.75rem; }
+    .ticker-countdown { justify-content: center; padding: 0.5rem; }
+    .ticker-local { justify-content: space-between; }
+    .sub-recent-inner { flex-direction: column; align-items: stretch; gap: 1rem; }
   }
-  /* ========================================= */
 
   /* Section Spacing */
   .section-block {
@@ -650,9 +959,43 @@ for (const race of TICKER_RACES) {
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
   }
 
+  .highlight-card {
+    position: relative;
+    background: linear-gradient(135deg, rgba(225, 6, 0, 0.15) 0%, rgba(15, 23, 42, 1) 100%);
+    border: 1px solid rgba(225, 6, 0, 0.5);
+    box-shadow: 0 0 20px rgba(225, 6, 0, 0.15);
+    overflow: hidden;
+  }
+
+  .highlight-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: #e10600;
+    box-shadow: 0 2px 8px rgba(225, 6, 0, 0.5);
+  }
+
+  .highlight-card:hover {
+    border-color: #e10600;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 30px rgba(225, 6, 0, 0.35);
+  }
+
+  .card-badge-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+
   .pillar-icon {
     font-size: 2rem;
     margin-bottom: 1rem;
+  }
+
+  .card-badge-row .pillar-icon {
+    margin-bottom: 0;
   }
 
   .pillar-card h3 {

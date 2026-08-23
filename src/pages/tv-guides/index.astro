@@ -92,12 +92,12 @@ const broadcasters = [
     }
   },
   { 
-    id: 'us-espn',
+    id: 'us-appletv',
     country: 'United States', 
     flag: 'us', 
-    network: 'ESPN / ABC', 
-    app: 'ESPN+', 
-    url: 'https://plus.espn.com/',
+    network: 'Apple TV', 
+    app: 'Apple TV App', 
+    url: 'https://tv.apple.com/us/channel/formula-1/tvs.sbd.241000',
     radio: { name: 'SiriusXM Ch 81 / ESPN Radio', url: 'https://www.siriusxm.com/sports/formula-1' },
     type: 'Live', 
     f1tvPro: true,
@@ -130,7 +130,7 @@ const broadcasters = [
     id: 'ca-tsn',
     country: 'Canada', 
     flag: 'ca', 
-    network: 'TSN / RDS', 
+    network: 'TSN / RDS / Noovo', 
     app: 'TSN+', 
     url: 'https://www.tsn.ca/auto-racing/f1',
     type: 'Live', 
@@ -233,7 +233,7 @@ const broadcasters = [
     id: 'de-sky',
     country: 'Germany', 
     flag: 'de', 
-    network: 'Sky Deutschland', 
+    network: 'Sky Deutschland / RTL', 
     app: 'WOW / Sky Go', 
     url: 'https://sport.sky.de/formel1',
     type: 'Live', 
@@ -301,7 +301,7 @@ const broadcasters = [
     id: 'es-dazn',
     country: 'Spain', 
     flag: 'es', 
-    network: 'DAZN F1', 
+    network: 'DAZN', 
     app: 'DAZN App', 
     url: 'https://www.dazn.com/',
     type: 'Live', 
@@ -366,12 +366,12 @@ const broadcasters = [
     }
   },
   { 
-    id: 'br-band',
+    id: 'br-globo',
     country: 'Brazil', 
     flag: 'br', 
-    network: 'Band / Bandsports', 
-    app: 'Bandplay', 
-    url: 'https://www.band.uol.com.br/esportes/automobilismo/formula-1',
+    network: 'TV Globo', 
+    app: 'Globoplay', 
+    url: 'https://ge.globo.com/motor/formula-1/',
     type: 'Live', 
     f1tvPro: true,
     timezone: 'BRT (UTC-3)',
@@ -434,12 +434,12 @@ const broadcasters = [
     }
   },
   { 
-    id: 'jp-dazn',
+    id: 'jp-fuji',
     country: 'Japan', 
     flag: 'jp', 
-    network: 'Fuji TV / DAZN', 
-    app: 'DAZN App', 
-    url: 'https://www.dazn.com/en-JP/competition/Competition:2owzja3d9h1129eq165d63f45',
+    network: 'Fuji TV', 
+    app: 'Fuji TV Next', 
+    url: 'https://otn.fujitv.co.jp/b_hp/923200029.html',
     type: 'Live', 
     f1tvPro: true,
     timezone: 'JST (UTC+9)',
@@ -468,10 +468,10 @@ const broadcasters = [
     }
   },
   { 
-    id: 'mena-ssc',
+    id: 'mena-bein',
     country: 'Middle East & MENA', 
     flag: 'ae', 
-    network: 'SSC / beIN Sports', 
+    network: 'beIN SPORTS', 
     app: 'TOD App', 
     url: 'https://www.tod.tv/',
     type: 'Live', 
@@ -505,7 +505,7 @@ const broadcasters = [
     id: 'nz-sky',
     country: 'New Zealand', 
     flag: 'nz', 
-    network: 'Sky Sport NZ', 
+    network: 'Sky NZ', 
     app: 'Sky Sport Now', 
     url: 'https://www.skysportnow.co.nz/',
     type: 'Live', 
@@ -539,7 +539,7 @@ const broadcasters = [
     id: 'in-fancode',
     country: 'India', 
     flag: 'in', 
-    network: 'FanCode', 
+    network: 'FanCode / TATA Play', 
     app: 'FanCode App', 
     url: 'https://www.fancode.com/',
     type: 'Live', 
@@ -602,6 +602,131 @@ const broadcasters = [
         { day: 'Sunday', session: 'Grand Prix', networkOnAir: '20:00', f1tvOnAir: null, start: '21:00', duration: '56 Laps', utcStart: '2026-10-25T19:00:00Z', utcEnd: '2026-10-25T21:00:00Z' },
       ]
     }
+  },
+  // --- GLOBAL DIRECTORY ENTRIES (No local schedules attached) ---
+  { 
+    id: 'africa-ss', country: 'Africa', flag: 'za', network: 'SuperSport', 
+    app: '', url: '', type: 'Live', f1tvPro: true, timezone: 'Various', schedules: {} 
+  },
+  { 
+    id: 'al-digitalb', country: 'Albania', flag: 'al', network: 'DigitAlb', 
+    app: '', url: '', type: 'Live', f1tvPro: true, timezone: 'CET (UTC+1)', schedules: {} 
+  },
+  { 
+    id: 'am-fastsports', country: 'Armenia', flag: 'am', network: 'FastSports', 
+    app: '', url: '', type: 'Live', f1tvPro: true, timezone: 'AMT (UTC+4)', schedules: {} 
+  },
+  { 
+    id: 'at-servus', country: 'Austria', flag: 'at', network: 'Servus TV / ORF / Sky', 
+    app: 'ServusTV On', url: '', type: 'Live', f1tvPro: true, timezone: 'CEST (UTC+2)', schedules: {} 
+  },
+  { 
+    id: 'az-idman', country: 'Azerbaijan', flag: 'az', network: 'Idman Azerbaijan', 
+    app: '', url: '', type: 'Live', f1tvPro: true, timezone: 'AZT (UTC+4)', schedules: {} 
+  },
+  { 
+    id: 'be-rtbf', country: 'Belgium', flag: 'be', network: 'RTBF / Play Sports', 
+    app: 'RTBF Auvio', url: '', type: 'Live', f1tvPro: true, timezone: 'CEST (UTC+2)', schedules: {} 
+  },
+  { 
+    id: 'ba-arena', country: 'Bosnia', flag: 'ba', network: 'Arena Sport', 
+    app: '', url: '', type: 'Live', f1tvPro: true, timezone: 'CET (UTC+1)', schedules: {} 
+  },
+  { 
+    id: 'gr-ant1', country: 'Greece', flag: 'gr', network: 'ANT1 / ANT1+', 
+    app: 'ANT1+', url: '', type: 'Live', f1tvPro: true, timezone: 'EEST (UTC+3)', schedules: {} 
+  },
+  { 
+    id: 'hk-bein', country: 'Hong Kong', flag: 'hk', network: 'beIN SPORTS / Now Sports 1 & 2', 
+    app: 'beIN CONNECT', url: '', type: 'Live', f1tvPro: true, timezone: 'HKT (UTC+8)', schedules: {} 
+  },
+  { 
+    id: 'hu-m4', country: 'Hungary', flag: 'hu', network: 'M4 (MTVA Sports Channel)', 
+    app: '', url: '', type: 'Live', f1tvPro: true, timezone: 'CEST (UTC+2)', schedules: {} 
+  },
+  { 
+    id: 'is-viaplay', country: 'Iceland', flag: 'is', network: 'Viaplay', 
+    app: 'Viaplay App', url: '', type: 'Live', f1tvPro: true, timezone: 'GMT (UTC+0)', schedules: {} 
+  },
+  { 
+    id: 'id-bein', country: 'Indonesia', flag: 'id', network: 'beIN SPORTS', 
+    app: 'beIN CONNECT', url: '', type: 'Live', f1tvPro: true, timezone: 'WIB (UTC+7)', schedules: {} 
+  },
+  { 
+    id: 'in-flight', country: 'In-Ship & In-Flight', flag: 'un', network: 'Sport 24 / Sport 24 Extra', 
+    app: '', url: '', type: 'Live', f1tvPro: false, timezone: 'Various', schedules: {} 
+  },
+  { 
+    id: 'il-sport5', country: 'Israel', flag: 'il', network: 'Sport 5', 
+    app: '', url: '', type: 'Live', f1tvPro: true, timezone: 'IDT (UTC+3)', schedules: {} 
+  },
+  { 
+    id: 'xk-arena', country: 'Kosovo', flag: 'xk', network: 'Arena Sport', 
+    app: '', url: '', type: 'Live', f1tvPro: true, timezone: 'CET (UTC+1)', schedules: {} 
+  },
+  { 
+    id: 'no-viaplay', country: 'Norway', flag: 'no', network: 'V sport 1 / Viaplay', 
+    app: 'Viaplay App', url: '', type: 'Live', f1tvPro: true, timezone: 'CEST (UTC+2)', schedules: {} 
+  },
+  { 
+    id: 'pg-tvwan', country: 'Papua New Guinea & Pacific Islands', flag: 'pg', network: 'TVWAN Sports', 
+    app: '', url: '', type: 'Live', f1tvPro: false, timezone: 'Various', schedules: {} 
+  },
+  { 
+    id: 'ph-bein', country: 'Philippines', flag: 'ph', network: 'beIN SPORTS', 
+    app: 'beIN CONNECT', url: '', type: 'Live', f1tvPro: true, timezone: 'PHT (UTC+8)', schedules: {} 
+  },
+  { 
+    id: 'pl-eleven', country: 'Poland', flag: 'pl', network: 'Eleven Sports', 
+    app: '', url: '', type: 'Live', f1tvPro: true, timezone: 'CEST (UTC+2)', schedules: {} 
+  },
+  { 
+    id: 'pt-dazn', country: 'Portugal', flag: 'pt', network: 'DAZN', 
+    app: 'DAZN App', url: '', type: 'Live', f1tvPro: true, timezone: 'WEST (UTC+1)', schedules: {} 
+  },
+  { 
+    id: 'ro-antena', country: 'Romania', flag: 'ro', network: 'Antena', 
+    app: '', url: '', type: 'Live', f1tvPro: true, timezone: 'EEST (UTC+3)', schedules: {} 
+  },
+  { 
+    id: 'rs-arena', country: 'Serbia', flag: 'rs', network: 'Arena Sport', 
+    app: '', url: '', type: 'Live', f1tvPro: true, timezone: 'CET (UTC+1)', schedules: {} 
+  },
+  { 
+    id: 'sg-bein', country: 'Singapore', flag: 'sg', network: 'beIN SPORTS', 
+    app: 'beIN SPORTS CONNECT', url: '', type: 'Live', f1tvPro: false, timezone: 'SGT (UTC+8)', schedules: {} 
+  },
+  { 
+    id: 'si-kanal', country: 'Slovenia', flag: 'si', network: 'Kanal A / VOYO', 
+    app: 'VOYO', url: '', type: 'Live', f1tvPro: true, timezone: 'CEST (UTC+2)', schedules: {} 
+  },
+  { 
+    id: 'kr-coupang', country: 'South Korea', flag: 'kr', network: 'Coupang Play', 
+    app: 'Coupang Play', url: '', type: 'Live', f1tvPro: false, timezone: 'KST (UTC+9)', schedules: {} 
+  },
+  { 
+    id: 'se-viaplay', country: 'Sweden', flag: 'se', network: 'Viaplay', 
+    app: 'Viaplay App', url: '', type: 'Live', f1tvPro: true, timezone: 'CEST (UTC+2)', schedules: {} 
+  },
+  { 
+    id: 'ch-srf', country: 'Switzerland', flag: 'ch', network: 'SRF / RSI / RTS / Sky', 
+    app: '', url: '', type: 'Live', f1tvPro: true, timezone: 'CEST (UTC+2)', schedules: {} 
+  },
+  { 
+    id: 'th-bein', country: 'Thailand', flag: 'th', network: 'beIN SPORTS', 
+    app: 'beIN CONNECT', url: '', type: 'Live', f1tvPro: true, timezone: 'ICT (UTC+7)', schedules: {} 
+  },
+  { 
+    id: 'tr-bein', country: 'Turkey', flag: 'tr', network: 'beIN SPORTS', 
+    app: 'TOD App', url: '', type: 'Live', f1tvPro: true, timezone: 'TRT (UTC+3)', schedules: {} 
+  },
+  { 
+    id: 'ua-setanta', country: 'Ukraine', flag: 'ua', network: 'Setanta Ukraine', 
+    app: '', url: '', type: 'Live', f1tvPro: true, timezone: 'EEST (UTC+3)', schedules: {} 
+  },
+  { 
+    id: 'vn-tv360', country: 'Vietnam', flag: 'vn', network: 'TV360', 
+    app: 'TV360', url: '', type: 'Live', f1tvPro: true, timezone: 'ICT (UTC+7)', schedules: {} 
   }
 ].sort((a, b) => a.country.localeCompare(b.country));
 

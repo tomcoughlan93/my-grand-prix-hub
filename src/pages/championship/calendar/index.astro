@@ -49,10 +49,10 @@ interface Race {
   sessions: SessionInfo;
   sessionResults?: SessionResults;
   podium?: Podium;
-  weather?: Weather;
   isSprint?: boolean;
   tyresAnnounced?: boolean; 
   tyres: [string, string, string]; 
+  weather?: Weather;
 }
 
 // 2026 Calendar with EXACT Latitude & Longitude added
@@ -68,22 +68,11 @@ const CALENDAR: Race[] = [
   { season: "2026", round: "9", raceName: "British Grand Prix", tyresAnnounced: true, tyres: ["C1", "C2", "C3"], Circuit: { circuitName: "Silverstone Circuit", Location: { locality: "Silverstone", country: "UK", timezone: "Europe/London", coordinates: { lat: 52.0786, lon: -1.01694 } } }, date: "2026-07-05", time: "14:00:00Z", sessions: { fp1: "2026-07-03T11:30:00Z", fp2: "2026-07-03T15:00:00Z", fp3: "2026-07-04T10:30:00Z", quali: "2026-07-04T14:00:00Z", race: "2026-07-05T14:00:00Z" }, podium: { first: "LEC", second: "RUS", third: "HAM" } },
   { season: "2026", round: "10", raceName: "Belgian Grand Prix", tyresAnnounced: true, tyres: ["C2", "C3", "C4"], Circuit: { circuitName: "Circuit de Spa-Francorchamps", Location: { locality: "Spa", country: "Belgium", timezone: "Europe/Brussels", coordinates: { lat: 50.4372, lon: 5.97139 } } }, date: "2026-07-19", time: "13:00:00Z", sessions: { fp1: "2026-07-17T11:30:00Z", fp2: "2026-07-17T15:00:00Z", fp3: "2026-07-18T10:30:00Z", quali: "2026-07-18T14:00:00Z", race: "2026-07-19T13:00:00Z" }, podium: { first: "ANT", second: "LEC", third: "VER" } },
   { season: "2026", round: "11", raceName: "Hungarian Grand Prix", tyresAnnounced: true, tyres: ["C3", "C4", "C5"], Circuit: { circuitName: "Hungaroring", Location: { locality: "Budapest", country: "Hungary", timezone: "Europe/Budapest", coordinates: { lat: 47.5789, lon: 19.2486 } } }, date: "2026-07-26", time: "13:00:00Z", sessions: { fp1: "2026-07-24T11:30:00Z", fp2: "2026-07-24T15:00:00Z", fp3: "2026-07-25T10:30:00Z", quali: "2026-07-25T14:00:00Z", race: "2026-07-26T13:00:00Z" }, podium: { first: "NOR", second: "VER", third: "ANT" } },
-  
-  // Dutch GP - Sprint Toggled, explicit offsets
-  { 
-    season: "2026", round: "12", raceName: "Dutch Grand Prix", isSprint: true, tyresAnnounced: true, tyres: ["C2", "C3", "C4"], 
-    Circuit: { circuitName: "Circuit Park Zandvoort", Location: { locality: "Zandvoort", country: "Netherlands", timezone: "Europe/Amsterdam", coordinates: { lat: 52.3888, lon: 4.54092 } } }, 
-    date: "2026-08-23", time: "15:00:00+02:00", 
-    sessions: { fp1: "2026-08-21T12:30:00+02:00", fp2: "2026-08-21T16:00:00+02:00", fp3: "2026-08-22T11:30:00+02:00", quali: "2026-08-22T16:00:00+02:00", race: "2026-08-23T15:00:00+02:00" }
-  },
-  
+  { season: "2026", round: "12", raceName: "Dutch Grand Prix", isSprint: true, tyresAnnounced: true, tyres: ["C2", "C3", "C4"], Circuit: { circuitName: "Circuit Park Zandvoort", Location: { locality: "Zandvoort", country: "Netherlands", timezone: "Europe/Amsterdam", coordinates: { lat: 52.3888, lon: 4.54092 } } }, date: "2026-08-23", time: "15:00:00+02:00", sessions: { fp1: "2026-08-21T12:30:00+02:00", fp2: "2026-08-21T16:00:00+02:00", fp3: "2026-08-22T11:30:00+02:00", quali: "2026-08-22T16:00:00+02:00", race: "2026-08-23T15:00:00+02:00" } },
   { season: "2026", round: "13", raceName: "Italian Grand Prix", tyresAnnounced: true, tyres: ["C3", "C4", "C5"], Circuit: { circuitName: "Autodromo Nazionale Monza", Location: { locality: "Monza", country: "Italy", timezone: "Europe/Rome", coordinates: { lat: 45.6156, lon: 9.28111 } } }, date: "2026-09-06", time: "15:00:00+02:00", sessions: { fp1: "2026-09-04T13:30:00+02:00", fp2: "2026-09-04T17:00:00+02:00", fp3: "2026-09-05T12:30:00+02:00", quali: "2026-09-05T16:00:00+02:00", race: "2026-09-06T15:00:00+02:00" } },
   { season: "2026", round: "14", raceName: "Madrid Grand Prix", tyresAnnounced: true, tyres: ["C2", "C3", "C4"], Circuit: { circuitName: "IFEMA Madrid", Location: { locality: "Madrid", country: "Spain", timezone: "Europe/Madrid", coordinates: { lat: 40.4667, lon: -3.6167 } } }, date: "2026-09-13", time: "15:00:00+02:00", sessions: { fp1: "2026-09-11T13:30:00+02:00", fp2: "2026-09-11T17:00:00+02:00", fp3: "2026-09-12T12:30:00+02:00", quali: "2026-09-12T16:00:00+02:00", race: "2026-09-13T15:00:00+02:00" } },
   { season: "2026", round: "15", raceName: "Azerbaijan Grand Prix", tyresAnnounced: false, tyres: ["C3", "C4", "C5"], Circuit: { circuitName: "Baku City Circuit", Location: { locality: "Baku", country: "Azerbaijan", timezone: "Asia/Baku", coordinates: { lat: 40.3725, lon: 49.8533 } } }, date: "2026-09-26", time: "15:00:00+04:00", sessions: { fp1: "2026-09-24T13:30:00+04:00", fp2: "2026-09-24T17:00:00+04:00", fp3: "2026-09-25T12:30:00+04:00", quali: "2026-09-25T16:00:00+04:00", race: "2026-09-26T15:00:00+04:00" } },
-  
-  // Singapore GP - Sprint Toggled, explicit offsets
   { season: "2026", round: "16", raceName: "Singapore Grand Prix", isSprint: true, tyresAnnounced: false, tyres: ["C3", "C4", "C5"], Circuit: { circuitName: "Marina Bay Street Circuit", Location: { locality: "Marina Bay", country: "Singapore", timezone: "Asia/Singapore", coordinates: { lat: 1.2914, lon: 103.864 } } }, date: "2026-10-11", time: "20:00:00+08:00", sessions: { fp1: "2026-10-09T17:30:00+08:00", fp2: "2026-10-09T21:30:00+08:00", fp3: "2026-10-10T17:30:00+08:00", quali: "2026-10-10T21:00:00+08:00", race: "2026-10-11T20:00:00+08:00" } },
-  
   { season: "2026", round: "17", raceName: "United States Grand Prix", isSprint: true, tyresAnnounced: false, tyres: ["C2", "C3", "C4"], Circuit: { circuitName: "Circuit of the Americas", Location: { locality: "Austin", country: "USA", timezone: "America/Chicago", coordinates: { lat: 30.1328, lon: -97.6411 } } }, date: "2026-10-25", time: "19:00:00Z", sessions: { fp1: "2026-10-23T17:30:00Z", fp2: "2026-10-23T21:00:00Z", fp3: "2026-10-24T18:00:00Z", quali: "2026-10-24T22:00:00Z", race: "2026-10-25T19:00:00Z" } },
   { season: "2026", round: "18", raceName: "Mexico City Grand Prix", tyresAnnounced: false, tyres: ["C3", "C4", "C5"], Circuit: { circuitName: "Autódromo Hermanos Rodríguez", Location: { locality: "Mexico City", country: "Mexico", timezone: "America/Mexico_City", coordinates: { lat: 19.4042, lon: -99.0907 } } }, date: "2026-11-01", time: "20:00:00Z", sessions: { fp1: "2026-10-30T18:30:00Z", fp2: "2026-10-30T22:00:00Z", fp3: "2026-10-31T17:30:00Z", quali: "2026-10-31T21:00:00Z", race: "2026-11-01T20:00:00Z" } },
   { season: "2026", round: "19", raceName: "São Paulo Grand Prix", isSprint: true, tyresAnnounced: false, tyres: ["C2", "C3", "C4"], Circuit: { circuitName: "Autódromo José Carlos Pace", Location: { locality: "São Paulo", country: "Brazil", timezone: "America/Sao_Paulo", coordinates: { lat: -23.7036, lon: -46.6997 } } }, date: "2026-11-08", time: "17:00:00Z", sessions: { fp1: "2026-11-06T14:30:00Z", fp2: "2026-11-06T18:00:00Z", fp3: "2026-11-07T14:30:00Z", quali: "2026-11-07T18:00:00Z", race: "2026-11-08T17:00:00Z" } },
@@ -92,27 +81,56 @@ const CALENDAR: Race[] = [
   { season: "2026", round: "22", raceName: "Abu Dhabi Grand Prix", tyresAnnounced: false, tyres: ["C3", "C4", "C5"], Circuit: { circuitName: "Yas Marina Circuit", Location: { locality: "Abu Dhabi", country: "UAE", timezone: "Asia/Dubai", coordinates: { lat: 24.4672, lon: 54.6031 } } }, date: "2026-12-06", time: "13:00:00Z", sessions: { fp1: "2026-12-04T09:30:00Z", fp2: "2026-12-04T13:00:00Z", fp3: "2026-12-05T10:30:00Z", quali: "2026-12-05T14:00:00Z", race: "2026-12-06T13:00:00Z" } }
 ];
 
-// Split calendar into Upcoming vs Past
+// --- 1. DYNAMIC RACE SORTING LOGIC ---
 const now = new Date();
 let nextRace: Race | null = null;
 let upcomingRaces: Race[] = [];
 let pastRaces: Race[] = [];
 
 for (const race of CALENDAR) {
-  const raceDateTime = new Date(race.sessions.race);
-  if (raceDateTime > now) {
-    if (!nextRace) nextRace = race;
-    else upcomingRaces.push(race);
+  const raceStartTime = new Date(race.sessions.race);
+
+  if (!nextRace) {
+    if (now < raceStartTime) {
+      // It's entirely in the future
+      nextRace = race;
+    } else {
+      // The race has officially begun! Check if it's finished.
+      if (!race.podium) {
+        if (!tinaResults.race?.first) {
+          // No hardcoded results AND no Tina results. 
+          // Hold the active race at the top of the page!
+          nextRace = race;
+        } else {
+          // Tina CMS has results. The weekend is officially wrapped.
+          race.podium = tinaResults.race;
+          race.sessionResults = {
+            fp1: tinaResults.fp1?.first ? tinaResults.fp1 : undefined,
+            fp2: tinaResults.fp2?.first ? tinaResults.fp2 : undefined,
+            fp3: tinaResults.fp3?.first ? tinaResults.fp3 : undefined,
+            quali: tinaResults.quali?.first ? tinaResults.quali : undefined,
+            race: tinaResults.race?.first ? tinaResults.race : undefined,
+          };
+          pastRaces.push(race);
+        }
+      } else {
+        // Had hardcoded results from earlier in the season
+        pastRaces.push(race);
+      }
+    }
   } else {
-    pastRaces.push(race);
+    // We already found our hero nextRace. Add everything else to upcoming.
+    upcomingRaces.push(race);
   }
 }
 
-pastRaces.reverse();
+pastRaces.reverse(); // Newest completed at the top
 
-// DYNAMIC NEXT SESSION COUNTDOWN
+// --- 2. DYNAMIC NEXT SESSION COUNTDOWN & LIVE BADGE ---
 let targetCountdown = "";
 let targetSessionName = "Next Session";
+let isSessionLive = false;
+let awaitingResults = false;
 
 if (nextRace) {
   const sessionsList = [
@@ -124,28 +142,42 @@ if (nextRace) {
   ];
 
   for (const session of sessionsList) {
-    // 1-hour buffer so a live session stays active on the timer
-    const sessionEndTime = new Date(session.time.getTime() + (60 * 60 * 1000)); 
-    if (sessionEndTime > now) {
+    const sessionStart = session.time.getTime();
+    // Rough session duration (1 hr for practice/quali, 2 hrs for race)
+    const durationHours = session.id === 'race' ? 2 : 1; 
+    const sessionEnd = sessionStart + (durationHours * 60 * 60 * 1000); 
+    
+    if (now.getTime() < sessionStart) {
       targetCountdown = session.time.toISOString();
       targetSessionName = session.name;
       break;
+    } else if (now.getTime() >= sessionStart && now.getTime() <= sessionEnd) {
+      targetCountdown = session.time.toISOString(); 
+      targetSessionName = session.name;
+      isSessionLive = true;
+      break;
     }
+  }
+
+  // If no sessions caught it, but we are holding the race at the top, it's finished but awaiting CMS update.
+  if (!targetCountdown && !isSessionLive) {
+    awaitingResults = true;
   }
 }
 
-// INJECT TINA CMS RESULTS INTO THE NEXT RACE
-if (nextRace) {
+// --- 3. INJECT TINA CMS RESULTS INTO THE ACTIVE RACE ---
+if (nextRace && !tinaResults.race?.first) {
+  // Only inject if the race isn't fully completed. This prevents old current.json data from bleeding into the next race.
   nextRace.sessionResults = {
     fp1: tinaResults.fp1?.first ? tinaResults.fp1 : undefined,
     fp2: tinaResults.fp2?.first ? tinaResults.fp2 : undefined,
     fp3: tinaResults.fp3?.first ? tinaResults.fp3 : undefined,
     quali: tinaResults.quali?.first ? tinaResults.quali : undefined,
-    race: tinaResults.race?.first ? tinaResults.race : undefined,
+    race: undefined, // Race handles the overall trigger, so keep it empty for the hero list
   };
 }
 
-// FETCH LIVE WEATHER FOR NEXT RACE
+// --- 4. FETCH LIVE WEATHER FOR NEXT RACE ---
 if (nextRace) {
   nextRace.weather = {
     temp: 21,
@@ -201,14 +233,9 @@ if (nextRace) {
   }
 }
 
-function formatMonth(dateStr: string) {
-  return new Date(dateStr).toLocaleString('en-US', { month: 'short' }).toUpperCase();
-}
-
-function formatDay(dateStr: string) {
-  return new Date(dateStr).toLocaleString('en-US', { day: '2-digit' });
-}
-
+// Helpers
+function formatMonth(dateStr: string) { return new Date(dateStr).toLocaleString('en-US', { month: 'short' }).toUpperCase(); }
+function formatDay(dateStr: string) { return new Date(dateStr).toLocaleString('en-US', { day: '2-digit' }); }
 function getFlagCode(country: string) {
   const map: Record<string, string> = {
     'Bahrain': 'bh', 'Saudi Arabia': 'sa', 'Australia': 'au', 'Japan': 'jp', 'China': 'cn',
@@ -218,14 +245,8 @@ function getFlagCode(country: string) {
   };
   return map[country] || 'un';
 }
-
-function getGuideSlug(raceName: string) {
-  return `/circuits-live/circuit-guides/${raceName.toLowerCase().replace(/\s+/g, '-')}`;
-}
-
-function getSlug(raceName: string) {
-  return raceName.toLowerCase().replace(/\s+/g, '-');
-}
+function getGuideSlug(raceName: string) { return `/circuits-live/circuit-guides/${raceName.toLowerCase().replace(/\s+/g, '-')}`; }
+function getSlug(raceName: string) { return raceName.toLowerCase().replace(/\s+/g, '-'); }
 
 const getSessionArray = (race: Race) => [
   { id: 'fp1', name: 'Practice 1', utc: race.sessions.fp1, results: race.sessionResults?.fp1 },
@@ -306,32 +327,47 @@ const getSessionArray = (race: Race) => [
 
           <div class="countdown-card">
             <div class="countdown-header">
-              <span class="pulse-dot"></span>
-              <!-- Now strictly dynamic based on the active session -->
-              <span>Countdown to {targetSessionName}</span>
+              {isSessionLive ? <span class="live-pulse"></span> : <span class="pulse-dot"></span>}
+              <span>
+                {isSessionLive ? `${targetSessionName} is LIVE` : 
+                 awaitingResults ? `Weekend Concluded` : 
+                 `Countdown to ${targetSessionName}`}
+              </span>
             </div>
             
-            <div class="timer-grid" id="f1-countdown" data-target={targetCountdown}>
-              <div class="time-box">
-                <span class="time-val" id="cd-days">00</span>
-                <span class="time-label">Days</span>
+            {isSessionLive ? (
+              <div class="live-active-box">
+                <div class="live-badge-lg">● LIVE NOW</div>
+                <span class="live-sub">Session in progress on track</span>
               </div>
-              <span class="time-sep">:</span>
-              <div class="time-box">
-                <span class="time-val" id="cd-hours">00</span>
-                <span class="time-label">Hrs</span>
+            ) : awaitingResults ? (
+              <div class="live-active-box">
+                <div class="live-badge-lg" style="background: #334155; box-shadow: none;">🏁 FINISHED</div>
+                <span class="live-sub" style="color:#94a3b8;">Awaiting official classification...</span>
               </div>
-              <span class="time-sep">:</span>
-              <div class="time-box">
-                <span class="time-val" id="cd-mins">00</span>
-                <span class="time-label">Min</span>
+            ) : (
+              <div class="timer-grid" id="f1-countdown" data-target={targetCountdown}>
+                <div class="time-box">
+                  <span class="time-val" id="cd-days">00</span>
+                  <span class="time-label">Days</span>
+                </div>
+                <span class="time-sep">:</span>
+                <div class="time-box">
+                  <span class="time-val" id="cd-hours">00</span>
+                  <span class="time-label">Hrs</span>
+                </div>
+                <span class="time-sep">:</span>
+                <div class="time-box">
+                  <span class="time-val" id="cd-mins">00</span>
+                  <span class="time-label">Min</span>
+                </div>
+                <span class="time-sep">:</span>
+                <div class="time-box">
+                  <span class="time-val" id="cd-secs">00</span>
+                  <span class="time-label">Sec</span>
+                </div>
               </div>
-              <span class="time-sep">:</span>
-              <div class="time-box">
-                <span class="time-val" id="cd-secs">00</span>
-                <span class="time-label">Sec</span>
-              </div>
-            </div>
+            )}
           </div>
         </div>
 
@@ -561,7 +597,6 @@ const getSessionArray = (race: Race) => [
 
   function formatHeroSchedule() {
     const cards = document.querySelectorAll('.js-session-card');
-    const now = new Date().getTime();
 
     cards.forEach(card => {
       const utcStr = card.getAttribute('data-utc');
@@ -569,7 +604,6 @@ const getSessionArray = (race: Race) => [
       if (!utcStr || !trackTz) return;
 
       const dateObj = new Date(utcStr);
-      const sessionEndTime = dateObj.getTime() + (2 * 60 * 60 * 1000); 
 
       const trackFormatter = new Intl.DateTimeFormat('en-US', {
         timeZone: trackTz, weekday: 'short', hour: '2-digit', minute: '2-digit', hour12: false
@@ -937,12 +971,13 @@ const getSessionArray = (race: Race) => [
     color: #94a3b8;
   }
 
-  /* Countdown Timer */
+  /* Countdown & Live Timer */
   .countdown-card {
     background: #1e293b;
     padding: 1.5rem;
     border-radius: 8px;
     border: 1px solid #334155;
+    min-width: 250px;
   }
 
   .countdown-header {
@@ -958,6 +993,14 @@ const getSessionArray = (race: Race) => [
   }
 
   .pulse-dot {
+    width: 8px;
+    height: 8px;
+    background: #e10600;
+    border-radius: 50%;
+    box-shadow: 0 0 8px #e10600;
+  }
+  
+  .live-pulse {
     width: 8px;
     height: 8px;
     background: #e10600;
@@ -1010,6 +1053,34 @@ const getSessionArray = (race: Race) => [
     font-weight: 900;
     color: #475569;
     margin-top: -15px;
+  }
+
+  /* Live Session State Boxes */
+  .live-active-box {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+    padding: 0.5rem 0;
+  }
+
+  .live-badge-lg {
+    background: #e10600;
+    color: #ffffff;
+    font-size: 1.5rem;
+    font-weight: 900;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    letter-spacing: 0.05em;
+    box-shadow: 0 0 15px rgba(225, 6, 0, 0.4);
+  }
+
+  .live-sub {
+    color: #cbd5e1;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0.05em;
   }
 
   /* Hero Bottom Full Schedule */
