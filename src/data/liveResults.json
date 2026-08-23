@@ -1,27 +1,12 @@
 {
-  "FP1": {
-    "first": "NOR",
-    "second": "VER",
-    "third": "LEC"
+  "Session3": {
+    "first": "RUS",
+    "second": "LEC",
+    "third": "NOR"
   },
-  "FP2": {
+  "Session4": {
     "first": "NOR",
-    "second": "VER",
-    "third": "LEC"
-  },
-  "FP3": {
-    "first": "NOR",
-    "second": "VER",
-    "third": "LEC"
-  },
-  "Q": {
-    "first": "NOR",
-    "second": "VER",
-    "third": "PIA"
-  },
-  "R": {
-    "first": "NOR",
-    "second": "VER",
-    "third": "LEC"
+    "second": "RUS",
+    "third": "ANT"
   }
 }
