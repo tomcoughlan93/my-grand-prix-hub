@@ -5,18 +5,18 @@
 <header class="site-header">
   <div class="header-container">
     <!-- Brand Logo -->
-<a href="/" class="logo-container">
-  <svg width="32" height="24" viewBox="0 0 32 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-    <!-- Red Forward Slash -->
-    <path d="M10 2L2 22H10L18 2H10Z" fill="#e10600"/>
-    <!-- Gray/White Slashes -->
-    <path d="M20 2L14 14H20L26 2H20Z" fill="#e5e7eb"/>
-    <path d="M28 2L24 10H30L34 2H28Z" fill="#94a3b8"/>
-  </svg>
-  <span class="logo-text italic-shift">
-    <span class="logo-accent">MY GRAND PRIX</span> HUB
-  </span>
-</a>
+    <a href="/" class="logo-container">
+      <svg width="32" height="24" viewBox="0 0 32 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <!-- Red Forward Slash -->
+        <path d="M10 2L2 22H10L18 2H10Z" fill="#e10600"/>
+        <!-- Gray/White Slashes -->
+        <path d="M20 2L14 14H20L26 2H20Z" fill="#e5e7eb"/>
+        <path d="M28 2L24 10H30L34 2H28Z" fill="#94a3b8"/>
+      </svg>
+      <span class="logo-text italic-shift">
+        <span class="logo-accent">MY GRAND PRIX</span> HUB
+      </span>
+    </a>
 
     <!-- Mobile Menu Toggle Button -->
     <button id="mobile-menu-toggle" class="mobile-toggle" aria-label="Toggle navigation menu">
@@ -56,10 +56,6 @@
       <a href="/travel-and-tickets" class="nav-link">Travel & Tickets</a>
       <a href="/tv-guides" class="nav-link">Where to Watch</a>
       <a href="/creators" class="nav-link">Creators</a>
-      <a href="/live" class="nav-live-link">
-        <span class="nav-live-pulse"></span>
-        LIVE
-      </a>
     </nav>
   </div>
 </header>
@@ -106,7 +102,7 @@
     align-items: center;
   }
 
-.logo-container {
+  .logo-container {
     display: flex;
     align-items: center;
     gap: 0.75rem; /* Space between the SVG icon and the text */
@@ -210,44 +206,6 @@
     display: block;
   }
 
-  .nav-live-link {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    background: rgba(239, 68, 68, 0.15); /* Semi-transparent red */
-    border: 1px solid rgba(239, 68, 68, 0.4);
-    color: #ef4444; /* Bright red text */
-    padding: 0.4rem 0.85rem;
-    border-radius: 6px;
-    font-weight: 800;
-    text-decoration: none;
-    text-transform: uppercase;
-    font-size: 0.85rem;
-    letter-spacing: 0.05em;
-    transition: all 0.2s ease;
-  }
-
-  .nav-live-link:hover {
-    background: rgba(239, 68, 68, 0.25);
-    color: #f87171;
-    border-color: rgba(239, 68, 68, 0.6);
-  }
-
-  .nav-live-pulse {
-    width: 8px;
-    height: 8px;
-    background: #ef4444;
-    border-radius: 50%;
-    box-shadow: 0 0 8px #ef4444;
-    animation: navPulse 1.5s infinite;
-  }
-
-  @keyframes navPulse {
-    0% { transform: scale(0.95); opacity: 1; }
-    50% { transform: scale(1.2); opacity: 0.5; }
-    100% { transform: scale(0.95); opacity: 1; }
-  }
-
   /* ========================================================
      MOBILE RESPONSIVE STYLES
      Triggers at 1024px (Tablets & Phones) to prevent crowding
@@ -308,10 +266,6 @@
 
     .arrow {
       display: none; /* Hide the arrow since it's always open on mobile */
-    }
-
-    .nav-live-link {
-      margin-top: 0.5rem;
     }
   }
 </style>
