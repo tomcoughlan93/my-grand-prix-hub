@@ -1,4 +1,9 @@
 {
+  "Session1": {
+    "first": "NOR",
+    "second": "ANT",
+    "third": "RUS"
+  },
   "Session3": {
     "first": "RUS",
     "second": "LEC",
@@ -8,5 +13,10 @@
     "first": "NOR",
     "second": "RUS",
     "third": "ANT"
+  },
+  "Session5": {
+    "first": "NOR",
+    "second": "ANT",
+    "third": "RUS"
   }
 }
