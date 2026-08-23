@@ -14,7 +14,7 @@ const structuredData = {
       "@id": "https://mygrandprixhub.com/#website",
       "url": "https://mygrandprixhub.com/",
       "name": "My Grand Prix Hub",
-      "description": "Your ultimate Formula 1 fan companion for the 2026 season: 2026 race calendar, live timing telemetry, grandstand reviews, travel logistics, and track guides.",
+      "description": "Your ultimate Formula 1 fan companion for the 2026 season: 2026 race calendar, grandstand reviews, travel logistics, and track guides.",
       "inLanguage": "en-GB"
     },
     {
@@ -67,8 +67,8 @@ const TICKER_RACES = [
     sessions: { 
       fp1: "2026-09-24T13:30:00+04:00", 
       fp2: "2026-09-24T17:00:00+04:00", 
-      fp3: "2026-09-25T12:30:00+04:00", // Fixed
-      quali: "2026-09-25T16:00:00+04:00", // Fixed
+      fp3: "2026-09-25T12:30:00+04:00", 
+      quali: "2026-09-25T16:00:00+04:00", 
       race: "2026-09-26T15:00:00+04:00" 
     } 
   },
@@ -116,8 +116,8 @@ for (const race of TICKER_RACES) {
 ---
 
 <Layout 
-  title="My Grand Prix Hub | F1 2026 Calendar, Grandstand Reviews & Live Timing"
-  description="Your complete Formula 1 fan companion for 2026. Explore track guides, grandstand reviews, live timing & telemetry, race calendar countdowns, and travel tips."
+  title="My Grand Prix Hub | F1 2026 Calendar & Grandstand Reviews"
+  description="Your complete Formula 1 fan companion for 2026. Explore track guides, grandstand reviews, race calendar countdowns, and travel tips."
 >
   <script type="application/ld+json" set:html={JSON.stringify(structuredData)} />
 
@@ -127,16 +127,12 @@ for (const race of TICKER_RACES) {
       <span class="f1-badge">2026 Formula 1 Fan & Travel Guide</span>
       <h1>Plan Your Ultimate Grand Prix Weekend</h1>
       <p>
-        Unbiased grandstand reviews, trackside city guides, 2026 championship calendar countdowns, and second-screen live telemetry for Formula 1 fans worldwide.
+        Unbiased grandstand reviews, trackside city guides, and 2026 championship calendar countdowns for Formula 1 fans worldwide.
       </p>
       
       <div class="hero-actions">
         <a href="/championship/calendar" class="btn primary-btn">
           <span>2026 Race Calendar</span> 📅
-        </a>
-        <a href="/live" class="btn live-btn">
-          <span class="live-pulse"></span>
-          <span>Live Timing & Telemetry</span> ⏱️
         </a>
         <a href="/circuits-live/grandstands" class="btn secondary-btn">
           Grandstand Reviews 💺
@@ -182,22 +178,11 @@ for (const race of TICKER_RACES) {
     <section class="section-block" aria-labelledby="core-features-title">
       <div class="section-title-row">
         <h2 id="core-features-title">Explore The Grand Prix Hub</h2>
-        <p>Everything you need whether attending trackside or following the live sessions from home.</p>
+        <p>Everything you need whether attending trackside or following the race from home.</p>
       </div>
 
       <div class="pillar-grid">
-        <!-- 1. LIVE RACE CENTRE -->
-        <a href="/live" class="pillar-card highlight-card">
-          <div class="card-badge-row">
-            <span class="pillar-icon">⏱️</span>
-            <span class="pulse-badge"><span class="pulse-dot"></span>LIVE CENTRE</span>
-          </div>
-          <h3>Live Timing & Radio</h3>
-          <p>Real-time lap deltas, live telemetry, team radio audio feeds, race control flags, and pit stint trackers.</p>
-          <span class="pillar-link">Open Live Dashboard &rarr;</span>
-        </a>
-
-        <!-- 2. 2026 RACE CALENDAR -->
+        <!-- 1. 2026 RACE CALENDAR -->
         <a href="/championship/calendar" class="pillar-card">
           <div class="pillar-icon">📅</div>
           <h3>2026 Race Calendar</h3>
@@ -205,7 +190,7 @@ for (const race of TICKER_RACES) {
           <span class="pillar-link">View 2026 Schedule &rarr;</span>
         </a>
 
-        <!-- 3. CIRCUITS & TRACK GUIDES -->
+        <!-- 2. CIRCUITS & TRACK GUIDES -->
         <a href="/circuits-live/circuit-guides" class="pillar-card">
           <div class="pillar-icon">🏎️</div>
           <h3>Circuit Guides</h3>
@@ -213,7 +198,7 @@ for (const race of TICKER_RACES) {
           <span class="pillar-link">Browse All Tracks &rarr;</span>
         </a>
 
-        <!-- 4. GRANDSTAND REVIEWS -->
+        <!-- 3. GRANDSTAND REVIEWS -->
         <a href="/circuits-live/grandstands" class="pillar-card">
           <div class="pillar-icon">💺</div>
           <h3>Grandstand Reviews</h3>
@@ -221,7 +206,7 @@ for (const race of TICKER_RACES) {
           <span class="pillar-link">Find Best Seats &rarr;</span>
         </a>
 
-        <!-- 5. CHAMPIONSHIP STANDINGS -->
+        <!-- 4. CHAMPIONSHIP STANDINGS -->
         <a href="/championship" class="pillar-card">
           <div class="pillar-icon">🏆</div>
           <h3>2026 Standings & Teams</h3>
@@ -229,7 +214,7 @@ for (const race of TICKER_RACES) {
           <span class="pillar-link">Check Standings &rarr;</span>
         </a>
 
-        <!-- 6. TRAVEL & TICKETS -->
+        <!-- 5. TRAVEL & TICKETS -->
         <a href="/travel-and-tickets" class="pillar-card">
           <div class="pillar-icon">✈️</div>
           <h3>Travel & Tickets</h3>
@@ -237,7 +222,7 @@ for (const race of TICKER_RACES) {
           <span class="pillar-link">Plan Your Trip &rarr;</span>
         </a>
 
-        <!-- 7. WHERE TO WATCH & BROADCASTERS -->
+        <!-- 6. WHERE TO WATCH & BROADCASTERS -->
         <a href="/tv-guides" class="pillar-card">
           <div class="pillar-icon">📺</div>
           <h3>Where to Watch</h3>
@@ -245,12 +230,22 @@ for (const race of TICKER_RACES) {
           <span class="pillar-link">Find Broadcasters &rarr;</span>
         </a>
 
-        <!-- 8. PODCASTS & CREATORS -->
+        <!-- 7. PODCASTS & CREATORS -->
         <a href="/creators" class="pillar-card">
           <div class="pillar-icon">🎙️</div>
           <h3>Podcasts & Creators</h3>
           <p>Curated directory of top F1 YouTubers, technical analysis channels, and paddock podcasts.</p>
           <span class="pillar-link">Discover Creators &rarr;</span>
+        </a>
+
+        <!-- 8. LATEST NEWS & EDITORIALS -->
+        <a href="/latest-news" class="pillar-card highlight-card">
+          <div class="card-badge-row">
+            <span class="pillar-icon">📰</span>
+          </div>
+          <h3>Latest News & Editorials</h3>
+          <p>Read expert race previews, weekend summaries, and deep-dive editorial pieces from around the paddock.</p>
+          <span class="pillar-link">Read Articles &rarr;</span>
         </a>
       </div>
     </section>
@@ -413,27 +408,6 @@ for (const race of TICKER_RACES) {
 
   .primary-btn:hover {
     background-color: #b80500;
-  }
-
-  .live-btn {
-    background: rgba(239, 68, 68, 0.15);
-    color: #ef4444;
-    border: 1px solid rgba(239, 68, 68, 0.4);
-  }
-
-  .live-btn:hover {
-    background: rgba(239, 68, 68, 0.25);
-    border-color: rgba(239, 68, 68, 0.7);
-    color: #ffffff;
-  }
-
-  .live-pulse {
-    width: 8px;
-    height: 8px;
-    background: #ef4444;
-    border-radius: 50%;
-    box-shadow: 0 0 8px #ef4444;
-    animation: pulse 1.5s infinite;
   }
 
   .secondary-btn {
@@ -676,59 +650,9 @@ for (const race of TICKER_RACES) {
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
   }
 
-  .highlight-card {
-    position: relative;
-    background: linear-gradient(135deg, rgba(225, 6, 0, 0.15) 0%, rgba(15, 23, 42, 1) 100%);
-    border: 1px solid rgba(225, 6, 0, 0.5);
-    box-shadow: 0 0 20px rgba(225, 6, 0, 0.15);
-    overflow: hidden;
-  }
-
-  .highlight-card::before {
-    content: '';
-    position: absolute;
-    top: 0; 
-    left: 0; 
-    right: 0;
-    height: 3px;
-    background: #e10600;
-    box-shadow: 0 2px 8px rgba(225, 6, 0, 0.5);
-  }
-
-  .highlight-card:hover {
-    border-color: #e10600;
-    transform: translateY(-3px);
-    box-shadow: 0 8px 30px rgba(225, 6, 0, 0.35);
-  }
-
-  .card-badge-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1rem;
-  }
-
-  .pulse-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-    background: rgba(239, 68, 68, 0.15);
-    border: 1px solid rgba(239, 68, 68, 0.3);
-    color: #ef4444;
-    font-size: 0.65rem;
-    font-weight: 800;
-    padding: 0.2rem 0.5rem;
-    border-radius: 4px;
-    letter-spacing: 0.05em;
-  }
-
   .pillar-icon {
     font-size: 2rem;
     margin-bottom: 1rem;
-  }
-
-  .card-badge-row .pillar-icon {
-    margin-bottom: 0;
   }
 
   .pillar-card h3 {
