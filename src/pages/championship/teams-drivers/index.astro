@@ -2,6 +2,68 @@
 // src/pages/championship/teams-drivers.astro
 import Layout from '@/layouts/Layout.astro';
 
+// --- NEW: DRIVER SLUG MAPPING HELPER ---
+const DRIVER_SLUGS: Record<string, string> = {
+  VER: 'max-verstappen',
+  NOR: 'lando-norris',
+  LEC: 'charles-leclerc',
+  PIA: 'oscar-piastri',
+  HAM: 'lewis-hamilton',
+  RUS: 'george-russell',
+  ANT: 'kimi-antonelli',
+  ALO: 'fernando-alonso',
+  STR: 'lance-stroll',
+  HAD: 'isack-hadjar',
+  TSU: 'yuki-tsunoda',
+  LAW: 'liam-lawson',
+  ALB: 'alexander-albon',
+  SAI: 'carlos-sainz',
+  HUL: 'nico-hulkenberg',
+  BOR: 'gabriel-bortoleto',
+  GAS: 'pierre-gasly',
+  DOO: 'jack-doohan',
+  OCO: 'esteban-ocon',
+  BEA: 'oliver-bearman',
+  COL: 'franco-colapinto',
+  PER: 'sergio-perez',
+  BOT: 'valtteri-bottas',
+  LIN: 'arvid-lindblad',
+};
+
+function getDriverSlug(code?: string, name?: string): string {
+  if (code && DRIVER_SLUGS[code.toUpperCase()]) {
+    return DRIVER_SLUGS[code.toUpperCase()];
+  }
+  if (name) {
+    return name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '');
+  }
+  return '#';
+}
+// ---------------------------------------
+
+// --- NEW: TEAM SLUG MAPPING HELPER ---
+const TEAM_SLUGS: Record<string, string> = {
+  mclaren: 'mclaren',
+  ferrari: 'ferrari',
+  redbull: 'red-bull-racing',
+  mercedes: 'mercedes',
+  astonmartin: 'aston-martin',
+  rb: 'rb',
+  williams: 'williams',
+  audi: 'audi',
+  alpine: 'alpine',
+  haas: 'haas',
+  cadillac: 'cadillac'
+};
+
+function getTeamSlug(teamKey: string): string {
+  return TEAM_SLUGS[teamKey.toLowerCase()] || teamKey.toLowerCase();
+}
+// -------------------------------------
+
 interface Driver {
   number: string;
   name: string;
@@ -217,18 +279,21 @@ const TEAMS_DATA: Team[] = [
           
           <!-- Team Header -->
           <div class="team-header">
-            <div class="team-identity">
-              <div class={`team-color-indicator team-bg-${team.teamKey}`}></div>
-              <h2>{team.name}</h2>
-              {team.isChampion ? (
-                <div class="champion-icon" title="Defending Constructors' Champion">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M4.222 19.778c.026.173.082.342.164.502.19.373.498.665.875.83A2.08 2.08 0 0 0 6.222 21h11.556a2.08 2.08 0 0 0 .961-.102c.377-.165.685-.457.875-.83.082-.16.138-.329.164-.502L22 6.556a1 1 0 0 0-1.572-.818l-4.606 3.29-2.934-5.867a1 1 0 0 0-1.776 0l-2.934 5.867-4.606-3.29A1 1 0 0 0 2 6.556l2.222 13.222zM6 19l-1.63-9.778 3.52 2.514a1 1 0 0 0 1.258-.176L12 6.16l2.852 5.4a1 1 0 0 0 1.258.176l3.52-2.514L18 19H6z"/>
-                    <path d="M12 21v-2H6v2h12v-2h-6z"/>
-                  </svg>
-                </div>
-              ) : null}
-            </div>
+            <!-- NEW LINK WRAPPER -->
+            <a href={`/teams/${getTeamSlug(team.teamKey)}`} class="team-profile-link">
+              <div class="team-identity">
+                <div class={`team-color-indicator team-bg-${team.teamKey}`}></div>
+                <h2>{team.name}</h2>
+                {team.isChampion ? (
+                  <div class="champion-icon" title="Defending Constructors' Champion">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M4.222 19.778c.026.173.082.342.164.502.19.373.498.665.875.83A2.08 2.08 0 0 0 6.222 21h11.556a2.08 2.08 0 0 0 .961-.102c.377-.165.685-.457.875-.83.082-.16.138-.329.164-.502L22 6.556a1 1 0 0 0-1.572-.818l-4.606 3.29-2.934-5.867a1 1 0 0 0-1.776 0l-2.934 5.867-4.606-3.29A1 1 0 0 0 2 6.556l2.222 13.222zM6 19l-1.63-9.778 3.52 2.514a1 1 0 0 0 1.258-.176L12 6.16l2.852 5.4a1 1 0 0 0 1.258.176l3.52-2.514L18 19H6z"/>
+                      <path d="M12 21v-2H6v2h12v-2h-6z"/>
+                    </svg>
+                  </div>
+                ) : null}
+              </div>
+            </a>
             
             <div class="social-links-group">
               <a href={team.website} target="_blank" rel="noopener noreferrer" class="social-btn website-btn" title={`${team.name} Official Website`}>
@@ -282,7 +347,12 @@ const TEAMS_DATA: Team[] = [
                           class="driver-flag"
                           loading="lazy"
                         />
-                        <span class="driver-fullname">{driver.name}</span>
+                        
+                        <a href={`/drivers/${getDriverSlug(driver.code, driver.name)}`} class="driver-profile-link">
+                          <span class="driver-fullname">{driver.name}</span>
+                          <span class="driver-code-tag">{driver.code}</span>
+                        </a>
+
                         {driver.isChampion ? (
                           <div class="champion-icon" title="Defending Drivers' Champion">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
@@ -293,7 +363,6 @@ const TEAMS_DATA: Team[] = [
                         {driver.wdc ? (
                           <span class="wdc-count-pill" title={`${driver.wdc}x World Champion`}>{driver.wdc}x WDC</span>
                         ) : null}
-                        <span class="driver-code-tag">{driver.code}</span>
                       </div>
                     </div>
                   </div>
@@ -427,6 +496,22 @@ const TEAMS_DATA: Team[] = [
     gap: 0.75rem;
   }
 
+  /* --- NEW TEAM PROFILE LINK STYLES --- */
+  .directory-page .team-profile-link {
+    text-decoration: none;
+    display: inline-block;
+    transition: transform 0.15s ease;
+  }
+
+  .directory-page .team-profile-link:hover {
+    transform: translateX(2px);
+  }
+
+  .directory-page .team-profile-link:hover h2 {
+    color: #38bdf8;
+  }
+  /* ------------------------------------ */
+
   .directory-page .team-identity {
     display: flex;
     align-items: center;
@@ -438,6 +523,7 @@ const TEAMS_DATA: Team[] = [
     font-weight: 700;
     color: #f8fafc;
     margin: 0;
+    transition: color 0.15s ease;
   }
 
   /* Champion Icon */
@@ -575,10 +661,43 @@ const TEAMS_DATA: Team[] = [
     object-fit: cover;
   }
 
+  /* --- NEW DRIVER PROFILE LINK STYLES --- */
+  .directory-page .driver-profile-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #f8fafc;
+    text-decoration: none;
+    transition: color 0.15s ease, transform 0.15s ease;
+  }
+
+  .directory-page .driver-profile-link:hover {
+    color: #38bdf8;
+    transform: translateX(2px);
+  }
+
   .directory-page .driver-fullname {
     font-size: 0.95rem;
     font-weight: 700;
-    color: #f8fafc;
+  }
+
+  .directory-page .driver-code-tag {
+    font-size: 0.72rem;
+    font-weight: 800;
+    background: #0f172a;
+    color: #94a3b8;
+    padding: 0.1rem 0.35rem;
+    border-radius: 4px;
+    border: 1px solid #334155;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  }
+
+  .directory-page .driver-profile-link:hover .driver-code-tag {
+    background: #38bdf8;
+    color: #0f172a;
+    border-color: #38bdf8;
   }
 
   /* Driver WDC Pill */
@@ -591,17 +710,6 @@ const TEAMS_DATA: Team[] = [
     border-radius: 4px;
     border: 1px solid rgba(245, 158, 11, 0.3);
     letter-spacing: 0.05em;
-    white-space: nowrap;
-    flex-shrink: 0;
-  }
-
-  .directory-page .driver-code-tag {
-    font-size: 0.72rem;
-    font-weight: 800;
-    background: #0f172a;
-    color: #94a3b8;
-    padding: 0.1rem 0.35rem;
-    border-radius: 4px;
     white-space: nowrap;
     flex-shrink: 0;
   }

@@ -67,12 +67,14 @@ const drivers = defineCollection({
   loader: glob({ pattern: '**/[^_]*.{md,mdx}', base: './src/content/drivers' }),
   schema: z.object({
     name: z.string(),
-    team: z.string(),
+    code: z.string(),
     number: z.number(),
-    country: z.string().optional(),
-    heroImage: z.string().optional(),
-    points: z.number().optional(),
-    position: z.number().optional(),
+    team: z.string(),
+    teamKey: z.string(),
+    teamColor: z.string(),
+    countryCode: z.string(),
+    nationality: z.string(),
+    worldTitles: z.number().optional().default(0), // <-- Add this line!
   }),
 });
 

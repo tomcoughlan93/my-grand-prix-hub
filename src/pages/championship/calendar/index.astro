@@ -374,20 +374,36 @@ const getSessionArray = (race: Race) => [
                   </div>
                 </div>
                 
-                {/* ONLY display the results block if this is the actual Race session */}
+                {/* --- NEW ANTI-SPOILER RACE RESULTS BLOCK --- */}
                 {session.id === 'race' && (
                   <div class="h-sess-results js-sess-results">
                     {session.results ? (
-                      <div class="mini-podium">
-                        <span class="m-step m-1" title="1st Place">🥇 {session.results.first}</span>
-                        <span class="m-step m-2" title="2nd Place">🥈 {session.results.second}</span>
-                        <span class="m-step m-3" title="3rd Place">🥉 {session.results.third}</span>
+                      <div class="spoiler-container js-spoiler-container">
+                        
+                        <!-- The Reveal Button -->
+                        <button class="reveal-btn js-reveal-btn">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                            <circle cx="12" cy="12" r="3"/>
+                          </svg>
+                          Reveal Results
+                        </button>
+                        
+                        <!-- The Hidden Results Grid -->
+                        <div class="mini-podium race-podium is-hidden js-race-podium">
+                          <span class="m-step m-1" title="1st Place">🥇 {session.results.first}</span>
+                          <span class="m-step m-2" title="2nd Place">🥈 {session.results.second}</span>
+                          <span class="m-step m-3" title="3rd Place">🥉 {session.results.third}</span>
+                        </div>
+                        
                       </div>
                     ) : (
                       <span class="pending-results">Awaiting Results...</span>
                     )}
                   </div>
                 )}
+                {/* ------------------------------------------- */}
+
               </div>
             ))}
           </div>
@@ -631,6 +647,25 @@ const getSessionArray = (race: Race) => [
     });
   }
 
+  // --- NEW SCRIPT: ANTI-SPOILER LOGIC ---
+  function setupSpoilers() {
+    const revealButtons = document.querySelectorAll('.js-reveal-btn');
+    
+    revealButtons.forEach(btn => {
+      const newBtn = btn.cloneNode(true);
+      btn.parentNode.replaceChild(newBtn, btn);
+      
+      newBtn.addEventListener('click', (e) => {
+        const container = e.target.closest('.js-spoiler-container');
+        const podium = container.querySelector('.js-race-podium');
+        
+        newBtn.classList.add('is-hidden');
+        podium.classList.remove('is-hidden');
+      });
+    });
+  }
+  // --------------------------------------
+
   function initCountdown() {
     const timerElement = document.getElementById('f1-countdown');
     if (!timerElement) return;
@@ -676,6 +711,7 @@ const getSessionArray = (race: Race) => [
     formatSessionTimes();
     formatHeroSchedule();
     setupAccordions();
+    setupSpoilers(); // <-- Added to our main runner
     initCountdown();
   }
 
@@ -1159,6 +1195,54 @@ const getSessionArray = (race: Race) => [
     border-radius: 4px;
     letter-spacing: 0.05em;
   }
+
+  /* --- NEW ANTI-SPOILER STYLES --- */
+  .spoiler-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+  }
+
+  .reveal-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: #1e293b;
+    border: 1px solid #38bdf8;
+    color: #38bdf8;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 0.3rem 0.6rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .reveal-btn:hover {
+    background: #38bdf8;
+    color: #0f172a;
+  }
+
+  .reveal-btn.is-hidden {
+    display: none;
+  }
+  
+  .race-podium {
+    animation: fadeIn 0.3s ease-in;
+  }
+  
+  .race-podium.is-hidden {
+    display: none !important;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  /* ------------------------------- */
 
   .mini-podium {
     display: flex;

@@ -1,0 +1,664 @@
+---
+// src/pages/drivers/[slug].astro
+import Layout from '@/layouts/Layout.astro';
+import seasonData from '@/content/results/season-2026.json';
+
+export async function getStaticPaths() {
+  const driverFiles = import.meta.glob('/src/content/drivers/*.md', { eager: true });
+
+  return Object.entries(driverFiles).map(([path, file]: [string, any]) => {
+    const slug = path.split('/').pop()?.replace('.md', '') || '';
+    return {
+      params: { slug },
+      props: {
+        driver: file.frontmatter,
+        Content: file.Content,
+      },
+    };
+  });
+}
+
+const { driver, Content } = Astro.props;
+
+// 2026 Calendar Map for the Season Timeline
+const ROUND_DATA = [
+  { round: 1, name: 'AUS', flag: 'au', gp: 'Australian GP' },
+  { round: 2, name: 'CHN', flag: 'cn', gp: 'Chinese GP' },
+  { round: 3, name: 'JPN', flag: 'jp', gp: 'Japanese GP' },
+  { round: 4, name: 'MIA', flag: 'us', gp: 'Miami GP' },
+  { round: 5, name: 'CAN', flag: 'ca', gp: 'Canadian GP' },
+  { round: 6, name: 'MON', flag: 'mc', gp: 'Monaco GP' },
+  { round: 7, name: 'ESP', flag: 'es', gp: 'Spanish GP' },
+  { round: 8, name: 'AUT', flag: 'at', gp: 'Austrian GP' },
+  { round: 9, name: 'GBR', flag: 'gb', gp: 'British GP' },
+  { round: 10, name: 'BEL', flag: 'be', gp: 'Belgian GP' },
+  { round: 11, name: 'HUN', flag: 'hu', gp: 'Hungarian GP' },
+  { round: 12, name: 'NED', flag: 'nl', gp: 'Dutch GP' },
+  { round: 13, name: 'ITA', flag: 'it', gp: 'Italian GP' },
+  { round: 14, name: 'MAD', flag: 'es', gp: 'Madrid GP' },
+  { round: 15, name: 'AZE', flag: 'az', gp: 'Azerbaijan GP' },
+  { round: 16, name: 'SIN', flag: 'sg', gp: 'Singapore GP' },
+  { round: 17, name: 'USA', flag: 'us', gp: 'United States GP' },
+  { round: 18, name: 'MEX', flag: 'mx', gp: 'Mexico City GP' },
+  { round: 19, name: 'BRA', flag: 'br', gp: 'São Paulo GP' },
+  { round: 20, name: 'LVG', flag: 'us', gp: 'Las Vegas GP' },
+  { round: 21, name: 'QAT', flag: 'qa', gp: 'Qatar GP' },
+  { round: 22, name: 'ABU', flag: 'ae', gp: 'Abu Dhabi GP' },
+];
+
+// 1. Pull Driver Season Results from Master Grid
+const code = driver.code.toUpperCase().trim();
+// Add "as any" to the end of this line to bypass the dynamic key error
+const gridDriver = seasonData?.drivers?.find((d: any) => String(d.code).toUpperCase().trim() === code) as any;
+const seasonResults: (string | number)[] = [];
+let seasonPodiums = 0;
+let seasonWins = 0;
+let seasonPointsFinishes = 0;
+
+for (let i = 1; i <= 22; i++) {
+  const val = gridDriver?.[`r${i}`] ? String(gridDriver[`r${i}`]).trim().toUpperCase() : '-';
+  if (val === 'RET' || val === 'DNF' || val === 'DSQ') {
+    seasonResults.push('RET');
+  } else if (val === '-' || val === '') {
+    seasonResults.push('-');
+  } else {
+    const pos = parseInt(val, 10);
+    if (!isNaN(pos)) {
+      seasonResults.push(pos);
+      if (pos === 1) seasonWins++;
+      if (pos <= 3) seasonPodiums++;
+      if (pos <= 10) seasonPointsFinishes++;
+    } else {
+      seasonResults.push(val);
+    }
+  }
+}
+
+// 2. Fetch Live Championship Stats (with Fallbacks)
+let currentStanding = {
+  pos: '--',
+  points: 0,
+  wins: seasonWins,
+};
+
+try {
+  const res = await fetch('https://api.jolpi.ca/ergast/f1/current/driverStandings.json', {
+    headers: { 'User-Agent': 'Mozilla/5.0' },
+  });
+  if (res.ok) {
+    const data = await res.json();
+    const dList = data?.MRData?.StandingsTable?.StandingsLists?.[0]?.DriverStandings;
+    if (dList) {
+      const match = dList.find(
+        (item: any) =>
+          (item.Driver.code && item.Driver.code.toUpperCase() === code) ||
+          item.Driver.familyName.toLowerCase().includes(driver.name.split(' ').pop()?.toLowerCase() || '')
+      );
+      if (match) {
+        currentStanding = {
+          pos: match.position,
+          points: parseFloat(match.points) || 0,
+          wins: parseInt(match.wins) || seasonWins,
+        };
+      }
+    }
+  }
+} catch {
+  // Graceful offline fallback
+}
+
+function getFormBadgeClass(result: number | string): string {
+  const resStr = String(result).toUpperCase().trim();
+  if (resStr === 'RET') return 'badge-ret';
+  if (resStr === 'DNS' || resStr === 'DSQ') return 'badge-dns'; // <-- Add this line!
+  if (resStr === '-' || resStr === '') return 'badge-dnp';
+  
+  const num = parseInt(resStr, 10);
+  if (!isNaN(num)) {
+    if (num === 1) return 'badge-p1';
+    if (num === 2) return 'badge-p2';
+    if (num === 3) return 'badge-p3';
+    if (num <= 10) return 'badge-points';
+  }
+  return 'badge-out';
+}
+---
+
+<Layout
+  title={`${driver.name} (#${driver.number}) | F1 Driver Profile | My Grand Prix Hub`}
+  description={`Official 2026 driver profile for ${driver.name}. Career biography, race results timeline, championship standing, and statistics.`}
+>
+  <main class="driver-profile-container">
+    <!-- Breadcrumb navigation -->
+    <nav class="breadcrumb-nav">
+      <a href="/championship/standings">Standings</a>
+      <span class="sep">/</span>
+      <span class="current">{driver.name}</span>
+    </nav>
+
+    <!-- Typography & Color Hero -->
+    <header class="driver-hero" style={`--team-accent: ${driver.teamColor};`}>
+      <div class="hero-glow"></div>
+      
+      <!-- Watermarked Driver Number -->
+      <span class="hero-number-bg">#{driver.number}</span>
+
+      <div class="hero-content">
+        <div class="hero-meta-top">
+          <div class="team-pill">
+            <span class="team-dot" style={`background-color: ${driver.teamColor};`}></span>
+            <span class="team-name">{driver.team}</span>
+          </div>
+          <div class="nat-pill">
+            <img
+              src={`https://flagcdn.com/w20/${driver.countryCode}.png`}
+              width="16"
+              height="12"
+              alt={driver.nationality}
+              class="flag-img"
+            />
+            <span>{driver.nationality}</span>
+          </div>
+        </div>
+
+        <div class="hero-title-row">
+          <h1>{driver.name}</h1>
+          <span class="driver-tag">{driver.code}</span>
+        </div>
+
+        <!-- Dynamic Season Stat Strip -->
+        <div class="season-stats-strip">
+          <div class="stat-card">
+            <span class="stat-label">2026 Championship</span>
+            <div class="stat-val-group">
+              <span class="stat-val">{currentStanding.pos !== '--' ? `P${currentStanding.pos}` : '--'}</span>
+            </div>
+          </div>
+
+          <!-- WORLD TITLES CARD -->
+          <div class="stat-card">
+            <span class="stat-label">World Titles</span>
+            <div class="stat-val-group">
+              <span class="stat-val">{driver.worldTitles}</span>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <span class="stat-label">Points</span>
+            <div class="stat-val-group">
+              <span class="stat-val">{currentStanding.points}</span>
+              <span class="stat-sub">PTS</span>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <span class="stat-label">Wins</span>
+            <div class="stat-val-group">
+              <span class="stat-val">{currentStanding.wins}</span>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <span class="stat-label">Podiums</span>
+            <div class="stat-val-group">
+              <span class="stat-val">{seasonPodiums}</span>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <span class="stat-label">Top 10 Finishes</span>
+            <div class="stat-val-group">
+              <span class="stat-val">{seasonPointsFinishes}</span>
+            </div>
+          </div>
+        </div> <!-- Closes season-stats-strip -->
+      </div> <!-- Closes hero-content -->
+    </header> <!-- Closes driver-hero -->
+
+    <!-- 2026 Season Timeline (Automated from Master Grid) -->
+    <section class="profile-section">
+      <div class="section-title-row">
+        <h2>2026 Grand Prix Results</h2>
+        <span class="section-badge">Season Tracker</span>
+      </div>
+
+      <div class="timeline-card">
+        <div class="full-season-grid">
+          {seasonResults.map((res, index) => {
+            const raceInfo = ROUND_DATA[index];
+            return (
+              <div class="season-race-box" title={raceInfo.gp}>
+                <img
+                  src={`https://flagcdn.com/w20/${raceInfo.flag}.png`}
+                  alt={raceInfo.name}
+                  class="race-card-flag"
+                  loading="lazy"
+                />
+                <span class="race-round">{raceInfo.name}</span>
+                <span class={`form-circle ${getFormBadgeClass(res)}`}>{res}</span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+
+    <!-- Biography & Editorial Section -->
+    <section class="profile-section">
+      <div class="section-title-row">
+        <h2>Biography & Career Notes</h2>
+      </div>
+      <div class="bio-card">
+        <div class="prose-content">
+          <Content />
+        </div>
+      </div>
+    </section>
+  </main>
+</Layout>
+
+<style>
+  .driver-profile-container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 2.5rem 1.5rem 6rem;
+    color: #f1f5f9;
+    box-sizing: border-box;
+  }
+
+  .breadcrumb-nav {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: #64748b;
+    margin-bottom: 1.5rem;
+    font-weight: 600;
+  }
+
+  .breadcrumb-nav a {
+    color: #38bdf8;
+    text-decoration: none;
+  }
+
+  .breadcrumb-nav a:hover {
+    text-decoration: underline;
+  }
+
+  .breadcrumb-nav .sep {
+    color: #334155;
+  }
+
+  .breadcrumb-nav .current {
+    color: #94a3b8;
+  }
+
+  /* Hero Section */
+  .driver-hero {
+    position: relative;
+    background: #0f172a;
+    border: 1px solid #1e293b;
+    border-radius: 16px;
+    overflow: hidden;
+    padding: 3rem;
+    margin-bottom: 3.5rem;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+  }
+
+  .hero-glow {
+    position: absolute;
+    top: -50px;
+    right: -50px;
+    width: 320px;
+    height: 320px;
+    background: radial-gradient(circle, var(--team-accent) 0%, rgba(15, 23, 42, 0) 70%);
+    opacity: 0.18;
+    pointer-events: none;
+  }
+
+  .hero-number-bg {
+    position: absolute;
+    right: 2rem;
+    bottom: -1.5rem;
+    font-size: 14rem;
+    font-weight: 900;
+    line-height: 1;
+    color: var(--team-accent);
+    opacity: 0.08;
+    user-select: none;
+    pointer-events: none;
+    font-family: inherit;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 2;
+  }
+
+  .hero-meta-top {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+    flex-wrap: wrap;
+  }
+
+  .team-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #1e293b;
+    border: 1px solid #334155;
+    padding: 0.35rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #ffffff;
+  }
+
+  .team-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+  }
+
+  .nat-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: #1e293b;
+    border: 1px solid #334155;
+    padding: 0.35rem 0.65rem;
+    border-radius: 9999px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #94a3b8;
+  }
+
+  .flag-img {
+    border-radius: 2px;
+  }
+
+  .hero-title-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2.5rem;
+    flex-wrap: wrap;
+  }
+
+  .hero-title-row h1 {
+    font-size: 3.25rem;
+    font-weight: 900;
+    color: #ffffff;
+    letter-spacing: -0.03em;
+    margin: 0;
+  }
+
+  .driver-tag {
+    background: #1e293b;
+    color: #38bdf8;
+    font-size: 1rem;
+    font-weight: 800;
+    padding: 0.25rem 0.6rem;
+    border-radius: 6px;
+    border: 1px solid #334155;
+  }
+
+  /* Stat Strip (3x2 Grid) */
+  .season-stats-strip {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+    max-width: 720px;
+  }
+
+  .stat-card {
+    background: #1e293b;
+    border: 1px solid #334155;
+    padding: 1rem 1.25rem;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  .stat-label {
+    font-size: 0.72rem;
+    color: #64748b;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .stat-val-group {
+    display: flex;
+    align-items: baseline;
+    gap: 0.35rem;
+  }
+
+  .stat-val {
+    font-size: 1.75rem;
+    font-weight: 900;
+    color: #ffffff;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .stat-sub {
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: #e10600;
+  }
+
+  /* Profile Sections */
+  .profile-section {
+    margin-bottom: 3.5rem;
+  }
+
+  .section-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.25rem;
+    border-bottom: 1px solid #334155;
+    padding-bottom: 0.75rem;
+  }
+
+  .section-title-row h2 {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin: 0;
+  }
+
+  .section-badge {
+    background: #0f172a;
+    color: #38bdf8;
+    border: 1px solid #334155;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    text-transform: uppercase;
+  }
+
+  .timeline-card,
+  .bio-card {
+    background: #0f172a;
+    border: 1px solid #1e293b;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  }
+
+  /* Horizontal Grid */
+  .full-season-grid {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 0.75rem;
+    overflow-x: auto;
+    padding-bottom: 0.75rem;
+  }
+
+  .full-season-grid::-webkit-scrollbar {
+    height: 6px;
+  }
+  .full-season-grid::-webkit-scrollbar-track {
+    background: #0f172a;
+    border-radius: 4px;
+  }
+  .full-season-grid::-webkit-scrollbar-thumb {
+    background: #334155;
+    border-radius: 4px;
+  }
+  .full-season-grid::-webkit-scrollbar-thumb:hover {
+    background: #475569;
+  }
+
+  .season-race-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    background: #1e293b;
+    border: 1px solid #334155;
+    padding: 0.75rem 0.5rem;
+    border-radius: 8px;
+    min-width: 58px;
+    height: 105px; /* Locks all cards to identical height */
+    box-sizing: border-box;
+    flex-shrink: 0;
+  }
+
+  .race-card-flag {
+    width: 20px;
+    height: 14px;
+    object-fit: cover;
+    border-radius: 2px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+  }
+
+  .race-round {
+    font-size: 0.65rem;
+    color: #94a3b8;
+    font-weight: 800;
+    line-height: 1;
+    margin: 0.25rem 0;
+  }
+
+  /* Form Circles */
+  .form-circle {
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
+    min-height: 28px;
+    max-width: 28px;
+    max-height: 28px;
+    border-radius: 50% !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.78rem;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    box-sizing: border-box;
+    text-align: center;
+    flex-shrink: 0;
+    margin-top: auto; /* Pins every badge to the bottom edge */
+  }
+
+  .badge-p1 {
+    background: #ffd700;
+    color: #000000;
+    font-weight: 900;
+    box-shadow: 0 0 6px rgba(255, 215, 0, 0.45);
+    border: 1px solid transparent;
+  }
+
+  .badge-p2 {
+    background: #cbd5e1;
+    color: #0f172a;
+    font-weight: 900;
+    border: 1px solid transparent;
+  }
+
+  .badge-p3 {
+    background: #d97706;
+    color: #ffffff;
+    font-weight: 900;
+    border: 1px solid transparent;
+  }
+
+  .badge-points {
+    background: #0f172a;
+    color: #38bdf8;
+    border: 1px solid #334155;
+  }
+
+  .badge-out {
+    background: #090e1a;
+    color: #64748b;
+    border: 1px solid #1e293b;
+  }
+
+  .badge-ret {
+    background: rgba(225, 6, 0, 0.25);
+    color: #f87171;
+    border: 1px solid rgba(225, 6, 0, 0.5);
+    font-size: 0.6rem; 
+  }
+
+  /* NEW: DNS / DSQ Badge */
+  .badge-dns {
+    background: rgba(100, 116, 139, 0.25);
+    color: #94a3b8;
+    border: 1px solid rgba(100, 116, 139, 0.5);
+    font-size: 0.6rem; /* Critical for fitting 3 letters */
+  }
+
+  .badge-dnp {
+    background: transparent;
+    color: #475569;
+    border: 1px dashed #334155;
+  }
+
+  /* Biography Prose */
+  .prose-content {
+    color: #cbd5e1;
+    font-size: 1.05rem;
+    line-height: 1.75;
+  }
+
+  .prose-content :global(p) {
+    margin-bottom: 1.25rem;
+  }
+
+  .prose-content :global(h3) {
+    color: #ffffff;
+    font-size: 1.3rem;
+    margin-top: 1.75rem;
+    margin-bottom: 0.75rem;
+    font-weight: 700;
+  }
+
+  /* Responsive Mobile Overrides */
+  @media (max-width: 768px) {
+    .driver-hero {
+      padding: 1.75rem;
+    }
+    .hero-title-row h1 {
+      font-size: 2.25rem;
+    }
+    .hero-number-bg {
+      font-size: 9rem;
+      right: 1rem;
+      bottom: 0;
+    }
+    .season-stats-strip {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+</style>

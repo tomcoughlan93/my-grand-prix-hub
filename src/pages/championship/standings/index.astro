@@ -4,6 +4,68 @@ import Layout from '@/layouts/Layout.astro';
 // 1. Import our new Master Results Grid!
 import seasonData from '@/content/results/season-2026.json';
 
+// --- NEW: DRIVER SLUG MAPPING HELPER ---
+const DRIVER_SLUGS: Record<string, string> = {
+  VER: 'max-verstappen',
+  NOR: 'lando-norris',
+  LEC: 'charles-leclerc',
+  PIA: 'oscar-piastri',
+  HAM: 'lewis-hamilton',
+  RUS: 'george-russell',
+  ANT: 'kimi-antonelli',
+  ALO: 'fernando-alonso',
+  STR: 'lance-stroll',
+  HAD: 'isack-hadjar',
+  TSU: 'yuki-tsunoda',
+  LAW: 'liam-lawson',
+  ALB: 'alexander-albon',
+  SAI: 'carlos-sainz',
+  HUL: 'nico-hulkenberg',
+  BOR: 'gabriel-bortoleto',
+  GAS: 'pierre-gasly',
+  DOO: 'jack-doohan',
+  OCO: 'esteban-ocon',
+  BEA: 'oliver-bearman',
+  COL: 'franco-colapinto',
+  PER: 'sergio-perez',
+  BOT: 'valtteri-bottas',
+  LIN: 'arvid-lindblad',
+};
+
+function getDriverSlug(code?: string, name?: string): string {
+  if (code && DRIVER_SLUGS[code.toUpperCase()]) {
+    return DRIVER_SLUGS[code.toUpperCase()];
+  }
+  if (name) {
+    return name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '');
+  }
+  return '#';
+}
+// ---------------------------------------
+
+// --- NEW: TEAM SLUG MAPPING HELPER ---
+const TEAM_SLUGS: Record<string, string> = {
+  mclaren: 'mclaren',
+  ferrari: 'ferrari',
+  redbull: 'red-bull-racing',
+  mercedes: 'mercedes',
+  astonmartin: 'aston-martin',
+  rb: 'rb',
+  williams: 'williams',
+  audi: 'audi',
+  alpine: 'alpine',
+  haas: 'haas',
+  cadillac: 'cadillac'
+};
+
+function getTeamSlug(teamKey: string): string {
+  return TEAM_SLUGS[teamKey.toLowerCase()] || teamKey.toLowerCase();
+}
+// -------------------------------------
+
 interface DriverStanding {
   pos: number;
   driverNumber: string;
@@ -249,6 +311,7 @@ try {
 function getFormBadgeClass(result: number | string): string {
   const resStr = String(result).toUpperCase().trim();
   if (resStr === 'RET') return 'badge-ret';
+  if (resStr === 'DNS' || resStr === 'DSQ') return 'badge-dns'; // <-- Add this line!
   if (resStr === '-' || resStr === '') return 'badge-dnp';
   
   const num = parseInt(resStr, 10);
@@ -313,8 +376,11 @@ function getFormBadgeClass(result: number | string): string {
                         <span class="driver-number">{d.driverNumber}</span>
                         <div class="driver-info-block">
                           <div class="driver-name-row">
-                            <span class="driver-fullname">{d.driverName}</span>
-                            <span class="driver-code-tag">{d.driverCode}</span>
+                            <!-- NEW DYNAMIC LINK HERE -->
+                            <a href={`/drivers/${getDriverSlug(d.driverCode, d.driverName)}`} class="driver-profile-link">
+                              <span class="driver-fullname">{d.driverName}</span>
+                              <span class="driver-code-tag">{d.driverCode}</span>
+                            </a>
                           </div>
                           <span class="driver-sub-team">{d.team}</span>
                         </div>
@@ -427,12 +493,15 @@ function getFormBadgeClass(result: number | string): string {
                   <td class="col-pos">
                     <span class={`pos-badge pos-${c.pos}`}>{c.pos}</span>
                   </td>
-                  <td class="col-team-title">
-                    <div class="team-cell">
-                      <div class={`team-color-indicator team-bg-${c.teamKey}`}></div>
-                      <span class="team-name-text">{c.team}</span>
-                    </div>
-                  </td>
+                  <!-- Replace this cell in the Constructors table -->
+<td class="col-team-title">
+  <a href={`/teams/${getTeamSlug(c.teamKey)}`} class="team-profile-link">
+    <div class="team-cell">
+      <div class={`team-color-indicator team-bg-${c.teamKey}`}></div>
+      <span class="team-name-text">{c.team}</span>
+    </div>
+  </a>
+</td>
                   <td class="col-wins">
                     <span class="stat-num">{c.wins}</span>
                   </td>
@@ -466,7 +535,10 @@ function getFormBadgeClass(result: number | string): string {
       const newRow = row.cloneNode(true);
       row.parentNode.replaceChild(newRow, row);
       
-      newRow.addEventListener('click', () => {
+      newRow.addEventListener('click', (e) => {
+        // Prevent accordion toggle if the user clicks the profile link!
+        if (e.target.closest('.driver-profile-link')) return;
+
         const targetId = newRow.getAttribute('data-target');
         const targetRow = document.getElementById(targetId);
         if (!targetRow) return;
@@ -846,9 +918,22 @@ function getFormBadgeClass(result: number | string): string {
     gap: 0.5rem;
   }
 
+  /* --- NEW DRIVER PROFILE LINK STYLES --- */
+  .driver-profile-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #f1f5f9;
+    text-decoration: none;
+    transition: color 0.15s ease, transform 0.15s ease;
+  }
+
+  .driver-profile-link:hover {
+    color: #38bdf8;
+  }
+
   .driver-fullname {
     font-weight: 700;
-    color: #ffffff;
     font-size: 1.02rem;
   }
 
@@ -859,7 +944,16 @@ function getFormBadgeClass(result: number | string): string {
     color: #94a3b8;
     padding: 0.15rem 0.4rem;
     border-radius: 4px;
+    border: 1px solid #334155;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
   }
+
+  .driver-profile-link:hover .driver-code-tag {
+    background: #38bdf8;
+    color: #0f172a;
+    border-color: #38bdf8;
+  }
+  /* -------------------------------------- */
 
   .driver-sub-team {
     font-size: 0.8rem;
@@ -973,7 +1067,15 @@ function getFormBadgeClass(result: number | string): string {
     background: rgba(225, 6, 0, 0.25);
     color: #f87171;
     border: 1px solid rgba(225, 6, 0, 0.5);
-    font-size: 0.6rem; /* Dropped slightly to fit "RET" cleanly */
+    font-size: 0.6rem; 
+  }
+
+  /* NEW: DNS / DSQ Badge */
+  .badge-dns {
+    background: rgba(100, 116, 139, 0.25);
+    color: #94a3b8;
+    border: 1px solid rgba(100, 116, 139, 0.5);
+    font-size: 0.6rem; /* Critical for fitting 3 letters */
   }
 
   .badge-dnp {
@@ -1057,5 +1159,19 @@ function getFormBadgeClass(result: number | string): string {
     .col-form {
       display: none;
     }
+  }
+  /* --- NEW TEAM PROFILE LINK STYLES --- */
+  .team-profile-link {
+    text-decoration: none;
+    display: inline-block;
+    transition: transform 0.15s ease;
+  }
+
+  .team-profile-link:hover {
+    transform: translateX(2px);
+  }
+
+  .team-profile-link:hover .team-name-text {
+    color: #38bdf8;
   }
 </style>

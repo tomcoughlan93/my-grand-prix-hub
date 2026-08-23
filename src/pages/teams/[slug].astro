@@ -1,0 +1,1093 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import seasonData from '@/content/results/season-2026.json';
+import Parser from 'rss-parser';
+
+// --- RSS PARSER SETUP ---
+interface CustomFeedItem {
+  mediaContent?: any;
+  mediaThumbnail?: any;
+  enclosure?: { url?: string };
+  contentEncoded?: string;
+  description?: string;
+  content?: string;
+  summary?: string;
+  contentSnippet?: string;
+  title?: string;
+  link?: string;
+  pubDate?: string;
+}
+
+const parser: Parser<{}, CustomFeedItem> = new Parser({
+  customFields: {
+    item: [
+      ['media:content', 'mediaContent', { keepArray: true }],
+      ['media:thumbnail', 'mediaThumbnail', { keepArray: true }],
+      ['enclosure', 'enclosure'],
+      ['content:encoded', 'contentEncoded'],
+      ['description', 'description'],
+    ],
+  },
+});
+
+const VERIFIED_FEEDS = [
+  { name: 'BBC Sport F1', url: 'https://feeds.bbci.co.uk/sport/formula1/rss.xml' },
+  { name: 'Autosport', url: 'https://www.autosport.com/rss/f1/news/' },
+  { name: 'Motorsport.com', url: 'https://www.motorsport.com/rss/f1/news/' },
+  { name: 'RacingNews365', url: 'https://racingnews365.com/feed/news.xml' },
+  { name: 'Crash.net F1', url: 'https://www.crash.net/rss/f1' },
+];
+
+function cleanSnippet(str?: string): string {
+  if (!str) return '';
+  const text = str.replace(/<[^>]*>?/gm, '').replace(/&quot;/g, '"').replace(/&amp;/g, '&').replace(/&#039;/g, "'").replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/\s+/g, ' ').trim();
+  return text.length > 130 ? text.substring(0, 127) + '...' : text;
+}
+
+function extractImage(item: CustomFeedItem, sourceName: string): string | undefined {
+  let url: string | undefined = undefined;
+  if (item.enclosure?.url) url = item.enclosure.url;
+  else if (item.mediaContent && Array.isArray(item.mediaContent)) {
+    const found = item.mediaContent.find((m: any) => m.$?.url || m.url);
+    if (found) url = found.$?.url || found.url;
+  }
+  else if (item.mediaThumbnail && Array.isArray(item.mediaThumbnail)) {
+    const found = item.mediaThumbnail.find((t: any) => t.$?.url || t.url);
+    if (found) url = found.$?.url || found.url;
+  }
+  if (!url) {
+    const html = item.contentEncoded || item.content || item.summary || item.description || '';
+    const match = html.match(/<img[^>]+src=["']([^"']+)["']/i);
+    if (match && match[1]) url = match[1];
+  }
+  if (!url) return undefined;
+  if (sourceName === 'BBC Sport F1') url = url.replace(/\/\d+x\d+\//g, '/976x549/').replace(/\/p\d+\//g, '/p0976/').replace(/\/(144|240|320|480)\//g, '/976/');
+  return url;
+}
+
+// 1. DEFINE TEAMS FOR STATIC PATH GENERATION
+export async function getStaticPaths() {
+  const teams = [
+    { 
+      slug: 'mclaren', name: 'McLaren Formula 1 Team', shortName: 'McLaren', key: 'mclaren', color: '#ff8000', 
+      d1: 'NOR', d1Name: 'Lando Norris', d1Last: 'Norris', d2: 'PIA', d2Name: 'Oscar Piastri', d2Last: 'Piastri', 
+      chassis: 'MCL38', pu: 'Mercedes-AMG', base: 'Woking, UK', principal: 'Andrea Stella',
+      aliases: ['mclaren', 'woking']
+    },
+    { 
+      slug: 'ferrari', name: 'Scuderia Ferrari', shortName: 'Ferrari', key: 'ferrari', color: '#e8002d', 
+      d1: 'LEC', d1Name: 'Charles Leclerc', d1Last: 'Leclerc', d2: 'HAM', d2Name: 'Lewis Hamilton', d2Last: 'Hamilton', 
+      chassis: 'SF-26', pu: 'Ferrari', base: 'Maranello, Italy', principal: 'Frédéric Vasseur',
+      aliases: ['ferrari', 'scuderia', 'maranello']
+    },
+    { 
+      slug: 'red-bull-racing', name: 'Red Bull Racing', shortName: 'Red Bull', key: 'redbull', color: '#3671c6', 
+      d1: 'VER', d1Name: 'Max Verstappen', d1Last: 'Verstappen', d2: 'HAD', d2Name: 'Isack Hadjar', d2Last: 'Hadjar', 
+      chassis: 'RB22', pu: 'RBPT Ford', base: 'Milton Keynes, UK', principal: 'Christian Horner',
+      aliases: ['red bull', 'rbpt', 'milton keynes']
+    },
+    { 
+      slug: 'mercedes', name: 'Mercedes-AMG Petronas', shortName: 'Mercedes', key: 'mercedes', color: '#27f4d2', 
+      d1: 'RUS', d1Name: 'George Russell', d1Last: 'Russell', d2: 'ANT', d2Name: 'Kimi Antonelli', d2Last: 'Antonelli', 
+      chassis: 'W17', pu: 'Mercedes-AMG', base: 'Brackley, UK', principal: 'Toto Wolff',
+      aliases: ['mercedes', 'brackley', 'silver arrows']
+    },
+    { 
+      slug: 'aston-martin', name: 'Aston Martin Aramco', shortName: 'Aston Martin', key: 'astonmartin', color: '#229971', 
+      d1: 'ALO', d1Name: 'Fernando Alonso', d1Last: 'Alonso', d2: 'STR', d2Name: 'Lance Stroll', d2Last: 'Stroll', 
+      chassis: 'AMR26', pu: 'Honda', base: 'Silverstone, UK', principal: 'Mike Krack',
+      aliases: ['aston martin', 'silverstone']
+    },
+    { 
+      slug: 'rb', name: 'Visa Cash App RB', shortName: 'RB', key: 'rb', color: '#6692ff', 
+      d1: 'LAW', d1Name: 'Liam Lawson', d1Last: 'Lawson', d2: 'LIN', d2Name: 'Arvid Lindblad', d2Last: 'Lindblad', 
+      chassis: 'VCARB 03', pu: 'RBPT Ford', base: 'Faenza, Italy', principal: 'Laurent Mekies',
+      aliases: ['racing bulls', 'vcarb', 'faenza', 'toro rosso', 'alphatauri']
+    },
+    { 
+      slug: 'williams', name: 'Williams Racing', shortName: 'Williams', key: 'williams', color: '#64c4ff', 
+      d1: 'ALB', d1Name: 'Alexander Albon', d1Last: 'Albon', d2: 'SAI', d2Name: 'Carlos Sainz', d2Last: 'Sainz', 
+      chassis: 'FW48', pu: 'Mercedes-AMG', base: 'Grove, UK', principal: 'James Vowles',
+      aliases: ['williams', 'grove']
+    },
+    { 
+      slug: 'audi', name: 'Audi F1 Team', shortName: 'Audi', key: 'audi', color: '#00e700', 
+      d1: 'HUL', d1Name: 'Nico Hülkenberg', d1Last: 'Hulkenberg', d2: 'BOR', d2Name: 'Gabriel Bortoleto', d2Last: 'Bortoleto', 
+      chassis: 'Audi F1-26', pu: 'Audi', base: 'Hinwil, Switzerland', principal: 'Mattia Binotto',
+      aliases: ['audi', 'sauber', 'hinwil']
+    },
+    { 
+      slug: 'alpine', name: 'BWT Alpine F1 Team', shortName: 'Alpine', key: 'alpine', color: '#ff87bc', 
+      d1: 'GAS', d1Name: 'Pierre Gasly', d1Last: 'Gasly', d2: 'COL', d2Name: 'Franco Colapinto', d2Last: 'Colapinto', 
+      chassis: 'A526', pu: 'Mercedes-AMG', base: 'Enstone, UK', principal: 'Oliver Oakes',
+      aliases: ['alpine', 'enstone', 'renault']
+    },
+    { 
+      slug: 'haas', name: 'Haas F1 Team', shortName: 'Haas', key: 'haas', color: '#b6babd', 
+      d1: 'OCO', d1Name: 'Esteban Ocon', d1Last: 'Ocon', d2: 'BEA', d2Name: 'Oliver Bearman', d2Last: 'Bearman', 
+      chassis: 'VF-26', pu: 'Ferrari', base: 'Kannapolis, USA', principal: 'Ayao Komatsu',
+      aliases: ['haas', 'kannapolis', 'banbury']
+    },
+    { 
+      slug: 'cadillac', name: 'Cadillac F1 Team', shortName: 'Cadillac', key: 'cadillac', color: '#d4af37', 
+      d1: 'PER', d1Name: 'Sergio Perez', d1Last: 'Perez', d2: 'BOT', d2Name: 'Valtteri Bottas', d2Last: 'Bottas', 
+      chassis: 'Cadillac V-Series.R', pu: 'Ferrari', base: 'Fishers, USA', principal: 'Marcin Budkowski',
+      aliases: ['cadillac', 'andretti', 'general motors']
+    },
+  ];
+
+  return teams.map(team => ({
+    params: { slug: team.slug },
+    props: { team },
+  }));
+}
+
+const { team } = Astro.props;
+
+// 2. FETCH LIVE API DATA FOR POINTS
+let teamPoints = 0;
+let teamWins = 0;
+let teamPos = '--';
+let d1Points = 0;
+let d2Points = 0;
+
+try {
+  const [driverRes, constrRes] = await Promise.all([
+    fetch('https://api.jolpi.ca/ergast/f1/current/driverStandings.json', { headers: { 'User-Agent': 'Mozilla/5.0' } }),
+    fetch('https://api.jolpi.ca/ergast/f1/current/constructorStandings.json', { headers: { 'User-Agent': 'Mozilla/5.0' } }),
+  ]);
+
+  if (constrRes.ok) {
+    const cData = await constrRes.json();
+    const cList = cData?.MRData?.StandingsTable?.StandingsLists?.[0]?.ConstructorStandings || [];
+    const matchedTeam = cList.find((c: any) => c.Constructor.constructorId.toLowerCase().includes(team.key.replace('racingbulls', 'rb')));
+    
+    if (matchedTeam) {
+      teamPoints = parseFloat(matchedTeam.points) || 0;
+      teamWins = parseInt(matchedTeam.wins) || 0;
+      teamPos = matchedTeam.position;
+    }
+  }
+
+  if (driverRes.ok) {
+    const dData = await driverRes.json();
+    const dList = dData?.MRData?.StandingsTable?.StandingsLists?.[0]?.DriverStandings || [];
+    
+    const matchedD1 = dList.find((d: any) => d.Driver.code === team.d1 || d.Driver.familyName.substring(0,3).toUpperCase() === team.d1);
+    const matchedD2 = dList.find((d: any) => d.Driver.code === team.d2 || d.Driver.familyName.substring(0,3).toUpperCase() === team.d2);
+
+    if (matchedD1) d1Points = parseFloat(matchedD1.points) || 0;
+    if (matchedD2) d2Points = parseFloat(matchedD2.points) || 0;
+  }
+} catch (e) {
+  // Silent fallback
+}
+
+const calcTotal = d1Points + d2Points;
+const displayTotal = Math.max(teamPoints, calcTotal);
+const d1Pct = displayTotal > 0 ? Math.round((d1Points / displayTotal) * 100) : 50;
+const d2Pct = displayTotal > 0 ? Math.round((d2Points / displayTotal) * 100) : 50;
+
+// 3. CALCULATE HEAD-TO-HEAD FROM LOCAL JSON
+let d1Ahead = 0;
+let d2Ahead = 0;
+let d1Best = 99;
+let d2Best = 99;
+
+const d1Season: (string | number)[] = Array(22).fill('-');
+const d2Season: (string | number)[] = Array(22).fill('-');
+
+if (seasonData && seasonData.drivers) {
+  const d1Row: any = seasonData.drivers.find((d: any) => d.code === team.d1);
+  const d2Row: any = seasonData.drivers.find((d: any) => d.code === team.d2);
+
+  for (let i = 1; i <= 22; i++) {
+    const rKey = `r${i}`;
+    let val1 = (d1Row && d1Row[rKey] !== undefined) ? String(d1Row[rKey]).trim().toUpperCase() : '-';
+    let val2 = (d2Row && d2Row[rKey] !== undefined) ? String(d2Row[rKey]).trim().toUpperCase() : '-';
+
+    if (val1 === 'DNF' || val1 === 'DSQ') val1 = 'RET';
+    if (val2 === 'DNF' || val2 === 'DSQ') val2 = 'RET';
+    if (val1 === '') val1 = '-';
+    if (val2 === '') val2 = '-';
+
+    const num1 = parseInt(val1, 10);
+    const num2 = parseInt(val2, 10);
+
+    d1Season[i-1] = isNaN(num1) ? val1 : num1;
+    d2Season[i-1] = isNaN(num2) ? val2 : num2;
+
+    if (!isNaN(num1) && !isNaN(num2)) {
+      if (num1 < num2) d1Ahead++;
+      if (num2 < num1) d2Ahead++;
+    }
+
+    if (!isNaN(num1) && num1 < d1Best) d1Best = num1;
+    if (!isNaN(num2) && num2 < d2Best) d2Best = num2;
+  }
+}
+
+function getFormBadgeClass(result: number | string): string {
+  const resStr = String(result).toUpperCase().trim();
+  if (resStr === 'RET') return 'badge-ret';
+  if (resStr === 'DNS' || resStr === 'DSQ') return 'badge-dns';
+  if (resStr === '-' || resStr === '') return 'badge-dnp';
+  
+  const num = parseInt(resStr, 10);
+  if (!isNaN(num)) {
+    if (num === 1) return 'badge-p1';
+    if (num === 2) return 'badge-p2';
+    if (num === 3) return 'badge-p3';
+    if (num <= 10) return 'badge-points';
+  }
+  return 'badge-out';
+}
+
+const ROUND_DATA = [
+  { round: 1, name: 'BHR', flag: 'bh' },
+  { round: 2, name: 'SAU', flag: 'sa' },
+  { round: 3, name: 'AUS', flag: 'au' },
+  { round: 4, name: 'JPN', flag: 'jp' },
+  { round: 5, name: 'CHN', flag: 'cn' },
+  { round: 6, name: 'MIA', flag: 'us' },
+  { round: 7, name: 'EMI', flag: 'it' },
+  { round: 8, name: 'MON', flag: 'mc' },
+  { round: 9, name: 'CAN', flag: 'ca' },
+  { round: 10, name: 'ESP', flag: 'es' },
+  { round: 11, name: 'AUT', flag: 'at' },
+  { round: 12, name: 'GBR', flag: 'gb' },
+  { round: 13, name: 'HUN', flag: 'hu' },
+  { round: 14, name: 'BEL', flag: 'be' },
+  { round: 15, name: 'NED', flag: 'nl' },
+  { round: 16, name: 'ITA', flag: 'it' },
+  { round: 17, name: 'AZE', flag: 'az' },
+  { round: 18, name: 'SIN', flag: 'sg' },
+  { round: 19, name: 'USA', flag: 'us' },
+  { round: 20, name: 'MEX', flag: 'mx' },
+  { round: 21, name: 'SAP', flag: 'br' },
+  { round: 22, name: 'LVG', flag: 'us' }
+];
+
+// --- 5. FETCH AND FILTER RSS NEWS AT TOP LEVEL ---
+let teamNews: any[] = [];
+
+try {
+  const feedPromises = VERIFIED_FEEDS.map(async (src) => {
+    try {
+      const feed = await parser.parseURL(src.url);
+      const validItems = [];
+      for (const item of feed.items || []) {
+        const hasValidDate = item.pubDate && !isNaN(new Date(item.pubDate).getTime());
+        if (!hasValidDate) continue;
+
+        const imageUrl = extractImage(item, src.name);
+        const rawDescription = item.contentEncoded || item.content || item.summary || item.description || item.contentSnippet || '';
+
+        validItems.push({
+          title: item.title || 'F1 News Headline',
+          link: item.link || '#',
+          pubDateStr: new Date(item.pubDate!).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }),
+          source: src.name,
+          snippet: cleanSnippet(rawDescription),
+          fullText: `${item.title || ''} ${rawDescription}`.toLowerCase(),
+          imageUrl: imageUrl || null,
+          timestamp: new Date(item.pubDate!).getTime(),
+        });
+      }
+      return validItems;
+    } catch (err) {
+      console.warn(`[RSS Notice] Could not fetch ${src.name}:`, err);
+      return [];
+    }
+  });
+
+  const rssResults = await Promise.all(feedPromises);
+  const globalRssFeed = rssResults.flat().sort((a, b) => b.timestamp - a.timestamp);
+
+  const searchKeywords = [
+    team.name.toLowerCase(),
+    team.shortName.toLowerCase(),
+    team.chassis.toLowerCase(),
+    team.principal.toLowerCase(),
+    team.d1Name.toLowerCase(),
+    team.d1Last.toLowerCase(),
+    team.d2Name.toLowerCase(),
+    team.d2Last.toLowerCase(),
+    ...(team.aliases || [])
+  ];
+
+  const matchedNews = globalRssFeed.filter(article => {
+    return searchKeywords.some(kw => article.fullText.includes(kw));
+  });
+
+  // Fallback to global news if no team-specific match is found
+  teamNews = (matchedNews.length > 0 ? matchedNews : globalRssFeed).slice(0, 3);
+
+} catch (e) {
+  console.error('Error fetching Team Profile RSS feed:', e);
+}
+---
+
+<Layout 
+  title={`${team.name} | Team Profile | My Grand Prix Hub`}
+  description={`2026 stats, head-to-head driver comparisons, and season form guide for ${team.name}.`}
+>
+  <main class="team-profile-container">
+    
+    <!-- Breadcrumbs -->
+    <nav class="breadcrumb-nav">
+      <a href="/championship/teams-drivers">Directory</a>
+      <span class="sep">/</span>
+      <span class="current">{team.shortName}</span>
+    </nav>
+
+    <!-- Typography & Color Hero -->
+    <header class="team-hero" style={`--team-accent: ${team.color};`}>
+      <div class="hero-glow"></div>
+      <span class="hero-chassis-bg">{team.chassis}</span>
+
+      <div class="hero-content">
+        <div class="hero-title-row">
+          <div class="title-stack">
+            <span class="team-badge">Constructor Profile</span>
+            <h1>{team.name}</h1>
+          </div>
+        </div>
+
+        <div class="season-stats-strip">
+          <div class="stat-card">
+            <span class="stat-label">2026 Standing</span>
+            <div class="stat-val-group">
+              <span class="stat-val">{teamPos !== '--' ? `P${teamPos}` : '--'}</span>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <span class="stat-label">Total Points</span>
+            <div class="stat-val-group">
+              <span class="stat-val">{displayTotal}</span>
+              <span class="stat-sub">PTS</span>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <span class="stat-label">Race Wins</span>
+            <div class="stat-val-group">
+              <span class="stat-val">{teamWins}</span>
+            </div>
+          </div>
+
+          <div class="stat-card technical-card">
+            <span class="stat-label">Power Unit</span>
+            <span class="tech-val">{team.pu}</span>
+          </div>
+          
+          <div class="stat-card technical-card">
+            <span class="stat-label">Base</span>
+            <span class="tech-val">{team.base}</span>
+          </div>
+          
+          <div class="stat-card technical-card">
+            <span class="stat-label">Principal</span>
+            <span class="tech-val">{team.principal}</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Head-to-Head & Points Breakdown -->
+    <section class="profile-section">
+      <div class="section-title-row">
+        <h2>Driver Head-to-Head</h2>
+        <span class="section-badge">Intra-Team Battle</span>
+      </div>
+
+      <div class="h2h-container">
+        
+        <!-- Points Contribution Bar -->
+        <div class="points-split-wrapper">
+          <div class="points-split-header">
+            <span class="d-label d1-label">{team.d1} <span class="pts-count">({d1Points} pts)</span></span>
+            <span class="split-title">Points Contribution</span>
+            <span class="d-label d2-label"><span class="pts-count">({d2Points} pts)</span> {team.d2}</span>
+          </div>
+          
+          <div class="progress-bar-container">
+            <div class="progress-bar-d1" style={`width: ${d1Pct}%; background-color: ${team.color};`}>
+              {d1Pct > 15 ? <span class="pct-text">{d1Pct}%</span> : ''}
+            </div>
+            <div class="progress-bar-d2" style={`width: ${d2Pct}%;`}>
+              {d2Pct > 15 ? <span class="pct-text">{d2Pct}%</span> : ''}
+            </div>
+          </div>
+        </div>
+
+        <!-- H2H Scorecard -->
+        <div class="h2h-scorecard">
+          <div class="score-row headers-row">
+            <div class="score-col score-header">{team.d1}</div>
+            <div class="score-col metric-col">Metric</div>
+            <div class="score-col score-header">{team.d2}</div>
+          </div>
+
+          <div class="score-row">
+            <div class="score-col score-val">{d1Ahead}</div>
+            <div class="score-col score-metric">Races Finished Ahead</div>
+            <div class="score-col score-val">{d2Ahead}</div>
+          </div>
+
+          <div class="score-row border-none">
+            <div class="score-col score-val">{d1Best === 99 ? '-' : `P${d1Best}`}</div>
+            <div class="score-col score-metric">Best Race Result</div>
+            <div class="score-col score-val">{d2Best === 99 ? '-' : `P${d2Best}`}</div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Dual Driver Timeline -->
+    <section class="profile-section">
+      <div class="section-title-row">
+        <h2>2026 Season Results</h2>
+        <span class="section-badge">Team Form Guide</span>
+      </div>
+      
+      <div class="timeline-card">
+        <div class="timeline-scroll-wrapper">
+          <div class="timeline-flex-table">
+
+            <!-- Shared Header Row (Flags & Tracks) -->
+            <div class="t-row header-row">
+              <div class="t-fixed-col"></div>
+              <div class="t-scroll-cols">
+                {ROUND_DATA.map((race) => (
+                  <div class="t-col">
+                    <img src={`https://flagcdn.com/w20/${race.flag}.png`} alt={race.name} class="race-card-flag" loading="lazy" />
+                    <span class="race-round">{race.name}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <!-- Driver 1 Row -->
+            <div class="t-row d-row">
+              <div class="t-fixed-col">
+                <span class="d-code-tag">{team.d1}</span>
+              </div>
+              <div class="t-scroll-cols">
+                {d1Season.map((res) => (
+                  <div class="t-col">
+                    <span class={`form-circle ${getFormBadgeClass(res)}`}>{res}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <!-- Driver 2 Row -->
+            <div class="t-row d-row border-none" style="padding-bottom: 0;">
+              <div class="t-fixed-col">
+                <span class="d-code-tag">{team.d2}</span>
+              </div>
+              <div class="t-scroll-cols">
+                {d2Season.map((res) => (
+                  <div class="t-col">
+                    <span class={`form-circle ${getFormBadgeClass(res)}`}>{res}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Latest Team News (RSS Powered) -->
+    <section class="profile-section">
+      <div class="section-title-row">
+        <h2>Latest {team.shortName} News</h2>
+        <span class="section-badge">Around The Paddock</span>
+      </div>
+
+      {teamNews && teamNews.length > 0 ? (
+        <div class="news-grid">
+          {teamNews.map((article: any) => (
+            <a href={article.link} target="_blank" rel="noopener noreferrer" class="news-card">
+              {article.imageUrl && (
+                <div class="card-image-wrap">
+                  <img src={article.imageUrl} alt={article.title} loading="lazy" class="card-image" />
+                </div>
+              )}
+              
+              <div class="news-content">
+                <div class="news-meta">
+                  <span class="feed-source">{article.source}</span>
+                  <span class="news-date">{article.pubDateStr}</span>
+                </div>
+                
+                <h3 class="news-title">{article.title}</h3>
+                {article.snippet && <p class="news-excerpt">{article.snippet}</p>}
+                <span class="read-more">Read on {article.source} ↗</span>
+              </div>
+            </a>
+          ))}
+        </div>
+      ) : (
+        <div class="news-empty-state">
+          <p>Currently scouting the paddock for the latest updates. Check back soon!</p>
+        </div>
+      )}
+    </section>
+
+  </main>
+</Layout>
+
+<style>
+  .team-profile-container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 2.5rem 1.5rem 6rem;
+    color: #f1f5f9;
+    box-sizing: border-box;
+  }
+
+  .breadcrumb-nav {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: #64748b;
+    margin-bottom: 1.5rem;
+    font-weight: 600;
+  }
+  .breadcrumb-nav a { color: #38bdf8; text-decoration: none; }
+  .breadcrumb-nav a:hover { text-decoration: underline; }
+  .breadcrumb-nav .sep { color: #334155; }
+
+  /* Hero Section */
+  .team-hero {
+    position: relative;
+    background: #0f172a;
+    border: 1px solid #1e293b;
+    border-radius: 16px;
+    overflow: hidden;
+    padding: 3rem;
+    margin-bottom: 3.5rem;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+  }
+
+  .hero-glow {
+    position: absolute;
+    top: -50px;
+    right: -50px;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, var(--team-accent) 0%, rgba(15, 23, 42, 0) 70%);
+    opacity: 0.15;
+    pointer-events: none;
+  }
+
+  .hero-chassis-bg {
+    position: absolute;
+    right: -1rem;
+    bottom: -1rem;
+    font-size: 9rem;
+    font-weight: 900;
+    line-height: 1;
+    color: var(--team-accent);
+    opacity: 0.06;
+    user-select: none;
+    pointer-events: none;
+    letter-spacing: -0.02em;
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 2;
+  }
+
+  .team-badge {
+    display: inline-block;
+    background: #1e293b;
+    color: var(--team-accent);
+    font-size: 0.75rem;
+    font-weight: 800;
+    padding: 0.35rem 0.75rem;
+    border-radius: 9999px;
+    border: 1px solid #334155;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 1rem;
+  }
+
+  .hero-title-row h1 {
+    font-size: 3.25rem;
+    font-weight: 900;
+    color: #ffffff;
+    letter-spacing: -0.03em;
+    margin: 0 0 2.5rem 0;
+  }
+
+  /* Stat Strip */
+  .season-stats-strip {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+    max-width: 760px;
+  }
+
+  .stat-card {
+    background: #1e293b;
+    border: 1px solid #334155;
+    padding: 1rem 1.25rem;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 0.5rem;
+    min-height: 90px;
+    box-sizing: border-box;
+  }
+
+  .stat-label {
+    font-size: 0.72rem;
+    color: #64748b;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .stat-val-group {
+    display: flex;
+    align-items: baseline;
+    gap: 0.35rem;
+  }
+
+  .stat-val {
+    font-size: 1.75rem;
+    font-weight: 900;
+    color: #ffffff;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .stat-sub {
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: #e10600;
+  }
+
+  .technical-card {
+    background: transparent;
+    border-color: #1e293b;
+  }
+
+  .tech-val {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #cbd5e1;
+  }
+
+  /* Sections */
+  .profile-section {
+    margin-bottom: 4rem;
+  }
+
+  .section-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.25rem;
+    border-bottom: 1px solid #334155;
+    padding-bottom: 0.75rem;
+  }
+
+  .section-title-row h2 {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin: 0;
+  }
+
+  .section-badge {
+    background: #0f172a;
+    color: #38bdf8;
+    border: 1px solid #334155;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    text-transform: uppercase;
+  }
+
+  /* H2H Container */
+  .h2h-container {
+    background: #0f172a;
+    border: 1px solid #1e293b;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  }
+
+  /* Points Split */
+  .points-split-wrapper {
+    margin-bottom: 3rem;
+  }
+
+  .points-split-header {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: end;
+    margin-bottom: 0.75rem;
+  }
+
+  .d-label { font-size: 1.1rem; font-weight: 900; color: #ffffff; line-height: 1; }
+  .d1-label { text-align: left; }
+  .d2-label { text-align: right; }
+  
+  .pts-count {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #64748b;
+  }
+
+  .split-title {
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: #475569;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    text-align: center;
+    line-height: 1;
+  }
+
+  .progress-bar-container {
+    display: flex;
+    height: 32px;
+    border-radius: 16px;
+    overflow: hidden;
+    background: #1e293b;
+    border: 1px solid #334155;
+  }
+
+  .progress-bar-d1 {
+    display: flex;
+    align-items: center;
+    padding-left: 1rem;
+    transition: width 1s ease-out;
+  }
+  
+  .progress-bar-d2 {
+    background: #334155;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 1rem;
+    transition: width 1s ease-out;
+  }
+
+  .pct-text {
+    font-size: 0.75rem;
+    font-weight: 900;
+    color: #ffffff;
+  }
+
+  /* H2H Scorecard */
+  .h2h-scorecard {
+    display: flex;
+    flex-direction: column;
+    background: #1e293b;
+    border-radius: 8px;
+    border: 1px solid #334155;
+    padding: 0 1.5rem; 
+  }
+
+  .score-row {
+    display: grid;
+    grid-template-columns: 1fr 1.5fr 1fr;
+    align-items: center;
+    text-align: center;
+    padding: 1.25rem 0;
+    border-bottom: 1px dashed #475569; 
+  }
+
+  .score-row:last-child, .score-row.border-none {
+    border-bottom: none;
+    padding-bottom: 1.5rem;
+  }
+
+  .headers-row {
+    align-items: baseline; 
+    padding-top: 1.5rem;
+    padding-bottom: 1rem;
+  }
+
+  .score-col { margin: 0; padding: 0; }
+
+  .score-header {
+    font-size: 1.25rem;
+    font-weight: 900;
+    color: #f8fafc;
+  }
+
+  .metric-col {
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .score-val {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: #ffffff;
+  }
+
+  .score-metric {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+  }
+
+  /* Timeline Table */
+  .timeline-card {
+    background: #0f172a;
+    border: 1px solid #1e293b;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  }
+
+  .timeline-scroll-wrapper {
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+  }
+
+  .timeline-scroll-wrapper::-webkit-scrollbar { height: 6px; }
+  .timeline-scroll-wrapper::-webkit-scrollbar-track { background: #0f172a; border-radius: 4px; }
+  .timeline-scroll-wrapper::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+  .timeline-scroll-wrapper::-webkit-scrollbar-thumb:hover { background: #475569; }
+
+  .timeline-flex-table {
+    min-width: max-content;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .t-row {
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid #1e293b;
+    padding: 0.85rem 0;
+  }
+
+  .header-row {
+    border-bottom: 1px dashed #334155;
+    padding-top: 0;
+    padding-bottom: 0.75rem;
+  }
+
+  .t-fixed-col {
+    width: 70px;
+    flex-shrink: 0;
+    position: sticky;
+    left: 0;
+    background: #0f172a;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    padding-right: 1rem;
+  }
+
+  .t-scroll-cols {
+    display: flex;
+    gap: 0.75rem;
+  }
+
+  .t-col {
+    width: 36px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+    flex-shrink: 0;
+  }
+
+  .race-card-flag {
+    border-radius: 2px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+    display: block;
+    width: 20px;
+    height: 14px;
+    object-fit: cover;
+  }
+
+  .race-round {
+    font-size: 0.65rem;
+    color: #64748b;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+  }
+
+  .d-code-tag {
+    font-size: 0.85rem;
+    font-weight: 800;
+    background: #1e293b;
+    color: #cbd5e1;
+    padding: 0.35rem 0;
+    border-radius: 6px;
+    border: 1px solid #334155;
+    text-align: center;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* Form Circles */
+  .form-circle {
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
+    min-height: 28px;
+    border-radius: 50% !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.78rem;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    box-sizing: border-box;
+    flex-shrink: 0;
+    line-height: 1;
+    margin: 0 auto;
+  }
+
+  .badge-p1 { background: #ffd700; color: #000; box-shadow: 0 0 6px rgba(255, 215, 0, 0.45); border: 1px solid transparent; }
+  .badge-p2 { background: #cbd5e1; color: #0f172a; border: 1px solid transparent; }
+  .badge-p3 { background: #d97706; color: #fff; border: 1px solid transparent; }
+  .badge-points { background: #1e293b; color: #38bdf8; border: 1px solid #334155; }
+  .badge-out { background: #090e1a; color: #64748b; border: 1px solid #1e293b; }
+  .badge-ret { background: rgba(225, 6, 0, 0.25); color: #f87171; border: 1px solid rgba(225, 6, 0, 0.5); font-size: 0.6rem; }
+  .badge-dns { background: rgba(100, 116, 139, 0.25); color: #94a3b8; border: 1px solid rgba(100, 116, 139, 0.5); font-size: 0.6rem; }
+  .badge-dnp { background: transparent; color: #475569; border: 1px dashed #334155; }
+
+  /* News Grid */
+  .news-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .news-card {
+    background: #0f172a;
+    border: 1px solid #1e293b;
+    border-radius: 12px;
+    text-decoration: none;
+    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .news-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--team-accent);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+  }
+
+  .card-image-wrap {
+    height: 160px;
+    overflow: hidden;
+    background: #0b0f19;
+    border-bottom: 1px solid #1e293b;
+  }
+
+  .card-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .news-content {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+  }
+
+  .news-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .feed-source { color: var(--team-accent); }
+  .news-date { color: #64748b; }
+
+  .news-title {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: #f8fafc;
+    margin: 0 0 0.75rem 0;
+    line-height: 1.4;
+  }
+
+  .news-excerpt {
+    font-size: 0.9rem;
+    color: #94a3b8;
+    line-height: 1.5;
+    margin: 0 0 1.5rem 0;
+    flex-grow: 1;
+  }
+
+  .read-more {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #38bdf8;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    transition: color 0.2s ease;
+  }
+
+  .news-card:hover .read-more {
+    color: #7dd3fc;
+  }
+
+  .news-empty-state {
+    background: #0f172a;
+    border: 1px dashed #334155;
+    padding: 3rem 1.5rem;
+    border-radius: 12px;
+    text-align: center;
+  }
+
+  .news-empty-state p {
+    color: #64748b;
+    font-size: 0.95rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 0;
+  }
+
+  @media (max-width: 768px) {
+    .team-hero { padding: 2rem; }
+    .hero-title-row h1 { font-size: 2.25rem; }
+    .hero-chassis-bg { font-size: 5rem; }
+    .season-stats-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    
+    .points-split-header {
+      grid-template-columns: 1fr;
+      text-align: center;
+      gap: 0.5rem;
+    }
+    .d1-label, .d2-label { text-align: center; }
+  }
+</style>

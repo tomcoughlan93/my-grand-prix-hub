@@ -72,7 +72,82 @@ export default defineConfig({
           { type: "rich-text", name: "body", label: "Guide Content", isBody: true },
         ],
       },
-      // 5. Live Weekend Results
+      // 5. Driver Profiles (NEW)
+      {
+        name: "driver",
+        label: "Drivers",
+        path: "src/content/drivers",
+        format: "md",
+        fields: [
+          {
+            type: "string",
+            name: "name",
+            label: "Full Name",
+            isTitle: true,
+            required: true,
+          },
+          {
+            type: "string",
+            name: "code",
+            label: "3-Letter Code",
+            description: "Must match the Master Grid code (e.g. NOR, VER, HAM).",
+            required: true,
+          },
+          {
+            type: "number",
+            name: "number",
+            label: "Driver Number",
+            required: true,
+          },
+          {
+            type: "string",
+            name: "team",
+            label: "Team Name",
+            required: true,
+          },
+          {
+            type: "string",
+            name: "teamKey",
+            label: "Team Key (for CSS styling)",
+            description: "e.g. mclaren, ferrari, redbull, mercedes, astonmartin, williams, alpine, rb, audi, haas, cadillac",
+            required: true,
+          },
+          {
+            type: "string",
+            name: "teamColor",
+            label: "Team Hex Color",
+            description: "e.g. #ff8000",
+            required: true,
+          },
+          {
+            type: "string",
+            name: "countryCode",
+            label: "Country Flag Code (2-letter)",
+            description: "e.g. gb, nl, mc, au, es",
+            required: true,
+          },
+          {
+            type: "string",
+            name: "nationality",
+            label: "Nationality Tag",
+            description: "e.g. GBR, NED, MON, AUS",
+            required: true,
+          },
+          {
+            type: "number",
+            name: "worldTitles",
+            label: "World Championship Titles",
+            description: "Enter 0 for drivers who haven't won a title yet.",
+          },
+          {
+            type: "rich-text",
+            name: "biography",
+            label: "Biography & Career Notes",
+            isBody: true,
+          },
+        ],
+      },
+      // 6. Live Weekend Results
       {
         name: "liveResults",
         label: "Live Weekend Results",
@@ -105,7 +180,7 @@ export default defineConfig({
           },
         ],
       },
-      // 6. Driver Form Guide (Legacy)
+      // 7. Driver Form Guide (Legacy)
       {
         name: "driverForm",
         label: "Driver Form Guide (Legacy)",
@@ -123,13 +198,13 @@ export default defineConfig({
           }
         ]
       },
-      // 7. Master Results Grid (NEW)
+      // 8. Master Results Grid
       {
         name: "masterGrid",
         label: "2026 Master Results Grid",
         path: "src/content/results",
         match: {
-          include: "season-2026", // Locks it to a single file!
+          include: "season-2026", 
         },
         format: "json",
         ui: {
@@ -142,7 +217,6 @@ export default defineConfig({
             label: "Driver Season Results",
             list: true,
             ui: {
-              // Displays the driver name nicely in the list
               itemProps: (item) => ({ label: `${item?.code || 'Driver'} | ${item?.name || ''}` }),
             },
             fields: [
@@ -150,7 +224,7 @@ export default defineConfig({
               { type: "string", name: "name", label: "Full Name (e.g. Max Verstappen)" },
               { type: "string", name: "team", label: "Team Name (e.g. Red Bull Racing)" },
               
-              // The "Grid" fields
+              // Grid fields
               { type: "string", name: "r1", label: "R1: Australia" },
               { type: "string", name: "r2", label: "R2: China" },
               { type: "string", name: "r3", label: "R3: Japan" },
