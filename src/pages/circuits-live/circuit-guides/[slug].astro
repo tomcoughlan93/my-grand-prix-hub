@@ -1,42 +1,76 @@
 ---
 // src/pages/circuit-guides/[slug].astro
 import Layout from '@/layouts/Layout.astro';
-import CircuitWeather from '@/components/CircuitWeather.astro'; // 1. Imported the component
+import CircuitWeather from '@/components/CircuitWeather.astro';
+// 1. Import the Master Results Grid from TinaCMS!
+import seasonData from '@/content/results/season-2026.json';
 
 export const prerender = true; 
 
 export function getStaticPaths() {
   return [
     {
+      params: { slug: 'british-grand-prix' },
+      props: {
+        round: 9, // Corrected to R9
+        raceName: 'British Grand Prix',
+        circuitName: 'Silverstone Circuit',
+        location: 'Silverstone, UK',
+        lat: 52.0786,
+        lon: -1.0169, 
+        flagCode: 'gb',
+        firstSessionDate: '2026-07-03T11:30:00Z', 
+        stats: { firstGP: 1950, laps: 52, length: '5.891 km', distance: '306.198 km', corners: 18, drsZones: 2 },
+        record: { time: '1:27.097', driver: 'Max Verstappen', year: '2020' },
+        description: 'Silverstone is the historic home of British motorsport and the site of the very first Formula 1 World Championship race in 1950. Renowned for its sequence of ultra-fast sweeping corners like Maggotts, Becketts, and Chapel, the track pushes both the aerodynamic limits of the cars and the physical endurance of the drivers. High-speed cornering makes this circuit notoriously demanding on tyres.',
+        sectors: [
+          { id: 1, name: 'Sector 1', color: '#db2777', desc: 'The start-finish straight down to Abbey, through the Village curve, and accelerating down the Wellington Straight.' },
+          { id: 2, name: 'Sector 2', color: '#fbbf24', desc: 'Heavy braking into Brooklands, sweeping through Luffield and Woodcote, before the flat-out blast through Copse.' },
+          { id: 3, name: 'Sector 3', color: '#38bdf8', desc: 'The iconic high-speed Maggotts/Becketts complex leading onto the Hangar Straight, finishing through Stowe and Club.' }
+        ],
+        tyres: [
+          { compound: 'C1', type: 'Hard', borderColor: '#f8fafc' },
+          { compound: 'C2', type: 'Medium', borderColor: '#facc15' },
+          { compound: 'C3', type: 'Soft', borderColor: '#ef4444' }
+        ],
+        grandstands: [
+          { name: 'Becketts', view: 'Arguably the best seats in F1. Watch the cars change direction at mind-bending speeds through the iconic complex.' },
+          { name: 'Club Corner', view: 'Situated on the final corner with views of the pit entry, podium ceremony, and start/finish line.' },
+          { name: 'Luffield', view: 'An extended view of the cars battling through the long right-hand sweeper before accelerating down the straight.' }
+        ],
+        schedule: [
+          { session: 'Practice 1', time: '12:30 Local' },
+          { session: 'Practice 2', time: '16:00 Local' },
+          { session: 'Qualifying', time: '15:00 Local' },
+          { session: 'Grand Prix', time: '15:00 Local' }
+        ],
+        pastWinners: [
+          { year: '2025', driver: 'Lewis Hamilton', team: 'Ferrari' },
+          { year: '2024', driver: 'Lewis Hamilton', team: 'Mercedes' },
+          { year: '2023', driver: 'Max Verstappen', team: 'Red Bull Racing' }
+        ],
+        trackSvg: `<svg width="100%" height="100%" viewBox="0 0 800 600" fill="none" xmlns="http://www.w3.org/2000/svg"><text x="50%" y="50%" fill="#94a3b8" text-anchor="middle" font-family="sans-serif" font-size="20">Silverstone SVG Placeholder</text></svg>`
+      }
+    },
+    {
       params: { slug: 'dutch-grand-prix' },
       props: {
+        round: 12, // Corrected to R12
         raceName: 'Dutch Grand Prix',
         circuitName: 'Circuit Park Zandvoort',
         location: 'Zandvoort, Netherlands',
-        lat: 52.3888, // 2. Added Latitude for API
-        lon: 4.5446,  // 2. Added Longitude for API
+        lat: 52.3888,
+        lon: 4.5446, 
         flagCode: 'nl',
         firstSessionDate: '2026-08-21T10:30:00Z', 
-        stats: {
-          firstGP: 1952,
-          laps: 72,
-          length: '4.259 km',
-          distance: '306.587 km',
-          corners: 14,
-          drsZones: 2,
-        },
-        record: {
-          time: '1:11.097',
-          driver: 'Lewis Hamilton',
-          year: '2021'
-        },
+        stats: { firstGP: 1952, laps: 72, length: '4.259 km', distance: '306.587 km', corners: 14, drsZones: 2 },
+        record: { time: '1:11.097', driver: 'Lewis Hamilton', year: '2021' },
         description: 'Opened in 1948, Circuit Zandvoort is a historic, old-school track set in the rolling sand dunes next to the North Sea. The seaside circuit is renowned for its unique challenge, combining tight, sweeping low-speed corners with two massive, steeply banked turns—Turn 3 (Hugenholtzbocht) and Turn 14 (Arie Luyendykbocht)—that feature a gradient of up to 19 degrees. Because of its coastal location, sand blown onto the track surface frequently reduces traction and increases tyre wear.',
         sectors: [
           { id: 1, name: 'Sector 1', color: '#db2777', desc: 'Starts from the main straight, through Tarzan (T1) and the complex twisting section up to Turn 6.' },
           { id: 2, name: 'Sector 2', color: '#fbbf24', desc: 'The sweeping high-speed curves through the dunes from Turn 6 down through the hairpin at Turn 10.' },
           { id: 3, name: 'Sector 3', color: '#38bdf8', desc: 'The technical sequence from Turn 11 through the final banked Arie Luyendykbocht onto the start-finish straight.' }
         ],
-        // Removed the old static weather block here
         tyres: [
           { compound: 'C2', type: 'Hard', borderColor: '#f8fafc' },
           { compound: 'C3', type: 'Medium', borderColor: '#facc15' },
@@ -55,44 +89,199 @@ export function getStaticPaths() {
         ],
         pastWinners: [
           { year: '2025', driver: 'Max Verstappen', team: 'Red Bull Racing' },
-          { year: '2024', driver: 'Max Verstappen', team: 'Red Bull Racing' },
+          { year: '2024', driver: 'Lando Norris', team: 'McLaren' },
           { year: '2023', driver: 'Max Verstappen', team: 'Red Bull Racing' }
-        ]
+        ],
+        trackSvg: `<svg class="track-svg" width="100%" height="100%" viewBox="0 0 872 776" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M121.036 555.357C123.071 550.434 125.18 545.419 127.316 540.298C189.958 390.146 287.498 156.479 314.935 90.3217C321.047 75.5777 335.575 69.168 351.618 75.5777C362.803 80.0444 368.769 87.0439 370.856 99.7036C372.917 112.2 367.684 120.053 362.803 134.257C355.943 154.213 350.162 168.29 341.927 188.169C334.769 205.444 328.21 222.723 327.611 244.168C327.027 265.204 327.142 272.328 326.717 280.806C325.823 298.678 318.962 310.144 298.383 317.739C281.079 324.127 267.894 328.53 256.416 332.677C254.244 333.464 222.331 343.655 230.831 369.121C240.629 398.478 267.704 388.484 269.869 387.84C293.707 380.774 344.508 364.483 366.383 357.654C382.13 352.74 420.664 353.484 449.145 360.634C467.265 365.179 498.212 374.648 526.987 375.378C556.363 376.123 605.125 343.06 618.994 333.231C632.863 323.401 659.404 313.78 680.881 314.617C715.329 315.956 760.953 319.33 776.466 320.424C797.644 321.914 835.282 335.086 845.361 371.656C854.308 404.122 842.978 427.952 832.538 443.293C819.146 462.969 800.328 488.419 791.38 505.398C785.991 515.624 772.291 543.228 760.799 566.573C753.215 581.984 746.643 592.372 709.662 588.798C691.221 587.013 651.881 581.232 611.54 545.312C597.82 533.098 599.013 517.015 604.084 511.06C614.897 498.36 627.347 491.996 640.769 490.21C674.804 485.678 679.84 486.636 724.873 469.657C746.819 461.386 752.699 443.214 749.629 426.766C746.347 409.189 734.118 399.361 712.346 396.382C646.302 387.343 587.571 390.907 539.662 399.958C473.454 412.467 414.98 437.156 356.242 467.273C334.171 478.593 331.191 464.593 324.632 451.188C318.758 439.193 306.081 435.862 294.506 438.974C278.998 443.146 274.926 453.827 276.315 462.505C280.789 490.503 301.664 611.438 307.926 644.797C312.887 671.218 303.454 701.391 264.383 702.584C239.624 703.342 218.26 702.773 184.752 698.116C161.191 694.841 131.253 670.393 120.627 644.501C113.173 626.328 103.63 597.438 121.036 555.357Z" stroke="black" stroke-width="20" stroke-linejoin="round"/>
+              <path d="M215.736 326.987C188.526 392.826 189.306 391.548 127.183 540.975C125.065 546.072 122.973 551.063 120.955 555.962C103.693 597.84 113.156 626.591 120.549 644.676C126.018 658.047 136.643 671.031 148.866 680.885" stroke="#38BDF8" stroke-width="6" stroke-linejoin="round"/>
+              <path d="M467.3 418.623C415.665 433.142 405.137 447.662 356.753 466.96C334.623 478.296 331.635 464.276 325.059 450.854C319.17 438.843 306.459 435.508 294.854 438.624C279.305 442.801 275.223 453.496 276.615 462.186C281.101 490.221 302.03 611.317 308.309 644.72C313.284 671.176 303.826 701.389 264.652 702.584C239.828 703.342 218.408 702.773 184.812 698.11C177.57 697.104 169.727 694.107 162.026 689.686" stroke="#38BDF8" stroke-width="6" stroke-linejoin="round"/>
+              <path d="M704 315C738.447 316.339 760.953 319.33 776.466 320.424C797.644 321.914 835.282 335.086 845.361 371.656C854.308 404.122 842.978 427.952 832.538 443.293C819.146 462.969 800.328 488.419 791.38 505.398C785.991 515.624 772.291 543.228 760.799 566.573C753.215 581.984 746.643 592.372 709.662 588.798C691.221 587.013 651.881 581.232 611.54 545.312C597.82 533.098 599.013 517.015 604.084 511.06C614.897 498.36 624.078 490.786 637.5 489C671.535 484.468 668.467 487.979 713.5 471C735.446 462.729 752.699 443.214 749.629 426.766C746.347 409.189 734.118 399.361 712.346 396.382C647.5 378.5 514.345 397.775 466.845 418.775" stroke="#FBBF24" stroke-width="6" stroke-linejoin="round"/>
+              <path d="M219.521 317.889C282.163 167.738 287.498 156.479 314.935 90.3217C321.047 75.5777 335.575 69.168 351.618 75.5777C362.803 80.0444 368.769 87.0439 370.856 99.7036C372.917 112.2 371.264 112.296 366.383 126.5C359.523 146.456 348.735 167.62 340.5 187.5C333.342 204.775 327.316 218.554 326.717 240C326.134 261.036 325 277 326.717 280.806C325.823 298.678 318.962 310.144 298.383 317.739C281.079 324.127 267.894 328.53 256.416 332.677C254.244 333.464 226.5 342.033 235 367.5C244.798 396.856 267.704 388.484 269.869 387.84C293.708 380.774 344.508 364.483 366.383 357.654C382.13 352.74 420.664 353.484 449.145 360.634C467.265 365.179 498.212 374.648 526.987 375.378C556.363 376.123 605.125 343.06 618.994 333.231C632.863 323.401 672 309 704 315" stroke="#DB2777" stroke-width="6" stroke-linejoin="round"/>
+            </svg>`
+      }
+    },
+    {
+      params: { slug: 'italian-grand-prix' },
+      props: {
+        round: 13, // Corrected to R13
+        raceName: 'Italian Grand Prix',
+        circuitName: 'Autodromo Nazionale Monza',
+        location: 'Monza, Italy',
+        lat: 45.6156,
+        lon: 9.2811, 
+        flagCode: 'it',
+        firstSessionDate: '2026-09-04T11:30:00Z', 
+        stats: { firstGP: 1950, laps: 53, length: '5.793 km', distance: '306.720 km', corners: 11, drsZones: 2 },
+        record: { time: '1:21.046', driver: 'Rubens Barrichello', year: '2004' },
+        description: 'Known as the "Temple of Speed", Monza is the quickest circuit on the calendar. Cars operate in the lowest downforce configuration, spending nearly 80% of the lap at full throttle. The track demands excellent braking stability for the heavy stops at the chicanes, while the iconic Parabolica tests aerodynamic balance at high speeds.',
+        sectors: [
+          { id: 1, name: 'Sector 1', color: '#db2777', desc: 'The long pit straight into the incredibly tight Turn 1/2 chicane and the high-speed run through Curva Grande.' },
+          { id: 2, name: 'Sector 2', color: '#fbbf24', desc: 'Heavy braking for the Della Roggia chicane, through the Lesmos, and down the sweeping straight to Ascari.' },
+          { id: 3, name: 'Sector 3', color: '#38bdf8', desc: 'The high-speed Ascari chicane complex and the legendary sweeping Parabolica onto the main straight.' }
+        ],
+        tyres: [
+          { compound: 'C3', type: 'Hard', borderColor: '#f8fafc' },
+          { compound: 'C4', type: 'Medium', borderColor: '#facc15' },
+          { compound: 'C5', type: 'Soft', borderColor: '#ef4444' }
+        ],
+        grandstands: [
+          { name: 'Prima Variante (T1)', view: 'Incredible heavy braking action, overtaking, and guaranteed lap 1 chaos.' },
+          { name: 'Ascari', view: 'Watch the cars violently change direction at high speed through the complex.' },
+          { name: 'Laterale Parabolica', view: 'A legendary atmosphere with great views of cars accelerating onto the main straight.' }
+        ],
+        schedule: [
+          { session: 'Practice 1', time: '13:30 Local' },
+          { session: 'Practice 2', time: '17:00 Local' },
+          { session: 'Qualifying', time: '16:00 Local' },
+          { session: 'Grand Prix', time: '15:00 Local' }
+        ],
+        pastWinners: [
+          { year: '2025', driver: 'Charles Leclerc', team: 'Ferrari' },
+          { year: '2024', driver: 'Charles Leclerc', team: 'Ferrari' },
+          { year: '2023', driver: 'Max Verstappen', team: 'Red Bull Racing' }
+        ],
+        trackSvg: `<svg width="100%" height="100%" viewBox="0 0 800 600" fill="none" xmlns="http://www.w3.org/2000/svg"><text x="50%" y="50%" fill="#94a3b8" text-anchor="middle" font-family="sans-serif" font-size="20">Monza SVG Placeholder</text></svg>`
+      }
+    },
+    {
+      params: { slug: 'madrid-grand-prix' },
+      props: {
+        round: 14, // Corrected to R14
+        raceName: 'Madrid Grand Prix',
+        circuitName: 'IFEMA Madrid Circuit',
+        location: 'Madrid, Spain',
+        lat: 40.466,
+        lon: -3.616, 
+        flagCode: 'es',
+        firstSessionDate: '2026-09-11T11:30:00Z', 
+        stats: { firstGP: 2026, laps: 55, length: '5.474 km', distance: '301.070 km', corners: 20, drsZones: 2 },
+        record: { time: 'N/A', driver: 'Inaugural Race', year: '2026' },
+        description: 'Making its debut on the 2026 calendar, the IFEMA Madrid Circuit is an innovative semi-street track. Combining permanent track sections with public roads around the IFEMA exhibition centre and Real Madrid\'s training complex, it features a steep banked corner designed to promote side-by-side overtaking.',
+        sectors: [
+          { id: 1, name: 'Sector 1', color: '#db2777', desc: 'The IFEMA complex section featuring sharp 90-degree corners and technical chicanes.' },
+          { id: 2, name: 'Sector 2', color: '#fbbf24', desc: 'The transition to the Valdebebas area, highlighted by the sweeping, high-speed banked curve.' },
+          { id: 3, name: 'Sector 3', color: '#38bdf8', desc: 'The high-speed return blast to the start-finish line under the stadium lights.' }
+        ],
+        tyres: [
+          { compound: 'C2', type: 'Hard', borderColor: '#f8fafc' },
+          { compound: 'C3', type: 'Medium', borderColor: '#facc15' },
+          { compound: 'C4', type: 'Soft', borderColor: '#ef4444' }
+        ],
+        grandstands: [
+          { name: 'Main Grandstand', view: 'Overlooks the pit lane, team garages, and the intense run down to Turn 1.' },
+          { name: 'Valdebebas Banking', view: 'Spectacular views of the unique banked corner where cars are pushed to the limit.' },
+          { name: 'IFEMA Arena', view: 'Close-quarters stadium section action with massive fan zones and screens.' }
+        ],
+        schedule: [
+          { session: 'Practice 1', time: '13:30 Local' },
+          { session: 'Practice 2', time: '17:00 Local' },
+          { session: 'Qualifying', time: '16:00 Local' },
+          { session: 'Grand Prix', time: '15:00 Local' }
+        ],
+        pastWinners: [
+          { year: '2026', driver: 'TBD', team: 'TBD' }
+        ],
+        trackSvg: `<svg width="100%" height="100%" viewBox="0 0 800 600" fill="none" xmlns="http://www.w3.org/2000/svg"><text x="50%" y="50%" fill="#94a3b8" text-anchor="middle" font-family="sans-serif" font-size="20">Madrid SVG Placeholder</text></svg>`
+      }
+    },
+    {
+      params: { slug: 'azerbaijan-grand-prix' },
+      props: {
+        round: 15, // Corrected to R15
+        raceName: 'Azerbaijan Grand Prix',
+        circuitName: 'Baku City Circuit',
+        location: 'Baku, Azerbaijan',
+        lat: 40.3725,
+        lon: 49.8533, 
+        flagCode: 'az',
+        firstSessionDate: '2026-09-24T09:30:00Z', 
+        stats: { firstGP: 2016, laps: 51, length: '6.003 km', distance: '306.049 km', corners: 20, drsZones: 2 },
+        record: { time: '1:43.009', driver: 'Charles Leclerc', year: '2019' },
+        description: 'Baku City Circuit is the fastest street track in Formula 1. It combines a massively long, 2.2km flat-out run along the Caspian Sea coastline with an incredibly tight, slow, and punishing sequence through the medieval Old City, where the track narrows to just 7.6 metres wide at Turn 8.',
+        sectors: [
+          { id: 1, name: 'Sector 1', color: '#db2777', desc: 'Heavy braking into Turn 1 and 2, followed by a sequence of 90-degree city corners.' },
+          { id: 2, name: 'Sector 2', color: '#fbbf24', desc: 'The iconic, incredibly narrow castle section (Turns 8-12) and the winding descent.' },
+          { id: 3, name: 'Sector 3', color: '#38bdf8', desc: 'A combination of fast sweeping corners leading onto the colossal 2.2km main straight.' }
+        ],
+        tyres: [
+          { compound: 'C3', type: 'Hard', borderColor: '#f8fafc' },
+          { compound: 'C4', type: 'Medium', borderColor: '#facc15' },
+          { compound: 'C5', type: 'Soft', borderColor: '#ef4444' }
+        ],
+        grandstands: [
+          { name: 'Absheron (Main)', view: 'Incredible views of the start/finish, pit lane, and cars reaching top speeds.' },
+          { name: 'Azneft (Turn 1)', view: 'The absolute best spot for overtaking and the guaranteed lock-ups at the end of the straight.' },
+          { name: 'Icheri Sheher', view: 'Situated right at the castle gates, watching cars thread the needle.' }
+        ],
+        schedule: [
+          { session: 'Practice 1', time: '13:30 Local' },
+          { session: 'Practice 2', time: '17:00 Local' },
+          { session: 'Qualifying', time: '16:00 Local' },
+          { session: 'Grand Prix', time: '15:00 Local' }
+        ],
+        pastWinners: [
+          { year: '2025', driver: 'Sergio Perez', team: 'Red Bull Racing' },
+          { year: '2024', driver: 'Oscar Piastri', team: 'McLaren' },
+          { year: '2023', driver: 'Sergio Perez', team: 'Red Bull Racing' }
+        ],
+        trackSvg: `<svg width="100%" height="100%" viewBox="0 0 800 600" fill="none" xmlns="http://www.w3.org/2000/svg"><text x="50%" y="50%" fill="#94a3b8" text-anchor="middle" font-family="sans-serif" font-size="20">Baku SVG Placeholder</text></svg>`
+      }
+    },
+    {
+      params: { slug: 'singapore-grand-prix' },
+      props: {
+        round: 16, // Corrected to R16
+        raceName: 'Singapore Grand Prix',
+        circuitName: 'Marina Bay Street Circuit',
+        location: 'Marina Bay, Singapore',
+        lat: 1.2914,
+        lon: 103.864, 
+        flagCode: 'sg',
+        firstSessionDate: '2026-10-09T09:30:00Z', 
+        stats: { firstGP: 2008, laps: 62, length: '4.940 km', distance: '306.143 km', corners: 19, drsZones: 4 },
+        record: { time: '1:35.867', driver: 'Lewis Hamilton', year: '2023' },
+        description: 'The original F1 night race, Marina Bay is a grueling physical and mental test. The intense heat, extreme humidity, and bumpy street surface push drivers to the absolute limit. With the track constantly illuminated by thousands of floodlights, the layout demands pinpoint precision, as the walls are unforgiving.',
+        sectors: [
+          { id: 1, name: 'Sector 1', color: '#db2777', desc: 'The complex Turn 1-3 sequence, leading into the first heavy braking zone at Turn 5.' },
+          { id: 2, name: 'Sector 2', color: '#fbbf24', desc: 'High-speed kinks and the tight Padang section, demanding heavy traction.' },
+          { id: 3, name: 'Sector 3', color: '#38bdf8', desc: 'The revised flat-out blast along Raffles Avenue and the tight chicane to end the lap.' }
+        ],
+        tyres: [
+          { compound: 'C3', type: 'Hard', borderColor: '#f8fafc' },
+          { compound: 'C4', type: 'Medium', borderColor: '#facc15' },
+          { compound: 'C5', type: 'Soft', borderColor: '#ef4444' }
+        ],
+        grandstands: [
+          { name: 'Pit Grandstand', view: 'Perfect views of the pit stops, start/finish line, and the post-race fireworks.' },
+          { name: 'Padang', view: 'Located right next to the concert stage, with cars rushing past the historic city hall.' },
+          { name: 'Bay Grandstand', view: 'Picturesque views of the cars racing underneath the floating platform.' }
+        ],
+        schedule: [
+          { session: 'Practice 1', time: '17:30 Local' },
+          { session: 'Practice 2', time: '21:30 Local' },
+          { session: 'Qualifying', time: '21:00 Local' },
+          { session: 'Grand Prix', time: '20:00 Local' }
+        ],
+        pastWinners: [
+          { year: '2025', driver: 'Lando Norris', team: 'McLaren' },
+          { year: '2024', driver: 'Lando Norris', team: 'McLaren' },
+          { year: '2023', driver: 'Carlos Sainz', team: 'Ferrari' }
+        ],
+        trackSvg: `<svg width="100%" height="100%" viewBox="0 0 800 600" fill="none" xmlns="http://www.w3.org/2000/svg"><text x="50%" y="50%" fill="#94a3b8" text-anchor="middle" font-family="sans-serif" font-size="20">Singapore SVG Placeholder</text></svg>`
       }
     }
   ];
 }
 
-interface Sector {
-  id: number;
-  name: string;
-  color: string;
-  desc: string;
-}
-
-interface Tyre {
-  compound: string;
-  type: string;
-  borderColor: string;
-}
-
-interface Grandstand {
-  name: string;
-  view: string;
-}
-
-interface ScheduleItem {
-  session: string;
-  time: string;
-}
-
-interface Winner {
-  year: string;
-  driver: string;
-  team: string;
-}
+interface Sector { id: number; name: string; color: string; desc: string; }
+interface Tyre { compound: string; type: string; borderColor: string; }
+interface Grandstand { name: string; view: string; }
+interface ScheduleItem { session: string; time: string; }
+interface Winner { year: string; driver: string; team: string; }
 
 interface CircuitProps {
+  round: number;
   raceName: string;
   circuitName: string;
   location: string;
@@ -100,28 +289,51 @@ interface CircuitProps {
   lon: number;
   flagCode: string;
   firstSessionDate: string;
-  stats: {
-    firstGP: number;
-    laps: number;
-    length: string;
-    distance: string;
-    corners: number;
-    drsZones: number;
-  };
-  record: {
-    time: string;
-    driver: string;
-    year: string;
-  };
+  stats: { firstGP: number; laps: number; length: string; distance: string; corners: number; drsZones: number; };
+  record: { time: string; driver: string; year: string; };
   description: string;
   sectors: Sector[];
   tyres: Tyre[];
   grandstands: Grandstand[];
   schedule: ScheduleItem[];
   pastWinners: Winner[];
+  trackSvg: string;
 }
 
-const { raceName, circuitName, location, lat, lon, flagCode, firstSessionDate, stats, record, description, sectors, tyres, grandstands, schedule, pastWinners } = Astro.props as CircuitProps;
+const { round, raceName, circuitName, location, lat, lon, flagCode, firstSessionDate, stats, record, description, sectors, tyres, grandstands, schedule, pastWinners, trackSvg } = Astro.props as CircuitProps;
+
+// 2. DYNAMIC PODIUM LOGIC
+// Look through the TinaCMS seasonData to find who finished 1st, 2nd, and 3rd for this specific round!
+let podium2026 = null;
+
+if (seasonData && seasonData.drivers) {
+  // Construct the string for the round key (e.g., "r12" or "r15")
+  const roundKey = `r${round}`;
+  
+  // Find the drivers whose position for this round equals "1", "2", and "3"
+  const p1Driver = seasonData.drivers.find((d: any) => String(d[roundKey]) === "1");
+  const p2Driver = seasonData.drivers.find((d: any) => String(d[roundKey]) === "2");
+  const p3Driver = seasonData.drivers.find((d: any) => String(d[roundKey]) === "3");
+
+  // If all three exist, build the podium object for the HTML template to use
+  if (p1Driver && p2Driver && p3Driver) {
+    podium2026 = {
+      // Extracts the last name (e.g. "Norris" from "Lando Norris") or defaults to driver code
+      first: { 
+        driver: p1Driver.name ? p1Driver.name.split(' ').pop() : p1Driver.code, 
+        team: p1Driver.team || 'Unknown' 
+      },
+      second: { 
+        driver: p2Driver.name ? p2Driver.name.split(' ').pop() : p2Driver.code, 
+        team: p2Driver.team || 'Unknown' 
+      },
+      third: { 
+        driver: p3Driver.name ? p3Driver.name.split(' ').pop() : p3Driver.code, 
+        team: p3Driver.team || 'Unknown' 
+      }
+    };
+  }
+}
 ---
 
 <Layout 
@@ -136,35 +348,76 @@ const { raceName, circuitName, location, lat, lon, flagCode, firstSessionDate, s
         <div>
           <span class="badge">2026 Circuit Guide</span>
           <h1>{circuitName}</h1>
-          <p class="subtitle">{location} &bull; {raceName} (Round 12)</p>
+          <p class="subtitle">{location} &bull; {raceName}</p>
         </div>
       </div>
     </header>
 
     <div class="countdown-card">
       <div class="countdown-header">
-        <span class="pulse-dot"></span>
-        <span>Countdown to Practice 1</span>
+        {podium2026 ? (
+          <>
+            <span class="pulse-dot" style="background: #22c55e; box-shadow: 0 0 8px #22c55e; animation: none;"></span>
+            <span>2026 Race Results</span>
+          </>
+        ) : (
+          <>
+            <span class="pulse-dot" id="pulse-dot"></span>
+            <span id="countdown-title">Countdown to Practice 1</span>
+          </>
+        )}
       </div>
       
-      <div class="timer-grid" id="f1-countdown" data-target={firstSessionDate}>
-        <div class="time-box">
-          <span class="time-val" id="cd-days">00</span>
-          <span class="time-label">Days</span>
+      {podium2026 ? (
+        <div class="results-wrapper">
+          <div class="podium-display">
+            <div class="podium-box p2">
+              <span class="pos">P2</span>
+              <span class="name">{podium2026.second.driver}</span>
+              <span class="team">{podium2026.second.team}</span>
+            </div>
+            <div class="podium-box p1">
+              <span class="pos">P1</span>
+              <span class="name">{podium2026.first.driver}</span>
+              <span class="team">{podium2026.first.team}</span>
+            </div>
+            <div class="podium-box p3">
+              <span class="pos">P3</span>
+              <span class="name">{podium2026.third.driver}</span>
+              <span class="team">{podium2026.third.team}</span>
+            </div>
+          </div>
         </div>
-        <div class="time-box">
-          <span class="time-val" id="cd-hours">00</span>
-          <span class="time-label">Hrs</span>
-        </div>
-        <div class="time-box">
-          <span class="time-val" id="cd-mins">00</span>
-          <span class="time-label">Min</span>
-        </div>
-        <div class="time-box">
-          <span class="time-val" id="cd-secs">00</span>
-          <span class="time-label">Sec</span>
-        </div>
-      </div>
+      ) : (
+        <>
+          <div class="timer-grid" id="f1-countdown" data-target={firstSessionDate} data-round={round}>
+            <div class="time-box">
+              <span class="time-val" id="cd-days">00</span>
+              <span class="time-label">Days</span>
+            </div>
+            <div class="time-box">
+              <span class="time-val" id="cd-hours">00</span>
+              <span class="time-label">Hrs</span>
+            </div>
+            <div class="time-box">
+              <span class="time-val" id="cd-mins">00</span>
+              <span class="time-label">Min</span>
+            </div>
+            <div class="time-box">
+              <span class="time-val" id="cd-secs">00</span>
+              <span class="time-label">Sec</span>
+            </div>
+          </div>
+
+          <!-- RESULTS FALLBACK BLOCK (Shown if timer hits 0 before CMS is updated) -->
+          <div id="f1-results" class="results-wrapper" style="display: none;">
+            <div id="awaiting-results" class="awaiting-state">
+              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="spin-icon"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+              <span>Awaiting Official FIA Results...</span>
+            </div>
+          </div>
+        </>
+      )}
     </div>
 
     <div class="guide-grid">
@@ -177,72 +430,8 @@ const { raceName, circuitName, location, lat, lon, flagCode, firstSessionDate, s
           
           <div class="svg-container">
             <div class="grid-overlay"></div>
-            
-            <svg class="track-svg" width="100%" height="100%" viewBox="0 0 872 776" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M121.036 555.357C123.071 550.434 125.18 545.419 127.316 540.298C189.958 390.146 287.498 156.479 314.935 90.3217C321.047 75.5777 335.575 69.168 351.618 75.5777C362.803 80.0444 368.769 87.0439 370.856 99.7036C372.917 112.2 367.684 120.053 362.803 134.257C355.943 154.213 350.162 168.29 341.927 188.169C334.769 205.444 328.21 222.723 327.611 244.168C327.027 265.204 327.142 272.328 326.717 280.806C325.823 298.678 318.962 310.144 298.383 317.739C281.079 324.127 267.894 328.53 256.416 332.677C254.244 333.464 222.331 343.655 230.831 369.121C240.629 398.478 267.704 388.484 269.869 387.84C293.707 380.774 344.508 364.483 366.383 357.654C382.13 352.74 420.664 353.484 449.145 360.634C467.265 365.179 498.212 374.648 526.987 375.378C556.363 376.123 605.125 343.06 618.994 333.231C632.863 323.401 659.404 313.78 680.881 314.617C715.329 315.956 760.953 319.33 776.466 320.424C797.644 321.914 835.282 335.086 845.361 371.656C854.308 404.122 842.978 427.952 832.538 443.293C819.146 462.969 800.328 488.419 791.38 505.398C785.991 515.624 772.291 543.228 760.799 566.573C753.215 581.984 746.643 592.372 709.662 588.798C691.221 587.013 651.881 581.232 611.54 545.312C597.82 533.098 599.013 517.015 604.084 511.06C614.897 498.36 627.347 491.996 640.769 490.21C674.804 485.678 679.84 486.636 724.873 469.657C746.819 461.386 752.699 443.214 749.629 426.766C746.347 409.189 734.118 399.361 712.346 396.382C646.302 387.343 587.571 390.907 539.662 399.958C473.454 412.467 414.98 437.156 356.242 467.273C334.171 478.593 331.191 464.593 324.632 451.188C318.758 439.193 306.081 435.862 294.506 438.974C278.998 443.146 274.926 453.827 276.315 462.505C280.789 490.503 301.664 611.438 307.926 644.797C312.887 671.218 303.454 701.391 264.383 702.584C239.624 703.342 218.26 702.773 184.752 698.116C161.191 694.841 131.253 670.393 120.627 644.501C113.173 626.328 103.63 597.438 121.036 555.357Z" stroke="black" stroke-width="20" stroke-linejoin="round"/>
-              <path d="M215.736 326.987C188.526 392.826 189.306 391.548 127.183 540.975C125.065 546.072 122.973 551.063 120.955 555.962C103.693 597.84 113.156 626.591 120.549 644.676C126.018 658.047 136.643 671.031 148.866 680.885" stroke="#38BDF8" stroke-width="6" stroke-linejoin="round"/>
-              <path d="M467.3 418.623C415.665 433.142 405.137 447.662 356.753 466.96C334.623 478.296 331.635 464.276 325.059 450.854C319.17 438.843 306.459 435.508 294.854 438.624C279.305 442.801 275.223 453.496 276.615 462.186C281.101 490.221 302.03 611.317 308.309 644.72C313.284 671.176 303.826 701.389 264.652 702.584C239.828 703.342 218.408 702.773 184.812 698.11C177.57 697.104 169.727 694.107 162.026 689.686" stroke="#38BDF8" stroke-width="6" stroke-linejoin="round"/>
-              <path d="M704 315C738.447 316.339 760.953 319.33 776.466 320.424C797.644 321.914 835.282 335.086 845.361 371.656C854.308 404.122 842.978 427.952 832.538 443.293C819.146 462.969 800.328 488.419 791.38 505.398C785.991 515.624 772.291 543.228 760.799 566.573C753.215 581.984 746.643 592.372 709.662 588.798C691.221 587.013 651.881 581.232 611.54 545.312C597.82 533.098 599.013 517.015 604.084 511.06C614.897 498.36 624.078 490.786 637.5 489C671.535 484.468 668.467 487.979 713.5 471C735.446 462.729 752.699 443.214 749.629 426.766C746.347 409.189 734.118 399.361 712.346 396.382C647.5 378.5 514.345 397.775 466.845 418.775" stroke="#FBBF24" stroke-width="6" stroke-linejoin="round"/>
-              <g clip-path="url(#clip0_3_57)">
-              <path d="M219.521 317.889C282.163 167.738 287.498 156.479 314.935 90.3217C321.047 75.5777 335.575 69.168 351.618 75.5777C362.803 80.0444 368.769 87.0439 370.856 99.7036C372.917 112.2 371.264 112.296 366.383 126.5C359.523 146.456 348.735 167.62 340.5 187.5C333.342 204.775 327.316 218.554 326.717 240C326.134 261.036 325 277 326.717 280.806C325.823 298.678 318.962 310.144 298.383 317.739C281.079 324.127 267.894 328.53 256.416 332.677C254.244 333.464 226.5 342.033 235 367.5C244.798 396.856 267.704 388.484 269.869 387.84C293.708 380.774 344.508 364.483 366.383 357.654C382.13 352.74 420.664 353.484 449.145 360.634C467.265 365.179 498.212 374.648 526.987 375.378C556.363 376.123 605.125 343.06 618.994 333.231C632.863 323.401 672 309 704 315" stroke="#DB2777" stroke-width="6" stroke-linejoin="round"/>
-              <circle cx="306.5" cy="637.5" r="5" fill="#34D399" stroke="#0F172A"/>
-              <circle cx="155.5" cy="685.5" r="7" stroke="#34D399" stroke-width="3"/>
-              <path d="M211.488 166H277.256" stroke="#918C8C"/>
-              <circle cx="281.5" cy="166.5" r="5" fill="#FACC15" stroke="#0F172A"/>
-              <line x1="83" y1="685.5" x2="147" y2="685.5" stroke="#918C8C"/>
-              <line x1="312" y1="637.5" x2="376" y2="637.5" stroke="#918C8C"/>
-              <rect x="355" y="625" width="87" height="30" fill="#86EFAC"/>
-              <path d="M373.12 636.26C373.392 636.732 373.912 636.968 374.68 636.968C375.448 636.968 375.964 636.736 376.228 636.272C376.5 635.808 376.636 635.032 376.636 633.944C376.636 632.848 376.496 632.052 376.216 631.556C375.944 631.06 375.432 630.812 374.68 630.812C373.928 630.812 373.412 631.06 373.132 631.556C372.852 632.052 372.712 632.844 372.712 633.932C372.712 635.012 372.848 635.788 373.12 636.26ZM377.272 637.124C376.784 637.796 375.92 638.132 374.68 638.132C373.44 638.132 372.572 637.796 372.076 637.124C371.58 636.444 371.332 635.38 371.332 633.932C371.332 632.484 371.58 631.408 372.076 630.704C372.58 630 373.448 629.648 374.68 629.648C375.912 629.648 376.776 630 377.272 630.704C377.768 631.4 378.016 632.476 378.016 633.932C378.016 635.388 377.768 636.452 377.272 637.124ZM383.986 629.78H385.378L383.362 638H380.746L378.73 629.78H380.122L381.754 636.824H382.354L383.986 629.78ZM386.563 638V629.78H391.747V630.944H387.895V633.272H391.027V634.424H387.895V636.824H391.747V638H386.563ZM394.528 635.072V638H393.196V629.78H396.316C398.172 629.78 399.1 630.652 399.1 632.396C399.1 633.564 398.652 634.356 397.756 634.772L399.112 638H397.648L396.46 635.072H394.528ZM397.732 632.408C397.732 631.424 397.26 630.932 396.316 630.932H394.528V633.92H396.34C396.82 633.92 397.172 633.784 397.396 633.512C397.62 633.232 397.732 632.864 397.732 632.408ZM399.775 630.968V629.78H405.775V630.968H403.459V638H402.115V630.968H399.775ZM405.683 638L407.711 629.78H410.363L412.403 638H411.059L410.615 636.236H407.459L407.015 638H405.683ZM408.743 630.896L407.723 635.06H410.351L409.343 630.896H408.743ZM414.907 638H413.575V629.78H414.907V633.488L416.131 633.392L417.811 629.78H419.335L417.307 633.908L419.419 638H417.871L416.131 634.568L414.907 634.652V638ZM420.571 638V629.78H425.755V630.944H421.903V633.272H425.035V634.424H421.903V636.824H425.755V638H420.571ZM372.608 652H369.764V643.78H372.608C373.872 643.78 374.736 644.1 375.2 644.74C375.664 645.38 375.896 646.384 375.896 647.752C375.896 648.448 375.848 649.04 375.752 649.528C375.664 650.008 375.504 650.444 375.272 650.836C374.816 651.612 373.928 652 372.608 652ZM374.516 647.752C374.516 646.76 374.392 646.044 374.144 645.604C373.896 645.164 373.384 644.944 372.608 644.944H371.096V650.824H372.608C373.4 650.824 373.928 650.532 374.192 649.948C374.32 649.652 374.404 649.336 374.444 649C374.492 648.664 374.516 648.248 374.516 647.752ZM377.452 652V643.78H382.636V644.944H378.784V647.272H381.916V648.424H378.784V650.824H382.636V652H377.452ZM383.293 644.968V643.78H389.293V644.968H386.977V652H385.633V644.968H383.293ZM390.401 652V643.78H395.585V644.944H391.733V647.272H394.865V648.424H391.733V650.824H395.585V652H390.401ZM399.724 652.132C398.524 652.132 397.708 651.8 397.276 651.136C396.852 650.472 396.64 649.38 396.64 647.86C396.64 646.34 396.856 645.26 397.288 644.62C397.72 643.972 398.532 643.648 399.724 643.648C400.436 643.648 401.22 643.748 402.076 643.948L402.028 645.028C401.308 644.9 400.588 644.836 399.868 644.836C399.148 644.836 398.66 645.052 398.404 645.484C398.148 645.908 398.02 646.712 398.02 647.896C398.02 649.072 398.144 649.876 398.392 650.308C398.64 650.732 399.124 650.944 399.844 650.944C400.564 650.944 401.292 650.884 402.028 650.764L402.064 651.868C401.24 652.044 400.46 652.132 399.724 652.132ZM402.699 644.968V643.78H408.699V644.968H406.383V652H405.039V644.968H402.699ZM409.807 652V643.78H411.139V652H409.807ZM414.458 650.26C414.73 650.732 415.25 650.968 416.018 650.968C416.786 650.968 417.302 650.736 417.566 650.272C417.838 649.808 417.974 649.032 417.974 647.944C417.974 646.848 417.834 646.052 417.554 645.556C417.282 645.06 416.77 644.812 416.018 644.812C415.266 644.812 414.75 645.06 414.47 645.556C414.19 646.052 414.05 646.844 414.05 647.932C414.05 649.012 414.186 649.788 414.458 650.26ZM418.61 651.124C418.122 651.796 417.258 652.132 416.018 652.132C414.778 652.132 413.91 651.796 413.414 651.124C412.918 650.444 412.67 649.38 412.67 647.932C412.67 646.484 412.918 645.408 413.414 644.704C413.918 644 414.786 643.648 416.018 643.648C417.25 643.648 418.114 644 418.61 644.704C419.106 645.4 419.354 646.476 419.354 647.932C419.354 649.388 419.106 650.452 418.61 651.124ZM420.905 652V643.78H423.233L425.729 650.824H425.909V643.78H427.241V652H424.961L422.405 644.944H422.237V652H420.905Z" fill="#0F172A"/>
-              <path d="M494.004 444.535C493.141 444.66 492.751 445.008 492.834 445.578C492.87 445.831 493.005 446.009 493.239 446.113C493.472 446.217 493.999 446.338 494.819 446.478C495.648 446.617 496.244 446.825 496.608 447.104C496.97 447.375 497.2 447.842 497.296 448.508C497.419 449.355 497.255 450.033 496.803 450.543C496.352 451.053 495.71 451.369 494.879 451.489C494.262 451.579 493.492 451.593 492.57 451.533L492.13 451.512L492.112 450.217C493.194 450.206 494.015 450.159 494.577 450.078C495.417 449.956 495.786 449.547 495.685 448.85C495.648 448.597 495.52 448.413 495.302 448.3C495.091 448.185 494.685 448.086 494.083 448.003C493.126 447.875 492.432 447.661 492.001 447.36C491.576 447.049 491.317 446.574 491.224 445.932C491.107 445.125 491.265 444.487 491.698 444.02C492.132 443.553 492.776 443.258 493.631 443.134C494.217 443.049 494.973 443.02 495.898 443.048L496.338 443.069L496.395 444.382C495.26 444.417 494.463 444.468 494.004 444.535ZM497.282 444.229L497.071 442.781L503.009 441.919L503.219 443.368L501.082 443.678L502.043 450.305L500.404 450.543L499.443 443.916L497.282 444.229ZM506.464 446.899L506.857 449.607L505.218 449.845L504.047 441.769L507.182 441.314C509.082 441.039 510.161 441.788 510.418 443.561C510.571 444.614 510.287 445.448 509.568 446.061L511.168 448.982L509.374 449.242L508.044 446.67L506.464 446.899ZM507.781 445.277C508.169 445.221 508.441 445.061 508.596 444.796C508.752 444.53 508.801 444.204 508.745 443.816C508.689 443.428 508.541 443.134 508.302 442.934C508.071 442.734 507.765 442.661 507.385 442.716L505.889 442.933L506.261 445.498L507.781 445.277ZM511.813 448.888L512.459 440.549L515.57 440.098L518.558 447.91L516.919 448.148L516.387 446.734L513.56 447.143L513.451 448.651L511.813 448.888ZM513.926 441.719L513.662 445.674L515.871 445.353L514.496 441.636L513.926 441.719ZM519.634 447.754L518.463 439.679L520.101 439.441L521.272 447.517L519.634 447.754ZM525.972 443.876L525.766 442.451L528.117 442.11L528.725 446.303C527.619 446.649 526.714 446.873 526.009 446.975C524.75 447.158 523.835 446.947 523.262 446.343C522.697 445.738 522.309 444.703 522.096 443.238C521.884 441.773 521.976 440.681 522.373 439.96C522.77 439.24 523.558 438.794 524.738 438.623C525.474 438.517 526.282 438.484 527.161 438.527L527.6 438.548L527.737 439.825C526.772 439.86 525.985 439.922 525.375 440.01C524.774 440.097 524.36 440.23 524.136 440.408C523.911 440.586 523.767 440.878 523.705 441.283C523.649 441.679 523.689 442.344 523.824 443.279C523.959 444.205 524.167 444.837 524.451 445.176C524.735 445.515 525.237 445.632 525.957 445.528L526.936 445.337L526.709 443.77L525.972 443.876ZM534.935 445.535L534.449 442.186L531.445 442.622L531.93 445.971L530.292 446.209L529.121 438.133L530.759 437.896L531.238 441.197L534.243 440.761L533.764 437.46L535.403 437.222L536.574 445.298L534.935 445.535ZM536.643 438.522L536.433 437.073L542.371 436.212L542.581 437.661L540.444 437.971L541.404 444.597L539.766 444.835L538.805 438.208L536.643 438.522ZM547.189 443.759L546.018 435.683L548.809 435.278L551.088 440.962L551.659 434.865L554.45 434.46L555.621 442.536L553.982 442.774L553.076 436.527L552.898 436.553L552.173 442.672L550.534 442.91L548.1 437.248L547.922 437.274L548.828 443.521L547.189 443.759ZM558.782 440.137C559.079 440.515 559.549 440.657 560.19 440.564C560.831 440.471 561.237 440.202 561.407 439.757C561.583 439.303 561.601 438.589 561.46 437.615C561.318 436.633 561.095 435.938 560.794 435.529C560.492 435.12 560.024 434.962 559.391 435.053C558.758 435.145 558.354 435.43 558.181 435.908C558.008 436.386 557.992 437.115 558.135 438.097C558.276 439.071 558.492 439.751 558.782 440.137ZM562.841 440.616C562.439 441.353 561.624 441.811 560.397 441.989C559.169 442.167 558.254 441.96 557.651 441.368C557.055 440.768 556.653 439.755 556.447 438.33C556.24 436.905 556.336 435.812 556.735 435.051C557.141 434.28 557.957 433.806 559.184 433.628C560.411 433.45 561.325 433.674 561.925 434.298C562.531 434.913 562.938 435.934 563.145 437.359C563.351 438.784 563.25 439.87 562.841 440.616ZM567.85 440.763L565.13 441.157L563.959 433.081L566.679 432.687C567.376 432.586 567.961 432.578 568.434 432.663C568.906 432.74 569.289 432.931 569.584 433.236C569.885 433.532 570.117 433.902 570.278 434.348C570.439 434.785 570.572 435.368 570.678 436.097C570.783 436.825 570.827 437.437 570.81 437.933C570.792 438.42 570.688 438.872 570.498 439.287C570.314 439.694 570.005 440.018 569.571 440.258C569.136 440.491 568.562 440.659 567.85 440.763ZM569.107 437.306C569.086 437.051 569.043 436.701 568.979 436.258C568.914 435.807 568.846 435.449 568.775 435.184C568.704 434.92 568.593 434.685 568.443 434.481C568.292 434.276 568.092 434.152 567.843 434.107C567.6 434.053 567.281 434.055 566.886 434.112L565.805 434.269L566.563 439.494L567.643 439.338C568.237 439.251 568.647 439.038 568.872 438.699C569.066 438.42 569.144 437.956 569.107 437.306ZM572.703 440.059L571.532 431.983L576.758 431.226L576.964 432.651L573.378 433.171L573.652 435.059L576.526 434.642L576.729 436.044L573.855 436.46L574.136 438.396L577.722 437.876L577.929 439.301L572.703 440.059ZM580.532 432.133L580.326 430.708L585.67 429.933L585.877 431.358L583.23 436.859L583.261 437.073L586.634 436.584L586.841 438.009L581.497 438.784L581.292 437.371L583.936 431.858L583.905 431.644L580.532 432.133ZM589.608 435.668C589.905 436.045 590.375 436.187 591.016 436.094C591.657 436.001 592.063 435.732 592.233 435.287C592.409 434.833 592.427 434.119 592.286 433.145C592.144 432.163 591.922 431.468 591.62 431.059C591.318 430.65 590.85 430.492 590.217 430.584C589.584 430.675 589.18 430.96 589.007 431.438C588.834 431.916 588.818 432.646 588.961 433.627C589.102 434.601 589.318 435.281 589.608 435.668ZM593.667 436.146C593.265 436.883 592.45 437.341 591.223 437.519C589.995 437.697 589.08 437.49 588.477 436.899C587.881 436.298 587.479 435.285 587.273 433.86C587.066 432.435 587.162 431.342 587.561 430.581C587.967 429.81 588.783 429.336 590.01 429.158C591.237 428.98 592.151 429.204 592.751 429.828C593.357 430.443 593.764 431.464 593.971 432.889C594.177 434.314 594.076 435.4 593.667 436.146ZM595.956 436.687L594.785 428.612L597.552 428.21L600.464 434.578L600.583 434.561L599.619 427.911L601.258 427.673L602.429 435.749L599.733 436.139L596.75 429.782L596.631 429.799L597.595 436.449L595.956 436.687ZM604.191 435.493L603.02 427.418L608.245 426.66L608.452 428.085L604.865 428.605L605.139 430.493L608.013 430.077L608.216 431.478L605.342 431.895L605.623 433.83L609.209 433.31L609.416 434.735L604.191 435.493Z" fill="#EF4444"/>
-              <rect x="125" y="156" width="87" height="20" fill="#FEF08A"/>
-              <path d="M139.299 162.812C138.283 162.812 137.775 163.168 137.775 163.88C137.775 164.248 137.895 164.512 138.135 164.672C138.375 164.824 138.903 165.016 139.719 165.248C140.543 165.472 141.123 165.744 141.459 166.064C141.795 166.376 141.963 166.872 141.963 167.552C141.963 168.416 141.715 169.064 141.219 169.496C140.731 169.92 140.063 170.132 139.215 170.132C138.535 170.132 137.783 170.052 136.959 169.892L136.527 169.808L136.659 168.74C137.739 168.884 138.563 168.956 139.131 168.956C140.123 168.956 140.619 168.516 140.619 167.636C140.619 167.292 140.507 167.04 140.283 166.88C140.059 166.712 139.555 166.532 138.771 166.34C137.987 166.14 137.403 165.868 137.019 165.524C136.635 165.18 136.443 164.636 136.443 163.892C136.443 163.148 136.683 162.588 137.163 162.212C137.651 161.828 138.323 161.636 139.179 161.636C139.795 161.636 140.523 161.708 141.363 161.852L141.783 161.924L141.675 163.004C140.555 162.876 139.763 162.812 139.299 162.812ZM146.415 167.444H144.735V170H143.403V161.78H146.415C148.279 161.78 149.211 162.7 149.211 164.54C149.211 165.484 148.975 166.204 148.503 166.7C148.039 167.196 147.343 167.444 146.415 167.444ZM144.735 166.292H146.403C147.363 166.292 147.843 165.708 147.843 164.54C147.843 163.98 147.727 163.572 147.495 163.316C147.263 163.06 146.899 162.932 146.403 162.932H144.735V166.292ZM150.493 170V161.78H155.677V162.944H151.825V165.272H154.957V166.424H151.825V168.824H155.677V170H150.493ZM157.126 170V161.78H162.31V162.944H158.458V165.272H161.59V166.424H158.458V168.824H162.31V170H157.126ZM166.603 170H163.759V161.78H166.603C167.867 161.78 168.731 162.1 169.195 162.74C169.659 163.38 169.891 164.384 169.891 165.752C169.891 166.448 169.843 167.04 169.747 167.528C169.659 168.008 169.499 168.444 169.267 168.836C168.811 169.612 167.923 170 166.603 170ZM168.511 165.752C168.511 164.76 168.387 164.044 168.139 163.604C167.891 163.164 167.379 162.944 166.603 162.944H165.091V168.824H166.603C167.395 168.824 167.923 168.532 168.187 167.948C168.315 167.652 168.399 167.336 168.439 167C168.487 166.664 168.511 166.248 168.511 165.752ZM173.291 162.968V161.78H179.291V162.968H176.975V170H175.631V162.968H173.291ZM181.731 167.072V170H180.399V161.78H183.519C185.375 161.78 186.303 162.652 186.303 164.396C186.303 165.564 185.855 166.356 184.959 166.772L186.315 170H184.851L183.663 167.072H181.731ZM184.935 164.408C184.935 163.424 184.463 162.932 183.519 162.932H181.731V165.92H183.543C184.023 165.92 184.375 165.784 184.599 165.512C184.823 165.232 184.935 164.864 184.935 164.408ZM187.027 170L189.055 161.78H191.707L193.747 170H192.403L191.959 168.236H188.803L188.359 170H187.027ZM190.087 162.896L189.067 167.06H191.695L190.687 162.896H190.087ZM197.931 167.444H196.251V170H194.919V161.78H197.931C199.795 161.78 200.727 162.7 200.727 164.54C200.727 165.484 200.491 166.204 200.019 166.7C199.555 167.196 198.859 167.444 197.931 167.444ZM196.251 166.292H197.919C198.879 166.292 199.359 165.708 199.359 164.54C199.359 163.98 199.243 163.572 199.011 163.316C198.779 163.06 198.415 162.932 197.919 162.932H196.251V166.292Z" fill="#0F172A"/>
-              <circle cx="342.428" cy="93.8667" r="7" fill="white" stroke="#0F172A"/>
-              <path d="M343.455 89.4467V97.3667H342.123V90.9587L340.263 92.1587L339.651 91.1627L342.231 89.4467H343.455Z" fill="#0F172A"/>
-              <circle cx="299.486" cy="288.407" r="7" fill="white" stroke="#0F172A"/>
-              <path d="M302.033 291.907H296.933V290.767L298.889 288.751C299.481 288.143 299.897 287.667 300.137 287.323C300.377 286.979 300.497 286.603 300.497 286.195C300.497 285.779 300.381 285.483 300.149 285.307C299.917 285.131 299.537 285.043 299.009 285.043C298.513 285.043 297.965 285.099 297.365 285.211L297.065 285.259L296.981 284.203C297.757 283.971 298.561 283.855 299.393 283.855C301.049 283.855 301.877 284.591 301.877 286.063C301.877 286.639 301.749 287.139 301.493 287.563C301.245 287.987 300.797 288.499 300.149 289.099L298.457 290.743H302.033V291.907Z" fill="#0F172A"/>
-              <circle cx="254.991" cy="363.706" r="7" fill="white" stroke="#0F172A"/>
-              <path d="M252.425 359.538C253.169 359.282 253.985 359.154 254.873 359.154C255.761 359.154 256.405 359.326 256.805 359.67C257.213 360.006 257.417 360.542 257.417 361.278C257.417 361.598 257.353 361.886 257.225 362.142C257.105 362.398 256.981 362.586 256.853 362.706C256.725 362.818 256.565 362.938 256.373 363.066C256.797 363.266 257.101 363.486 257.285 363.726C257.477 363.958 257.573 364.338 257.573 364.866C257.573 365.706 257.361 366.33 256.937 366.738C256.521 367.138 255.853 367.338 254.933 367.338C254.573 367.338 254.177 367.306 253.745 367.242C253.313 367.186 252.969 367.126 252.713 367.062L252.341 366.966L252.425 365.934C253.305 366.094 254.081 366.174 254.753 366.174C255.713 366.166 256.193 365.742 256.193 364.902C256.193 364.518 256.069 364.226 255.821 364.026C255.573 363.826 255.245 363.722 254.837 363.714H253.241V362.598H254.837C255.133 362.598 255.405 362.478 255.653 362.238C255.909 361.99 256.037 361.694 256.037 361.35C256.037 360.998 255.925 360.738 255.701 360.57C255.485 360.402 255.185 360.318 254.801 360.318C254.169 360.318 253.517 360.374 252.845 360.486L252.533 360.546L252.425 359.538Z" fill="#0F172A"/>
-              <circle cx="403.253" cy="334.084" r="7" fill="white" stroke="#0F172A"/>
-              <path d="M403.94 337.584V336.168H400.376V335.148L402.464 329.664H403.94L401.732 335.004H403.94V332.676H405.284V335.004H406.148V336.168H405.284V337.584H403.94Z" fill="#0F172A"/>
-              <circle cx="533.315" cy="353.642" r="7" fill="white" stroke="#0F172A"/>
-              <path d="M535.766 349.222V350.398H532.094L531.89 352.486C532.434 352.238 532.97 352.114 533.498 352.114C535.194 352.114 536.042 352.906 536.042 354.49C536.042 355.386 535.806 356.074 535.334 356.554C534.87 357.034 534.21 357.274 533.354 357.274C532.994 357.274 532.586 357.238 532.13 357.166C531.674 357.102 531.31 357.038 531.038 356.974L530.63 356.866L530.774 355.858C531.718 356.018 532.526 356.098 533.198 356.098C533.662 356.098 534.022 355.97 534.278 355.714C534.534 355.458 534.662 355.094 534.662 354.622C534.662 354.15 534.55 353.81 534.326 353.602C534.102 353.394 533.81 353.29 533.45 353.29C532.802 353.29 532.274 353.37 531.866 353.53L531.65 353.614L530.81 353.434L531.026 349.222H535.766Z" fill="#0F172A"/>
-              <circle cx="662.4" cy="294.967" r="7" fill="white" stroke="#0F172A"/>
-              <path d="M664.923 291.747C664.147 291.635 663.443 291.579 662.811 291.579C662.179 291.579 661.707 291.775 661.395 292.167C661.083 292.559 660.923 293.107 660.915 293.811L661.191 293.715C661.767 293.531 662.251 293.439 662.643 293.439C664.435 293.439 665.331 294.279 665.331 295.959C665.331 296.823 665.083 297.479 664.587 297.927C664.091 298.375 663.367 298.599 662.415 298.599C661.463 298.599 660.743 298.247 660.255 297.543C659.775 296.831 659.535 295.819 659.535 294.507C659.535 291.779 660.607 290.415 662.751 290.415C663.351 290.415 663.999 290.487 664.695 290.631L665.043 290.703L664.923 291.747ZM661.131 294.879L660.903 294.963C660.919 296.611 661.447 297.435 662.487 297.435C662.959 297.435 663.319 297.307 663.567 297.051C663.823 296.795 663.951 296.439 663.951 295.983C663.951 295.527 663.827 295.187 663.579 294.963C663.331 294.731 662.983 294.615 662.535 294.615C662.095 294.615 661.627 294.703 661.131 294.879Z" fill="#0F172A"/>
-              <circle cx="855.538" cy="336.04" r="7" fill="white" stroke="#0F172A"/>
-              <path d="M853.056 332.82V331.62H858.048V333.204L855.132 339.672L853.884 339.312L856.704 333.18V332.82H853.056Z" fill="#0F172A"/>
-              <circle cx="732.321" cy="567.805" r="7" fill="white" stroke="#0F172A"/>
-              <path d="M730.211 563.805C730.723 563.437 731.419 563.253 732.299 563.253C733.179 563.253 733.879 563.437 734.399 563.805C734.927 564.165 735.191 564.685 735.191 565.365C735.191 565.845 735.115 566.209 734.963 566.457C734.819 566.697 734.543 566.945 734.135 567.201C734.543 567.465 734.839 567.737 735.023 568.017C735.215 568.289 735.311 568.669 735.311 569.157C735.311 569.957 735.035 570.537 734.483 570.897C733.931 571.257 733.203 571.437 732.299 571.437C730.315 571.437 729.323 570.721 729.323 569.289C729.323 568.753 729.415 568.341 729.599 568.053C729.783 567.765 730.075 567.481 730.475 567.201C730.099 566.953 729.835 566.697 729.683 566.433C729.531 566.161 729.455 565.801 729.455 565.353C729.455 564.681 729.707 564.165 730.211 563.805ZM730.751 569.001C730.751 569.825 731.271 570.237 732.311 570.237C733.359 570.237 733.883 569.817 733.883 568.977C733.883 568.425 733.547 568.045 732.875 567.837H731.723C731.075 568.045 730.751 568.433 730.751 569.001ZM733.763 565.557C733.763 564.821 733.283 564.453 732.323 564.453C731.363 564.453 730.883 564.821 730.883 565.557C730.883 566.037 731.163 566.417 731.723 566.697H732.875C733.467 566.417 733.763 566.037 733.763 565.557Z" fill="#0F172A"/>
-              <circle cx="624.394" cy="523.31" r="7" fill="white" stroke="#0F172A"/>
-              <path d="M624.013 525.778C625.229 525.778 625.845 525.01 625.861 523.474L625.573 523.57C624.965 523.778 624.477 523.882 624.109 523.882C623.245 523.882 622.585 523.678 622.129 523.27C621.673 522.854 621.445 522.234 621.445 521.41C621.445 520.586 621.697 519.938 622.201 519.466C622.713 518.994 623.405 518.758 624.277 518.758C625.277 518.758 626.021 519.114 626.509 519.826C626.997 520.538 627.241 521.59 627.241 522.982C627.241 524.374 626.965 525.382 626.413 526.006C625.869 526.63 625.069 526.942 624.013 526.942C623.413 526.942 622.765 526.87 622.069 526.726L621.721 526.654L621.841 525.61C622.617 525.722 623.341 525.778 624.013 525.778ZM624.217 522.706C624.673 522.706 625.141 522.618 625.621 522.442L625.873 522.358C625.857 520.734 625.325 519.922 624.277 519.922C623.821 519.922 623.465 520.054 623.209 520.318C622.953 520.582 622.825 520.942 622.825 521.398C622.825 522.27 623.289 522.706 624.217 522.706Z" fill="#0F172A"/>
-              <circle cx="727.564" cy="431.593" r="7" fill="white" stroke="#0F172A"/>
-              <path d="M726.018 428.493V435.093H724.908V429.753L723.358 430.753L722.848 429.923L724.998 428.493H726.018ZM728.484 429.193C728.904 428.653 729.531 428.383 730.364 428.383C731.197 428.383 731.821 428.65 732.234 429.183C732.647 429.716 732.854 430.6 732.854 431.833C732.854 433.06 732.644 433.93 732.224 434.443C731.811 434.95 731.187 435.203 730.354 435.203C729.527 435.203 728.904 434.95 728.484 434.443C728.071 433.936 727.864 433.07 727.864 431.843C727.864 430.61 728.071 429.726 728.484 429.193ZM731.394 429.903C731.187 429.536 730.844 429.353 730.364 429.353C729.884 429.353 729.537 429.536 729.324 429.903C729.117 430.263 729.014 430.9 729.014 431.813C729.014 432.726 729.121 433.36 729.334 433.713C729.554 434.06 729.897 434.233 730.364 434.233C730.837 434.233 731.177 434.06 731.384 433.713C731.597 433.36 731.704 432.726 731.704 431.813C731.704 430.9 731.601 430.263 731.394 429.903Z" fill="#0F172A"/>
-              <circle cx="347.5" cy="446.593" r="7" fill="white" stroke="#0F172A"/>
-              <path d="M345.954 443.493V450.093H344.844V444.753L343.294 445.753L342.784 444.923L344.934 443.493H345.954ZM351.55 443.493V450.093H350.44V444.753L348.89 445.753L348.38 444.923L350.53 443.493H351.55Z" fill="#0F172A"/>
-              <circle cx="299.486" cy="462.866" r="7" fill="white" stroke="#0F172A"/>
-              <path d="M297.94 459.766V466.366H296.83V461.026L295.28 462.026L294.77 461.196L296.92 459.766H297.94ZM304.406 466.366H300.156V465.416L301.786 463.736C302.279 463.23 302.626 462.833 302.826 462.546C303.026 462.26 303.126 461.946 303.126 461.606C303.126 461.26 303.029 461.013 302.836 460.866C302.643 460.72 302.326 460.646 301.886 460.646C301.473 460.646 301.016 460.693 300.516 460.786L300.266 460.826L300.196 459.946C300.843 459.753 301.513 459.656 302.206 459.656C303.586 459.656 304.276 460.27 304.276 461.496C304.276 461.976 304.169 462.393 303.956 462.746C303.749 463.1 303.376 463.526 302.836 464.026L301.426 465.396H304.406V466.366Z" fill="#0F172A"/>
-              <circle cx="278.285" cy="675.364" r="7" fill="white" stroke="#0F172A"/>
-              <path d="M276.74 672.264V678.864H275.63V673.524L274.08 674.524L273.57 673.694L275.72 672.264H276.74ZM278.945 672.474C279.565 672.261 280.245 672.154 280.985 672.154C281.725 672.154 282.262 672.297 282.595 672.584C282.935 672.864 283.105 673.311 283.105 673.924C283.105 674.191 283.052 674.431 282.945 674.644C282.845 674.857 282.742 675.014 282.635 675.114C282.529 675.207 282.395 675.307 282.235 675.414C282.589 675.581 282.842 675.764 282.995 675.964C283.155 676.157 283.235 676.474 283.235 676.914C283.235 677.614 283.059 678.134 282.705 678.474C282.359 678.807 281.802 678.974 281.035 678.974C280.735 678.974 280.405 678.947 280.045 678.894C279.685 678.847 279.399 678.797 279.185 678.744L278.875 678.664L278.945 677.804C279.679 677.937 280.325 678.004 280.885 678.004C281.685 677.997 282.085 677.644 282.085 676.944C282.085 676.624 281.982 676.381 281.775 676.214C281.569 676.047 281.295 675.961 280.955 675.954H279.625V675.024H280.955C281.202 675.024 281.429 674.924 281.635 674.724C281.849 674.517 281.955 674.271 281.955 673.984C281.955 673.691 281.862 673.474 281.675 673.334C281.495 673.194 281.245 673.124 280.925 673.124C280.399 673.124 279.855 673.171 279.295 673.264L279.035 673.314L278.945 672.474Z" fill="#0F172A"/>
-              <circle cx="136.091" cy="619.5" r="7" fill="white" stroke="#0F172A"/>
-              <path d="M134.545 616.4V623H133.435V617.66L131.885 618.66L131.375 617.83L133.525 616.4H134.545ZM139.461 623V621.82H136.491V620.97L138.231 616.4H139.461L137.621 620.85H139.461V618.91H140.581V620.85H141.301V621.82H140.581V623H139.461Z" fill="#0F172A"/>
-              <circle cx="175.12" cy="308.313" r="7" fill="white" stroke="#0F172A"/>
-              <path d="M208.562 316.509L234.062 327.009" stroke="white" stroke-width="2" stroke-dasharray="2 2"/>
-              <path d="M206.081 317.585L231.581 328.085" stroke="white" stroke-width="2" stroke-dasharray="2 2"/>
-              <path d="M207.191 320.27L232.691 330.77" stroke="white" stroke-width="2" stroke-dasharray="2 2"/>
-              <path d="M204.635 321.334L230.135 331.834" stroke="white" stroke-width="2" stroke-dasharray="2 2"/>
-              <path d="M207.5 314L233 324.5" stroke="white" stroke-width="2" stroke-dasharray="2 2"/>
-              <path d="M413.902 463.81C511.552 421.462 572.415 411.901 689.56 414.77" stroke="#EF4444" stroke-width="8" stroke-dasharray="4 4"/>
-              <path d="M178.231 302.953C178.077 302.568 177.641 302.381 177.256 302.534L170.987 305.038C170.603 305.191 170.415 305.628 170.569 306.012C170.723 306.397 171.159 306.584 171.544 306.431L177.116 304.206L179.341 309.778C179.495 310.162 179.931 310.35 180.316 310.196C180.7 310.043 180.888 309.606 180.734 309.221L178.231 302.953ZM172.595 314.736L173.285 315.032L178.223 303.527L177.534 303.231L176.845 302.935L171.906 314.44L172.595 314.736Z" fill="black"/>
-              </g>
-              <rect x="5" y="670" width="87" height="30" fill="#86EFAC"/>
-              <path d="M23.1201 680.26C23.3921 680.732 23.9121 680.968 24.6801 680.968C25.4481 680.968 25.9641 680.736 26.2281 680.272C26.5001 679.808 26.6361 679.032 26.6361 677.944C26.6361 676.848 26.4961 676.052 26.2161 675.556C25.9441 675.06 25.4321 674.812 24.6801 674.812C23.9281 674.812 23.4121 675.06 23.1321 675.556C22.8521 676.052 22.7121 676.844 22.7121 677.932C22.7121 679.012 22.8481 679.788 23.1201 680.26ZM27.2721 681.124C26.7841 681.796 25.9201 682.132 24.6801 682.132C23.4401 682.132 22.5721 681.796 22.0761 681.124C21.5801 680.444 21.3321 679.38 21.3321 677.932C21.3321 676.484 21.5801 675.408 22.0761 674.704C22.5801 674 23.4481 673.648 24.6801 673.648C25.9121 673.648 26.7761 674 27.2721 674.704C27.7681 675.4 28.0161 676.476 28.0161 677.932C28.0161 679.388 27.7681 680.452 27.2721 681.124ZM33.9862 673.78H35.3782L33.3622 682H30.7462L28.7302 673.78H30.1222L31.7542 680.824H32.3542L33.9862 673.78ZM36.5632 682V673.78H41.7472V674.944H37.8952V677.272H41.0272V678.424H37.8952V680.824H41.7472V682H36.5632ZM44.528 679.072V682H43.196V673.78H46.316C48.172 673.78 49.1 674.652 49.1 676.396C49.1 677.564 48.652 678.356 47.756 678.772L49.112 682H47.648L46.46 679.072H44.528ZM47.732 676.408C47.732 675.424 47.26 674.932 46.316 674.932H44.528V677.92H46.34C46.82 677.92 47.172 677.784 47.396 677.512C47.62 677.232 47.732 676.864 47.732 676.408ZM49.7751 674.968V673.78H55.7751V674.968H53.4591V682H52.1151V674.968H49.7751ZM55.6834 682L57.7114 673.78H60.3634L62.4034 682H61.0594L60.6154 680.236H57.4594L57.0154 682H55.6834ZM58.7434 674.896L57.7234 679.06H60.3514L59.3434 674.896H58.7434ZM64.907 682H63.575V673.78H64.907V677.488L66.131 677.392L67.811 673.78H69.335L67.307 677.908L69.419 682H67.871L66.131 678.568L64.907 678.652V682ZM70.571 682V673.78H75.755V674.944H71.903V677.272H75.035V678.424H71.903V680.824H75.755V682H70.571ZM17.615 696L19.643 687.78H22.295L24.335 696H22.991L22.547 694.236H19.391L18.947 696H17.615ZM20.675 688.896L19.655 693.06H22.283L21.275 688.896H20.675ZM28.1494 696.132C26.9494 696.132 26.1334 695.8 25.7014 695.136C25.2774 694.472 25.0654 693.38 25.0654 691.86C25.0654 690.34 25.2814 689.26 25.7134 688.62C26.1454 687.972 26.9574 687.648 28.1494 687.648C28.8614 687.648 29.6454 687.748 30.5014 687.948L30.4534 689.028C29.7334 688.9 29.0134 688.836 28.2934 688.836C27.5734 688.836 27.0854 689.052 26.8294 689.484C26.5734 689.908 26.4454 690.712 26.4454 691.896C26.4454 693.072 26.5694 693.876 26.8174 694.308C27.0654 694.732 27.5494 694.944 28.2694 694.944C28.9894 694.944 29.7174 694.884 30.4534 694.764L30.4894 695.868C29.6654 696.044 28.8854 696.132 28.1494 696.132ZM31.1248 688.968V687.78H37.1248V688.968H34.8088V696H33.4648V688.968H31.1248ZM38.2332 696V687.78H39.5652V696H38.2332ZM46.0038 687.78H47.3958L45.3798 696H42.7638L40.7478 687.78H42.1398L43.7718 694.824H44.3718L46.0038 687.78ZM47.533 696L49.561 687.78H52.213L54.253 696H52.909L52.465 694.236H49.309L48.865 696H47.533ZM50.593 688.896L49.573 693.06H52.201L51.193 688.896H50.593ZM54.1404 688.968V687.78H60.1404V688.968H57.8244V696H56.4804V688.968H54.1404ZM61.2488 696V687.78H62.5808V696H61.2488ZM65.8994 694.26C66.1714 694.732 66.6914 694.968 67.4594 694.968C68.2274 694.968 68.7434 694.736 69.0074 694.272C69.2794 693.808 69.4154 693.032 69.4154 691.944C69.4154 690.848 69.2754 690.052 68.9954 689.556C68.7234 689.06 68.2114 688.812 67.4594 688.812C66.7074 688.812 66.1914 689.06 65.9114 689.556C65.6314 690.052 65.4914 690.844 65.4914 691.932C65.4914 693.012 65.6274 693.788 65.8994 694.26ZM70.0514 695.124C69.5634 695.796 68.6994 696.132 67.4594 696.132C66.2194 696.132 65.3514 695.796 64.8554 695.124C64.3594 694.444 64.1114 693.38 64.1114 691.932C64.1114 690.484 64.3594 689.408 64.8554 688.704C65.3594 688 66.2274 687.648 67.4594 687.648C68.6914 687.648 69.5554 688 70.0514 688.704C70.5474 689.4 70.7954 690.476 70.7954 691.932C70.7954 693.388 70.5474 694.452 70.0514 695.124ZM72.3464 696V687.78H74.6744L77.1704 694.824H77.3504V687.78H78.6824V696H76.4024L73.8464 688.944H73.6784V696H72.3464Z" fill="#0F172A"/>
-              <path d="M94.4368 559.958L275.528 114.708" stroke="#EF4444" stroke-width="8" stroke-dasharray="4 4"/>
-              <defs>
-              <clipPath id="clip0_3_57">
-              <rect width="784" height="776" fill="white" transform="translate(88)"/>
-              </clipPath>
-              </defs>
-            </svg>
-
+            <!-- Render the dynamic SVG provided by the StaticPaths prop -->
+            <div class="dynamic-svg-wrapper" set:html={trackSvg}></div>
           </div>
         </div>
 
@@ -294,7 +483,7 @@ const { raceName, circuitName, location, lat, lon, flagCode, firstSessionDate, s
           <p>{description}</p>
         </div>
 
-        <!-- 3. Replaced the static weather block with the CircuitWeather component -->
+        <!-- Dynamic Weather block relying on lat/lon -->
         <CircuitWeather lat={lat} lon={lon} locationName={circuitName} />
 
         <div class="info-card">
@@ -364,6 +553,8 @@ const { raceName, circuitName, location, lat, lon, flagCode, firstSessionDate, s
 
 <script is:inline>
   function initCountdown() {
+    if (window.f1Interval) clearInterval(window.f1Interval);
+
     const timerElement = document.getElementById('f1-countdown');
     if (!timerElement) return;
 
@@ -371,6 +562,9 @@ const { raceName, circuitName, location, lat, lon, flagCode, firstSessionDate, s
     if (!targetDateStr) return;
 
     const targetDate = new Date(targetDateStr).getTime();
+    const resultsElement = document.getElementById('f1-results');
+    const headerTitle = document.getElementById('countdown-title');
+    const pulseDot = document.getElementById('pulse-dot');
     
     const daysEl = document.getElementById('cd-days');
     const hoursEl = document.getElementById('cd-hours');
@@ -381,11 +575,18 @@ const { raceName, circuitName, location, lat, lon, flagCode, firstSessionDate, s
       const now = new Date().getTime();
       const distance = targetDate - now;
 
+      // If Practice 1 has started, swap to Results view
       if (distance < 0) {
-        if(daysEl) daysEl.innerText = "00";
-        if(hoursEl) hoursEl.innerText = "00";
-        if(minsEl) minsEl.innerText = "00";
-        if(secsEl) secsEl.innerText = "00";
+        clearInterval(window.f1Interval);
+        
+        if (timerElement) timerElement.style.display = 'none';
+        if (resultsElement) resultsElement.style.display = 'block';
+        if (headerTitle) headerTitle.innerText = 'Weekend Concluded';
+        if (pulseDot) {
+            pulseDot.style.background = '#334155';
+            pulseDot.style.boxShadow = 'none';
+            pulseDot.style.animation = 'none';
+        }
         return;
       }
 
@@ -401,7 +602,7 @@ const { raceName, circuitName, location, lat, lon, flagCode, firstSessionDate, s
     };
 
     updateTimer(); 
-    setInterval(updateTimer, 1000); 
+    window.f1Interval = setInterval(updateTimer, 1000); 
   }
 
   document.addEventListener('DOMContentLoaded', initCountdown);
@@ -417,22 +618,6 @@ const { raceName, circuitName, location, lat, lon, flagCode, firstSessionDate, s
 
   .guide-header {
     margin-bottom: 2rem;
-  }
-
-  .back-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    color: #38bdf8;
-    text-decoration: none;
-    font-size: 0.9rem;
-    font-weight: 700;
-    margin-bottom: 1.5rem;
-    transition: color 0.2s ease;
-  }
-
-  .back-link:hover {
-    color: #7dd3fc;
   }
 
   .title-wrapper {
@@ -549,6 +734,73 @@ const { raceName, circuitName, location, lat, lon, flagCode, firstSessionDate, s
     margin-top: 0.35rem;
   }
 
+  /* --- RESULTS & PODIUM DISPLAY --- */
+  .results-wrapper {
+    width: 100%;
+  }
+
+  .awaiting-state {
+    background: #0f172a;
+    border: 1px dashed #475569;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    padding: 3rem 1.5rem;
+    color: #cbd5e1;
+    font-size: 1.05rem;
+    font-weight: 600;
+    margin-top: 0.5rem;
+    box-shadow: inset 0 4px 12px rgba(0,0,0,0.1);
+  }
+
+  .spin-icon {
+    animation: spin 1.5s linear infinite;
+    stroke: #38bdf8;
+    width: 36px;
+    height: 36px;
+  }
+
+  @keyframes spin { 
+    100% { transform: rotate(360deg); } 
+  }
+  
+  .podium-display {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0.5rem;
+    align-items: flex-end;
+    margin-top: 0.5rem;
+  }
+
+  .podium-box {
+    background: #0f172a;
+    border: 1px solid #334155;
+    border-radius: 6px;
+    padding: 1rem 0.5rem;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+  .podium-box.p1 { border-top: 3px solid #ffd700; padding-top: 1.5rem; }
+  .podium-box.p2 { border-top: 3px solid #cbd5e1; }
+  .podium-box.p3 { border-top: 3px solid #d97706; }
+  .podium-box .pos { font-size: 0.8rem; font-weight: 900; }
+  .podium-box.p1 .pos { color: #ffd700; }
+  .podium-box.p2 .pos { color: #cbd5e1; }
+  .podium-box.p3 .pos { color: #d97706; }
+  .podium-box .name { font-weight: 800; color: #ffffff; font-size: 1.05rem; }
+  .podium-box .team { font-size: 0.7rem; color: #94a3b8; text-transform: uppercase; font-weight: 700; }
+  
+  @media (max-width: 600px) {
+    .podium-box .name { font-size: 0.9rem; }
+    .podium-box .team { font-size: 0.65rem; }
+  }
+
+  /* --- REST OF GUIDE STYLES --- */
   .guide-grid {
     display: grid;
     grid-template-columns: 1.2fr 1fr;
@@ -615,12 +867,15 @@ const { raceName, circuitName, location, lat, lon, flagCode, firstSessionDate, s
     pointer-events: none;
   }
 
-  .track-svg {
-    filter: drop-shadow(0 0 16px rgba(0,0,0,0.4));
+  .dynamic-svg-wrapper {
+    width: 100%;
+    height: 100%;
     z-index: 1;
   }
-
-  /* Weather Grid CSS removed because the CircuitWeather component handles its own styling */
+  
+  :global(.track-svg) {
+    filter: drop-shadow(0 0 16px rgba(0,0,0,0.4));
+  }
 
   .tyres-grid {
     display: grid;
@@ -704,9 +959,12 @@ const { raceName, circuitName, location, lat, lon, flagCode, firstSessionDate, s
     gap: 0.5rem;
   }
 
+  /* Centered driver names using absolute positioning */
   .winner-row {
     display: flex;
     justify-content: space-between;
+    align-items: center;
+    position: relative;
     background: #0f172a;
     border: 1px solid #334155;
     padding: 0.75rem 1rem;
@@ -718,11 +976,23 @@ const { raceName, circuitName, location, lat, lon, flagCode, firstSessionDate, s
   .win-year {
     font-weight: 800;
     color: #38bdf8;
+    z-index: 1;
   }
 
   .win-driver {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
     font-weight: 700;
     color: #ffffff;
+    text-align: center;
+    width: 60%;
+    pointer-events: none;
+  }
+
+  .win-team {
+    text-align: right;
+    z-index: 1;
   }
 
   .stats-grid {

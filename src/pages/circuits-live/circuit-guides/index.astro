@@ -5,33 +5,53 @@ import Layout from '@/layouts/Layout.astro';
 // --- DATA MODEL ---
 const circuits = [
   {
-    slug: "dutch-grand-prix", 
-    title: "Dutch Grand Prix",
-    circuitName: "Circuit Park Zandvoort",
-    country: "Netherlands",
-    // Authentic aerial shot from Wikimedia Commons (Creative Commons licensed)
-    heroImage: "https://commons.wikimedia.org/wiki/Special:FilePath/Circuit_Park_Zandvoort_aerial_photo.jpg"
-  },
-  {
+    round: 12,
     slug: "british-grand-prix",
     title: "British Grand Prix",
     circuitName: "Silverstone Circuit",
     country: "UK",
-    // Authentic aerial shot from Wikimedia Commons (Creative Commons licensed)
     heroImage: "https://commons.wikimedia.org/wiki/Special:FilePath/Silverstone_Circuit,_July_2,_2018_SkySat_(cropped).jpg"
+  },
+  {
+    round: 15,
+    slug: "dutch-grand-prix", 
+    title: "Dutch Grand Prix",
+    circuitName: "Circuit Park Zandvoort",
+    country: "Netherlands",
+    heroImage: "https://commons.wikimedia.org/wiki/Special:FilePath/Circuit_Park_Zandvoort_aerial_photo.jpg"
+  },
+  {
+    round: 16,
+    slug: "italian-grand-prix",
+    title: "Italian Grand Prix",
+    circuitName: "Autodromo Nazionale Monza",
+    country: "Italy"
+  },
+  {
+    round: 17,
+    slug: "madrid-grand-prix",
+    title: "Madrid Grand Prix",
+    circuitName: "IFEMA Madrid Circuit",
+    country: "Spain"
+  },
+  {
+    round: 18,
+    slug: "azerbaijan-grand-prix",
+    title: "Azerbaijan Grand Prix",
+    circuitName: "Baku City Circuit",
+    country: "Azerbaijan"
+  },
+  {
+    round: 19,
+    slug: "singapore-grand-prix",
+    title: "Singapore Grand Prix",
+    circuitName: "Marina Bay Street Circuit",
+    country: "Singapore"
   }
-  // Add new tracks here as you build them!
 ];
 
-// Sort circuits alphabetically by country, then by title
-circuits.sort((a, b) => {
-  const countryA = a.country || '';
-  const countryB = b.country || '';
-  if (countryA === countryB) {
-    return a.title.localeCompare(b.title);
-  }
-  return countryA.localeCompare(countryB);
-});
+// Sort circuits sequentially by championship round number
+circuits.sort((a, b) => a.round - b.round);
 
 // Flag helper
 function getFlagCode(country: string) {
@@ -55,7 +75,7 @@ function getFlagCode(country: string) {
       <header class="section-header">
         <span class="badge">Circuit Directory</span>
         <h1 class="gradient-title">F1 Circuit Guides</h1>
-        <p>Comprehensive track layouts, spectator sightlines, and race weekend guides.</p>
+        <p>Comprehensive track layouts, spectator sightlines, and race weekend guides ordered by championship round.</p>
       </header>
 
       <!-- LIVE SEARCH BAR -->
@@ -64,7 +84,7 @@ function getFlagCode(country: string) {
         <input 
           type="text" 
           id="circuit-search" 
-          placeholder="Search by track, country, or GP..." 
+          placeholder="Search by track, country, or round..." 
           autocomplete="off"
         />
       </div>
@@ -80,14 +100,16 @@ function getFlagCode(country: string) {
         {circuits.map((circuit) => (
           <article 
             class="card circuit-card" 
-            data-search={`${circuit.title.toLowerCase()} ${circuit.country?.toLowerCase() || ''} ${circuit.circuitName?.toLowerCase() || ''}`}
+            data-search={`round ${circuit.round} ${circuit.title.toLowerCase()} ${circuit.country?.toLowerCase() || ''} ${circuit.circuitName?.toLowerCase() || ''}`}
           >
             {circuit.heroImage ? (
               <div class="card-image-wrap">
+                <span class="round-badge">Round {circuit.round}</span>
                 <img src={circuit.heroImage} alt={circuit.title} class="card-image" loading="lazy" />
               </div>
             ) : (
               <div class="card-image-wrap placeholder-bg">
+                <span class="round-badge">Round {circuit.round}</span>
                 <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#334155" stroke-width="2"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242M12 12v9"/><path d="m8 17 4-4 4 4"/></svg>
               </div>
             )}
@@ -265,6 +287,23 @@ function getFlagCode(country: string) {
     background-color: #0b0f19;
     position: relative;
     border-bottom: 1px solid #334155;
+  }
+
+  .round-badge {
+    position: absolute;
+    top: 0.85rem;
+    left: 0.85rem;
+    background: rgba(15, 23, 42, 0.85);
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #f8fafc;
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 0.25rem 0.65rem;
+    border-radius: 4px;
+    z-index: 2;
   }
 
   .placeholder-bg {

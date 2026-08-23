@@ -77,66 +77,106 @@ export default defineConfig({
         name: "liveResults",
         label: "Live Weekend Results",
         path: "src/content/results",
-        format: "json",
-        ui: {
-          allowedActions: {
-            create: false,
-            delete: false,
-          },
+        match: {
+          include: "current", 
         },
+        format: "json",
+        ui: { allowedActions: { create: false, delete: false } },
         fields: [
           {
-            name: "fp1",
-            label: "Practice 1 (FP1)",
-            type: "object",
-            fields: [
-              { name: "first", label: "1st Place", type: "string" },
-              { name: "second", label: "2nd Place", type: "string" },
-              { name: "third", label: "3rd Place", type: "string" },
-            ],
+            name: "fp1", label: "Practice 1 (FP1)", type: "object",
+            fields: [{ name: "first", type: "string" }, { name: "second", type: "string" }, { name: "third", type: "string" }],
           },
           {
-            name: "fp2",
-            label: "Practice 2 / Sprint Qualifying (FP2/SQ)",
-            type: "object",
-            fields: [
-              { name: "first", label: "1st Place", type: "string" },
-              { name: "second", label: "2nd Place", type: "string" },
-              { name: "third", label: "3rd Place", type: "string" },
-            ],
+            name: "fp2", label: "Practice 2 / Sprint Quali", type: "object",
+            fields: [{ name: "first", type: "string" }, { name: "second", type: "string" }, { name: "third", type: "string" }],
           },
           {
-            name: "fp3",
-            label: "Practice 3 / Sprint Race (FP3/Sprint)",
-            type: "object",
-            fields: [
-              { name: "first", label: "1st Place", type: "string" },
-              { name: "second", label: "2nd Place", type: "string" },
-              { name: "third", label: "3rd Place", type: "string" },
-            ],
+            name: "fp3", label: "Practice 3 / Sprint Race", type: "object",
+            fields: [{ name: "first", type: "string" }, { name: "second", type: "string" }, { name: "third", type: "string" }],
           },
           {
-            name: "quali",
-            label: "Qualifying",
-            type: "object",
-            fields: [
-              { name: "first", label: "1st Place", type: "string" },
-              { name: "second", label: "2nd Place", type: "string" },
-              { name: "third", label: "3rd Place", type: "string" },
-            ],
+            name: "quali", label: "Qualifying", type: "object",
+            fields: [{ name: "first", type: "string" }, { name: "second", type: "string" }, { name: "third", type: "string" }],
           },
           {
-            name: "race",
-            label: "Grand Prix Race",
-            type: "object",
-            fields: [
-              { name: "first", label: "1st Place", type: "string" },
-              { name: "second", label: "2nd Place", type: "string" },
-              { name: "third", label: "3rd Place", type: "string" },
-            ],
+            name: "race", label: "Grand Prix Race", type: "object",
+            fields: [{ name: "first", type: "string" }, { name: "second", type: "string" }, { name: "third", type: "string" }],
           },
         ],
       },
+      // 6. Driver Form Guide (Legacy)
+      {
+        name: "driverForm",
+        label: "Driver Form Guide (Legacy)",
+        path: "src/content/results",
+        match: { include: "form" },
+        format: "json",
+        fields: [
+          {
+            type: "object", name: "drivers", label: "Drivers", list: true,
+            ui: { itemProps: (item) => ({ label: item?.code || "New Driver" }) },
+            fields: [
+              { type: "string", name: "code", label: "Driver Code (e.g. VER)" },
+              { type: "string", name: "recent", label: "Last 5 Races", list: true }
+            ]
+          }
+        ]
+      },
+      // 7. Master Results Grid (NEW)
+      {
+        name: "masterGrid",
+        label: "2026 Master Results Grid",
+        path: "src/content/results",
+        match: {
+          include: "season-2026", // Locks it to a single file!
+        },
+        format: "json",
+        ui: {
+          allowedActions: { create: false, delete: false },
+        },
+        fields: [
+          {
+            type: "object",
+            name: "drivers",
+            label: "Driver Season Results",
+            list: true,
+            ui: {
+              // Displays the driver name nicely in the list
+              itemProps: (item) => ({ label: `${item?.code || 'Driver'} | ${item?.name || ''}` }),
+            },
+            fields: [
+              { type: "string", name: "code", label: "Driver Code (e.g. VER, NOR)", required: true },
+              { type: "string", name: "name", label: "Full Name (e.g. Max Verstappen)" },
+              { type: "string", name: "team", label: "Team Name (e.g. Red Bull Racing)" },
+              
+              // The "Grid" fields
+              { type: "string", name: "r1", label: "R1: Australia" },
+              { type: "string", name: "r2", label: "R2: China" },
+              { type: "string", name: "r3", label: "R3: Japan" },
+              { type: "string", name: "r4", label: "R4: Miami" },
+              { type: "string", name: "r5", label: "R5: Canada" },
+              { type: "string", name: "r6", label: "R6: Monaco" },
+              { type: "string", name: "r7", label: "R7: Spain" },
+              { type: "string", name: "r8", label: "R8: Austria" },
+              { type: "string", name: "r9", label: "R9: Great Britain" },
+              { type: "string", name: "r10", label: "R10: Belgium" },
+              { type: "string", name: "r11", label: "R11: Hungary" },
+              { type: "string", name: "r12", label: "R12: Netherlands" },
+              { type: "string", name: "r13", label: "R13: Italy" },
+              { type: "string", name: "r14", label: "R14: Madrid" },
+              { type: "string", name: "r15", label: "R15: Azerbaijan" },
+              { type: "string", name: "r16", label: "R16: Singapore" },
+              { type: "string", name: "r17", label: "R17: USA (Austin)" },
+              { type: "string", name: "r18", label: "R18: Mexico" },
+              { type: "string", name: "r19", label: "R19: Brazil" },
+              { type: "string", name: "r20", label: "R20: Las Vegas" },
+              { type: "string", name: "r21", label: "R21: Qatar" },
+              { type: "string", name: "r22", label: "R22: Abu Dhabi" },
+            ]
+          }
+        ]
+      }
     ],
   },
 });
