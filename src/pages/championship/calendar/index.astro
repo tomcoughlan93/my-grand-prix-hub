@@ -1,10 +1,7 @@
 ---
 // src/pages/championship/calendar.astro
 import Layout from '@/layouts/Layout.astro';
-import liveResultsData from '@/data/liveResults.json';
-
-// Tell TypeScript to expect dynamic string keys in this JSON file
-const liveResults = liveResultsData as Record<string, any>;
+import tinaResults from '@/content/results/current.json';
 
 interface Podium {
   first: string;
@@ -73,7 +70,12 @@ const CALENDAR: Race[] = [
   { season: "2026", round: "11", raceName: "Hungarian Grand Prix", tyresAnnounced: true, tyres: ["C3", "C4", "C5"], Circuit: { circuitName: "Hungaroring", Location: { locality: "Budapest", country: "Hungary", timezone: "Europe/Budapest", coordinates: { lat: 47.5789, lon: 19.2486 } } }, date: "2026-07-26", time: "13:00:00Z", sessions: { fp1: "2026-07-24T11:30:00Z", fp2: "2026-07-24T15:00:00Z", fp3: "2026-07-25T10:30:00Z", quali: "2026-07-25T14:00:00Z", race: "2026-07-26T13:00:00Z" }, podium: { first: "NOR", second: "VER", third: "ANT" } },
   
   // Dutch GP - Sprint Toggled, explicit offsets
-  { season: "2026", round: "12", raceName: "Dutch Grand Prix", isSprint: true, tyresAnnounced: true, tyres: ["C2", "C3", "C4"], Circuit: { circuitName: "Circuit Park Zandvoort", Location: { locality: "Zandvoort", country: "Netherlands", timezone: "Europe/Amsterdam", coordinates: { lat: 52.3888, lon: 4.54092 } } }, date: "2026-08-23", time: "15:00:00+02:00", sessions: { fp1: "2026-08-21T12:30:00+02:00", fp2: "2026-08-21T16:00:00+02:00", fp3: "2026-08-22T11:30:00+02:00", quali: "2026-08-22T16:00:00+02:00", race: "2026-08-23T15:00:00+02:00" } },
+  { 
+    season: "2026", round: "12", raceName: "Dutch Grand Prix", isSprint: true, tyresAnnounced: true, tyres: ["C2", "C3", "C4"], 
+    Circuit: { circuitName: "Circuit Park Zandvoort", Location: { locality: "Zandvoort", country: "Netherlands", timezone: "Europe/Amsterdam", coordinates: { lat: 52.3888, lon: 4.54092 } } }, 
+    date: "2026-08-23", time: "15:00:00+02:00", 
+    sessions: { fp1: "2026-08-21T12:30:00+02:00", fp2: "2026-08-21T16:00:00+02:00", fp3: "2026-08-22T11:30:00+02:00", quali: "2026-08-22T16:00:00+02:00", race: "2026-08-23T15:00:00+02:00" }
+  },
   
   { season: "2026", round: "13", raceName: "Italian Grand Prix", tyresAnnounced: true, tyres: ["C3", "C4", "C5"], Circuit: { circuitName: "Autodromo Nazionale Monza", Location: { locality: "Monza", country: "Italy", timezone: "Europe/Rome", coordinates: { lat: 45.6156, lon: 9.28111 } } }, date: "2026-09-06", time: "15:00:00+02:00", sessions: { fp1: "2026-09-04T13:30:00+02:00", fp2: "2026-09-04T17:00:00+02:00", fp3: "2026-09-05T12:30:00+02:00", quali: "2026-09-05T16:00:00+02:00", race: "2026-09-06T15:00:00+02:00" } },
   { season: "2026", round: "14", raceName: "Madrid Grand Prix", tyresAnnounced: true, tyres: ["C2", "C3", "C4"], Circuit: { circuitName: "IFEMA Madrid", Location: { locality: "Madrid", country: "Spain", timezone: "Europe/Madrid", coordinates: { lat: 40.4667, lon: -3.6167 } } }, date: "2026-09-13", time: "15:00:00+02:00", sessions: { fp1: "2026-09-11T13:30:00+02:00", fp2: "2026-09-11T17:00:00+02:00", fp3: "2026-09-12T12:30:00+02:00", quali: "2026-09-12T16:00:00+02:00", race: "2026-09-13T15:00:00+02:00" } },
@@ -132,39 +134,15 @@ if (nextRace) {
   }
 }
 
-// INJECT AUTOMATED FASTF1 RESULTS (Time-Gated to Completed Sessions Only)
+// INJECT TINA CMS RESULTS INTO THE NEXT RACE
 if (nextRace) {
-  nextRace.sessionResults = nextRace.sessionResults || {};
-  
-  const hasSessionFinished = (isoString) => {
-    // Adds a 1-hour buffer to the start time before looking for results
-    return (new Date(isoString).getTime() + (60 * 60 * 1000)) < now.getTime();
+  nextRace.sessionResults = {
+    fp1: tinaResults.fp1?.first ? tinaResults.fp1 : undefined,
+    fp2: tinaResults.fp2?.first ? tinaResults.fp2 : undefined,
+    fp3: tinaResults.fp3?.first ? tinaResults.fp3 : undefined,
+    quali: tinaResults.quali?.first ? tinaResults.quali : undefined,
+    race: tinaResults.race?.first ? tinaResults.race : undefined,
   };
-
-  // Session 1: FP1
-  if (hasSessionFinished(nextRace.sessions.fp1)) {
-    nextRace.sessionResults.fp1 = liveResults['Session1'] || nextRace.sessionResults.fp1;
-  }
-
-  // Session 2: Sprint Quali (or FP2)
-  if (hasSessionFinished(nextRace.sessions.fp2)) {
-    nextRace.sessionResults.fp2 = liveResults['Session2'] || nextRace.sessionResults.fp2;
-  }
-
-  // Session 3: Sprint Race (or FP3)
-  if (hasSessionFinished(nextRace.sessions.fp3)) {
-    nextRace.sessionResults.fp3 = liveResults['Session3'] || nextRace.sessionResults.fp3;
-  }
-
-  // Session 4: Qualifying
-  if (hasSessionFinished(nextRace.sessions.quali)) {
-    nextRace.sessionResults.quali = liveResults['Session4'] || nextRace.sessionResults.quali;
-  }
-
-  // Session 5: Grand Prix Race
-  if (hasSessionFinished(nextRace.sessions.race)) {
-    nextRace.sessionResults.race = liveResults['Session5'] || nextRace.sessionResults.race;
-  }
 }
 
 // FETCH LIVE WEATHER FOR NEXT RACE
@@ -385,7 +363,7 @@ const getSessionArray = (race: Race) => [
                       <span class="m-step m-3" title="3rd Place">🥉 {session.results.third}</span>
                     </div>
                   ) : (
-                    <span class="pending-results js-pending" style="display:none;">Awaiting Results...</span>
+                    <span class="pending-results">Awaiting Results...</span>
                   )}
                 </div>
               </div>
@@ -606,14 +584,6 @@ const getSessionArray = (race: Race) => [
       if(trackSpan) trackSpan.textContent = trackFormatter.format(dateObj);
       if(localSpan) localSpan.textContent = localFormatter.format(dateObj);
 
-      const pendingSpan = card.querySelector('.js-pending');
-      if (pendingSpan) {
-        if (now > sessionEndTime) {
-          pendingSpan.style.display = 'inline-block';
-        } else {
-          pendingSpan.style.display = 'none';
-        }
-      }
     });
   }
 

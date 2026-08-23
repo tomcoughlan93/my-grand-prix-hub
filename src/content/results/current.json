@@ -1,0 +1,27 @@
+{
+  "fp1": {
+    "first": "ANT",
+    "second": "NOR",
+    "third": "RUS"
+  },
+  "fp2": {
+    "first": "RUS",
+    "second": "NOR",
+    "third": "LEC"
+  },
+  "fp3": {
+    "first": "RUS",
+    "second": "LEC",
+    "third": "NOR"
+  },
+  "quali": {
+    "first": "NOR",
+    "second": "RUS",
+    "third": "ANT"
+  },
+  "race": {
+    "first": "",
+    "second": "",
+    "third": ""
+  }
+}
