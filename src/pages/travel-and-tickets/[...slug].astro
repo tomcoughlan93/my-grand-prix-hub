@@ -1,5 +1,4 @@
 ---
-// src/pages/travel-and-tickets/[slug].astro
 import Layout from '../../layouts/Layout.astro';
 import JourneyPlanner from '../../components/JourneyPlanner.astro';
 import { 
@@ -26,59 +25,113 @@ const { race } = Astro.props as Props;
 
 const getStatusColor = (status: string) => {
   switch(status) {
-    case 'On Sale': return 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30';
-    case 'Selling Fast': return 'bg-amber-500/20 text-amber-400 border-amber-500/30';
-    case 'Sold Out': return 'bg-rose-500/20 text-rose-400 border-rose-500/30';
-    default: return 'bg-slate-500/20 text-slate-300 border-slate-500/30';
+    case 'On Sale': return 'status-onsale';
+    case 'Selling Fast': return 'status-fast';
+    case 'Sold Out': return 'status-soldout';
+    default: return 'status-default';
   }
 };
+
+const startingPriceGBP = race.ticketTiers.length > 0 ? race.ticketTiers[0].priceFromGBP : '--';
+const startingPriceEUR = race.ticketTiers.length > 0 ? race.ticketTiers[0].priceFromEUR : '--';
+const startingPriceUSD = race.ticketTiers.length > 0 ? race.ticketTiers[0].priceFromUSD : '--';
 ---
 
 <Layout 
-  title={`${race.raceName} Tickets & Travel Guide | My Grand Prix Hub`}
-  description={`Plan your trip to the ${race.raceName}. Get ticket prices, airport guides, accommodation tips, and local transport info for ${race.circuitName}.`}
+  title={`${race.raceName} Tickets & Trip Planner | My Grand Prix Hub`}
+  description={`Step-by-step travel & booking guide for the ${race.raceName}. Tickets, flights, train routes, city base guide, and circuit transport for ${race.circuitName}.`}
 >
   <main class="page-container hub-page">
     
-    <header class="hub-header">
-      <div class="header-content">
+    <!-- HERO HEADER -->
+    <header class="hub-hero">
+      <div class="hero-top-meta">
         <span class="round-badge">Round {race.round} &bull; {race.dates}</span>
-        <h1>{race.raceName}</h1>
-        <p class="subtitle">{race.circuitName}, {race.location}</p>
-        
-        <div class="header-actions">
-          <span class={`status-badge ${getStatusColor(race.ticketStatus)} border`}>
-            {race.ticketStatus}
+        <span class={`status-pill ${getStatusColor(race.ticketStatus)}`}>
+          ● {race.ticketStatus}
+        </span>
+      </div>
+
+      <h1>{race.raceName}</h1>
+      <p class="subtitle">{race.circuitName} &bull; {race.location}</p>
+      
+      <div class="hero-cta-strip">
+        <div class="hero-price-tag">
+          <span class="price-lbl">Official Tickets From</span>
+          <span 
+            class="price-hero-val price-val" 
+            data-eur={startingPriceEUR} 
+            data-gbp={startingPriceGBP} 
+            data-usd={startingPriceUSD}
+          >
+            £{startingPriceGBP}
           </span>
-          <a href={race.officialBoxOfficeUrl} target="_blank" rel="noopener noreferrer" class="btn-primary">
-            Official Tickets
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/></svg>
-          </a>
         </div>
+        <a href={race.officialBoxOfficeUrl} target="_blank" rel="noopener noreferrer" class="btn-primary">
+          Official Box Office
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/></svg>
+        </a>
       </div>
     </header>
 
-    <nav class="sticky-nav">
-      <ul class="nav-links">
-        <li><a href="#tickets">Tickets & Prices</a></li>
-        <!-- COMBINED NAV LINK -->
-        <li><a href="#travel-access">Getting There & Access</a></li>
-        <li><a href="#stay">Where to Stay</a></li>
-        <li><a href="#know-before-you-go">Know Before You Go</a></li>
-      </ul>
+    <!-- TRUST BADGE ROW -->
+    <div class="trust-bar">
+      <div class="trust-cell">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        <span>Verified Official Vendors</span>
+      </div>
+      <div class="trust-cell">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        <span>Secure Booking Portals</span>
+      </div>
+      <div class="trust-cell">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <span>Updated for 2026 Season</span>
+      </div>
+    </div>
+
+    <!-- STEP-BY-STEP STICKY JOURNEY NAV -->
+    <nav class="sticky-step-nav" id="trip-stepper">
+      <div class="step-nav-inner">
+        <a href="#step-tickets" class="step-link is-active" data-step="1">
+          <span class="step-num">01</span>
+          <span class="step-text">Tickets</span>
+        </a>
+        <span class="step-arrow">&rarr;</span>
+        <a href="#step-travel" class="step-link" data-step="2">
+          <span class="step-num">02</span>
+          <span class="step-text">Travel to City</span>
+        </a>
+        <span class="step-arrow">&rarr;</span>
+        <a href="#step-stay" class="step-link" data-step="3">
+          <span class="step-num">03</span>
+          <span class="step-text">Stay & City Guide</span>
+        </a>
+        <span class="step-arrow">&rarr;</span>
+        <a href="#step-access" class="step-link" data-step="4">
+          <span class="step-num">04</span>
+          <span class="step-text">Track Access</span>
+        </a>
+        <span class="step-arrow">&rarr;</span>
+        <a href="#step-rules" class="step-link" data-step="5">
+          <span class="step-num">05</span>
+          <span class="step-text">Track Rules</span>
+        </a>
+      </div>
     </nav>
 
-    <div class="content-grid">
+    <!-- CONTENT SECTIONS -->
+    <div class="journey-content">
       
-      <!-- TICKETS SECTION -->
-      <section id="tickets" class="hub-section">
-        <div class="section-header-flex">
-          <div>
-            <h2>Tickets & Packages</h2>
-            <p class="section-intro">Explore official grandstand options and verified VIP packages.</p>
+      <!-- STEP 1: TICKETS & PACKAGES -->
+      <section id="step-tickets" class="journey-step-section">
+        <div class="step-header-row">
+          <div class="step-title-group">
+            <span class="step-pill">Step 01</span>
+            <h2>Tickets & Official Passes</h2>
           </div>
-          <!-- Currency Switcher -->
-          <div class="currency-switcher">
+          
+          <div class="currency-box">
             <label for="currency-select">Currency:</label>
             <select id="currency-select" class="currency-dropdown">
               <option value="GBP">GBP (£)</option>
@@ -87,293 +140,450 @@ const getStatusColor = (status: string) => {
             </select>
           </div>
         </div>
-        
-        <div class="ticket-tiers">
+        <p class="step-intro">Compare ticket categories, pricing brackets, and verified ticket sellers for the {race.raceName}.</p>
+
+        <div class="ticket-grid">
           {race.ticketTiers.map((tier: TicketTier) => (
             <div class="ticket-card">
-              <div class="tier-header">
-                <span class="tier-category">{tier.category}</span>
+              <div class="ticket-top">
+                <span class="tier-tag">{tier.category}</span>
                 <h3>{tier.name}</h3>
+                <div class="price-row">
+                  <span class="from-text">From</span>
+                  <strong 
+                    class="price-val" 
+                    data-eur={tier.priceFromEUR} 
+                    data-gbp={tier.priceFromGBP} 
+                    data-usd={tier.priceFromUSD}
+                  >
+                    £{tier.priceFromGBP}
+                  </strong>
+                </div>
+                <p class="tier-desc">{tier.description}</p>
               </div>
-              <div class="tier-price">
-                From 
-                <strong 
-                  class="price-val" 
-                  data-eur={tier.priceFromEUR} 
-                  data-gbp={tier.priceFromGBP} 
-                  data-usd={tier.priceFromUSD}
-                >
-                  £{tier.priceFromGBP}
-                </strong>
+
+              <div class="ticket-bottom">
+                <a href={race.officialBoxOfficeUrl} target="_blank" rel="noopener noreferrer" class="btn-check-ticket">
+                  Check Tickets &rarr;
+                </a>
               </div>
-              <p class="tier-desc">{tier.description}</p>
             </div>
           ))}
         </div>
 
-        <div class="vendors-box">
-          <h4>Authorised International Resellers</h4>
-          <ul class="vendor-list">
+        <div class="vendors-panel">
+          <div class="vendors-panel-header">
+            <h4>Authorised International Resellers</h4>
+            <span class="verified-tag">100% Genuine Allocation</span>
+          </div>
+          <div class="vendor-grid">
             {race.vendors.map((vendor: { name: string; type: string; url: string }) => (
-              <li>
-                <a href={vendor.url} target="_blank" rel="noopener noreferrer" class="vendor-link">
-                  <strong>{vendor.name}</strong>
-                  <span class="vendor-type">{vendor.type}</span>
-                </a>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </section>
-
-      <hr class="section-divider" />
-
-      <!-- COMBINED TRAVEL & ACCESS SECTION -->
-      <section id="travel-access" class="hub-section">
-        <div class="section-header-flex">
-            <div>
-                <h2>Getting There & Circuit Access</h2>
-                <p class="section-intro">Plan your route from international airports right down to the local circuit gates.</p>
-            </div>
-        </div>
-
-        <JourneyPlanner 
-            circuitName={race.circuitName} 
-            lat={race.coordinates?.lat || 0} 
-            lon={race.coordinates?.lon || 0}
-        >
-            <div class="access-grid">
-                {race.circuitTransit.trainStation && (
-                  <div class="access-card">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2"><rect x="4" y="3" width="16" height="16" rx="2"/><path d="M4 11h16"/><path d="M12 3v8"/><path d="M8 19l-2 3"/><path d="M16 19l2 3"/><path d="M8 15h.01"/><path d="M16 15h.01"/></svg>
-                    <h4>Train Access</h4>
-                    <p>Nearest Station: <strong>{race.circuitTransit.trainStation}</strong></p>
-                    {race.circuitTransit.trainBookingUrl && (
-                      <a href={race.circuitTransit.trainBookingUrl} target="_blank" rel="noopener noreferrer" class="btn-text mt-2">Book Train Tickets &rarr;</a>
-                    )}
-                  </div>
-                )}
-                
-                <div class="access-card">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2"><rect x="3" y="11" width="18" height="8" rx="2"/><circle cx="7" cy="19" r="2"/><circle cx="17" cy="19" r="2"/><path d="M5 11V7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v4"/></svg>
-                  <h4>Shuttles & Buses</h4>
-                  <p>{race.circuitTransit.shuttleInfo}</p>
-                  {race.circuitTransit.shuttleBookingUrl && (
-                    <a href={race.circuitTransit.shuttleBookingUrl} target="_blank" rel="noopener noreferrer" class="btn-text mt-2">Book Shuttle Pass &rarr;</a>
-                  )}
-                </div>
-      
-                <div class="access-card">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#f43f5e" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><path d="M9 17V7h4a3 3 0 0 1 0 6H9"/></svg>
-                  <h4>Parking</h4>
-                  <p>{race.circuitTransit.parkingAdvice}</p>
-                  {race.circuitTransit.parkingBookingUrl && (
-                    <a href={race.circuitTransit.parkingBookingUrl} target="_blank" rel="noopener noreferrer" class="btn-text mt-2">Reserve Parking &rarr;</a>
-                  )}
-                </div>
-      
-                <div class="access-card full-width">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
-                  <h4>Gate Entry & App Rules</h4>
-                  <p>{race.circuitTransit.gateEntryTips}</p>
-                </div>
-              </div>
-        </JourneyPlanner>
-
-        <h3 class="subsection-title">Nearest Airports</h3>
-        <div class="airport-grid">
-          {race.airports.map((airport: Airport) => (
-            <div class="airport-card">
-              <div class="airport-header">
-                <div class="airport-code">{airport.code}</div>
+              <a href={vendor.url} target="_blank" rel="noopener noreferrer" class="vendor-card">
                 <div>
-                  <h4>{airport.name}</h4>
-                  <span class="distance">{airport.distanceToCircuit} to circuit</span>
+                  <strong>{vendor.name}</strong>
+                  <span class="v-type">{vendor.type}</span>
                 </div>
-              </div>
-              <p class="transit-summary">{airport.transitSummary}</p>
-              {airport.bookingUrl && (
-                <a href={airport.bookingUrl} target="_blank" rel="noopener noreferrer" class="btn-secondary mt-3">
-                  Search Flights
-                </a>
-              )}
-            </div>
-          ))}
+                <span class="v-arrow">&rarr;</span>
+              </a>
+            ))}
+          </div>
         </div>
       </section>
 
-      <hr class="section-divider" />
+      <!-- STEP 2: TRAVEL TO DESTINATION -->
+      <section id="step-travel" class="journey-step-section">
+        <div class="step-header-row">
+          <div class="step-title-group">
+            <span class="step-pill">Step 02</span>
+            <h2>Travel to Destination</h2>
+          </div>
+        </div>
+        <p class="step-intro">Choose how you are getting to the host region. Switch modes to compare flights, international trains, and driving.</p>
 
-      <!-- ACCOMMODATION SECTION -->
-      <section id="stay" class="hub-section">
-        <h2>Where to Stay</h2>
-        <div class="stay-card">
-          <div class="stay-areas">
-            <h4>Recommended Base Locations:</h4>
-            <ul>
-              {race.accommodation.recommendedAreas.map((area: string) => (
-                <li>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                  {area}
-                </li>
-              ))}
-            </ul>
-            {race.accommodation.bookingUrl && (
-              <a href={race.accommodation.bookingUrl} target="_blank" rel="noopener noreferrer" class="btn-secondary mt-4">
-                Find Hotels & Rentals
+        <!-- Travel Mode Selector Tabs -->
+        <div class="travel-tabs-wrapper">
+          <div class="travel-tabs">
+            <button type="button" class="tab-btn is-active" data-target="tab-flights">
+              ✈️ Flights & Airports
+            </button>
+            <button type="button" class="tab-btn" data-target="tab-trains">
+              🚆 International Rail
+            </button>
+            <button type="button" class="tab-btn" data-target="tab-driving">
+              🚗 Driving & Road Trips
+            </button>
+          </div>
+        </div>
+
+        <!-- TAB 1: FLIGHTS -->
+        <div id="tab-flights" class="travel-tab-content is-active">
+          <div class="airport-grid">
+            {race.airports.map((airport: Airport) => (
+              <div class="airport-card">
+                <div class="airport-header">
+                  <div class="airport-badge">
+                    <span class="code">{airport.code}</span>
+                  </div>
+                  <div>
+                    <h4>{airport.name}</h4>
+                    <span class="dist-pill">{airport.distanceToCircuit} to circuit</span>
+                  </div>
+                </div>
+                <p class="transit-p">{airport.transitSummary}</p>
+                {airport.bookingUrl && (
+  <a href={airport.bookingUrl} target="_blank" rel="noopener noreferrer" class="btn-primary mt-4">
+    Compare Flights to {airport.code} &rarr;
+  </a>
+)}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <!-- TAB 2: RAIL -->
+        <div id="tab-trains" class="travel-tab-content">
+          <div class="mode-info-card">
+            <div class="mode-info-header">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2"><rect x="4" y="3" width="16" height="16" rx="2"/><path d="M4 11h16"/><path d="M12 3v8"/><path d="M8 19l-2 3"/><path d="M16 19l2 3"/></svg>
+              <h3>High-Speed & Intercity Rail</h3>
+            </div>
+            <p>Travelling across Europe or domestically? High-speed rail connects directly into the nearest metropolitan transport hubs without airport security queues.</p>
+            
+            <div class="rail-perks">
+              <div class="perk-box">
+                <strong>Main Station Hub</strong>
+                <span>{race.circuitTransit.trainStation || 'Central Metropolitan Terminal'}</span>
+              </div>
+              <div class="perk-box">
+                <strong>Luggage Allowance</strong>
+                <span>Generous allowances with no extra fees for bags or fluids</span>
+              </div>
+            </div>
+
+            {race.circuitTransit.trainBookingUrl && (
+              <a href={race.circuitTransit.trainBookingUrl} target="_blank" rel="noopener noreferrer" class="btn-primary mt-4">
+                Search Train Timetables & Tickets &rarr;
               </a>
             )}
           </div>
-          <div class="stay-tips">
-            <h4>Local Tip:</h4>
-            <p>{race.accommodation.tips}</p>
+        </div>
+
+        <!-- TAB 3: DRIVING -->
+        <div id="tab-driving" class="travel-tab-content">
+          <div class="mode-info-card">
+            <div class="mode-info-header">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.5 2.8C2.1 11.2 2 11.6 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></svg>
+              <h3>Driving & Highway Advice</h3>
+            </div>
+            <p>Road-tripping to {race.raceName}? Ensure your vehicle is equipped with the necessary emissions vignettes, toll tags, or international driving kit.</p>
+
+            <div class="road-tips-list">
+              <div class="tip-item">
+                <span class="tip-icon">🅿️</span>
+                <div>
+                  <strong>Circuit Parking Requirement:</strong>
+                  <p>{race.circuitTransit.parkingAdvice}</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Dual Action Buttons for Driving -->
+            <div class="travel-actions mt-4">
+              {race.circuitTransit.parkingBookingUrl && (
+                <a href={race.circuitTransit.parkingBookingUrl} target="_blank" rel="noopener noreferrer" class="btn-primary">
+                  Reserve Circuit Parking &rarr;
+                </a>
+              )}
+              <a href={`https://www.google.com/maps/dir/?api=1&destination=${race.coordinates?.lat || ''},${race.coordinates?.lon || ''}`} target="_blank" rel="noopener noreferrer" class="btn-outline">
+                Plan Your Route 🗺️
+              </a>
+            </div>
+            
           </div>
         </div>
       </section>
 
-      <hr class="section-divider" />
+      <!-- STEP 3: WHERE TO STAY & CITY GUIDE -->
+      <section id="step-stay" class="journey-step-section">
+        <div class="step-header-row">
+          <div class="step-title-group">
+            <span class="step-pill">Step 03</span>
+            <h2>Where to Stay & City Guide</h2>
+          </div>
+        </div>
+        <p class="step-intro">Lock down your base. Explore top neighborhoods for nightlife, dining, and easy circuit transport.</p>
 
-      <!-- KNOW BEFORE YOU GO SECTION -->
-      <section id="know-before-you-go" class="hub-section">
-        <h2>Know Before You Go</h2>
-        <p class="section-intro">Essential logistics, rules, and tips for the race weekend.</p>
-        
-        <div class="kbyg-grid">
-          
-          <!-- Rules & Bags -->
-          <div class="kbyg-card border-t-blue">
-            <div class="kbyg-header">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-              <h4>Bag & Food Policy</h4>
+        <div class="stay-layout-grid">
+          <!-- Recommended Neighborhoods -->
+          <div class="neighborhood-panel">
+            <h3>Recommended Base Areas</h3>
+            <div class="hood-list">
+              {race.accommodation.recommendedAreas.map((area: string) => (
+                <div class="hood-box">
+                  <div class="hood-header">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                    <h4>{area}</h4>
+                  </div>
+                  <a href={race.accommodation.bookingUrl || '#'} target="_blank" rel="noopener noreferrer" class="hood-link">
+                    Search Hotels in {area} &rarr;
+                  </a>
+                </div>
+              ))}
             </div>
-            <p><strong>Bags:</strong> {race.knowBeforeYouGo.bagPolicy}</p>
-            <p><strong>Food & Drink:</strong> {race.knowBeforeYouGo.foodAndDrinkPolicy}</p>
+
+            <div class="stay-tip-card">
+              <strong>💡 Local Accommodation Tip:</strong>
+              <p>{race.accommodation.tips}</p>
+            </div>
           </div>
 
-          <!-- Prohibited Items (Warning) -->
-          <div class="kbyg-card border-t-red bg-rose-950/20">
-            <div class="kbyg-header">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f43f5e" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
-              <h4 class="text-rose-400">Strictly Prohibited</h4>
+          <!-- INTERNAL CITY GUIDE FEATURE CARD -->
+          <div class="city-guide-feature-card">
+            <span class="cg-badge">Trackside City Guide</span>
+            <h3>Explore {race.location.split(',')[0]} Beyond the Track</h3>
+            <p>Looking for the best motorsport pubs, fan zones, dining spots, and city travel tips during race week?</p>
+            
+            <a href={`/circuits-live/city-guides`} class="btn-city-guide">
+              Read {race.location.split(',')[0]} Fan & City Guide &rarr;
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <!-- STEP 4: TRACK ACCESS & LOCAL TRANSIT -->
+      <section id="step-access" class="journey-step-section">
+        <div class="step-header-row">
+          <div class="step-title-group">
+            <span class="step-pill">Step 04</span>
+            <h2>Daily Track Access & Gates</h2>
+          </div>
+        </div>
+        <p class="step-intro">How to get from your hotel or local station straight to the grandstand gates each morning.</p>
+
+        <JourneyPlanner 
+          circuitName={race.circuitName} 
+          lat={race.coordinates?.lat || 0} 
+          lon={race.coordinates?.lon || 0}
+        >
+          <div class="access-cards-grid">
+            {race.circuitTransit.trainStation && (
+              <div class="access-item">
+                <div class="access-icon-bubble">🚆</div>
+                <h4>Train & Shuttle Link</h4>
+                <p>Arrive at <strong>{race.circuitTransit.trainStation}</strong> and follow official circuit wayfinding.</p>
+                {race.circuitTransit.trainBookingUrl && (
+                  <a href={race.circuitTransit.trainBookingUrl} target="_blank" rel="noopener noreferrer" class="access-link">Train Passes &rarr;</a>
+                )}
+              </div>
+            )}
+            
+            <div class="access-item">
+              <div class="access-icon-bubble">🚌</div>
+              <h4>Express Circuit Buses</h4>
+              <p>{race.circuitTransit.shuttleInfo}</p>
+              {race.circuitTransit.shuttleBookingUrl && (
+                <a href={race.circuitTransit.shuttleBookingUrl} target="_blank" rel="noopener noreferrer" class="access-link">Shuttle Bookings &rarr;</a>
+              )}
             </div>
-            <ul class="prohibited-list">
+
+            <div class="access-item full-width-item">
+              <div class="access-icon-bubble">📲</div>
+              <div>
+                <h4>Gate Entry & Ticketing App Rules</h4>
+                <p>{race.circuitTransit.gateEntryTips}</p>
+              </div>
+            </div>
+          </div>
+        </JourneyPlanner>
+      </section>
+
+      <!-- STEP 5: KNOW BEFORE YOU GO -->
+      <section id="step-rules" class="journey-step-section">
+        <div class="step-header-row">
+          <div class="step-title-group">
+            <span class="step-pill">Step 05</span>
+            <h2>Know Before You Go</h2>
+          </div>
+        </div>
+        <p class="step-intro">Key circuit rules, bag dimensions, payment setups, and what you can bring through security.</p>
+
+        <div class="rules-grid">
+          <div class="rule-card rule-blue">
+            <h4>🎒 Bag & Food Policy</h4>
+            <p><strong>Bag Rules:</strong> {race.knowBeforeYouGo.bagPolicy}</p>
+            <p><strong>Food & Drinks:</strong> {race.knowBeforeYouGo.foodAndDrinkPolicy}</p>
+          </div>
+
+          <div class="rule-card rule-red">
+            <h4 class="text-red">🚫 Strictly Prohibited Items</h4>
+            <ul class="prohibited-bullets">
               {race.knowBeforeYouGo.prohibitedItems.map((item: string) => (
                 <li>{item}</li>
               ))}
             </ul>
           </div>
 
-          <!-- Payments & Currency -->
-          <div class="kbyg-card border-t-emerald">
-            <div class="kbyg-header">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
-              <h4>Currency & Payments</h4>
-            </div>
-            <p><strong>Track Systems:</strong> {race.knowBeforeYouGo.paymentMethods}</p>
+          <div class="rule-card rule-emerald">
+            <h4>💳 Currency & Payments</h4>
+            <p><strong>Payment Methods:</strong> {race.knowBeforeYouGo.paymentMethods}</p>
           </div>
 
-          <!-- Packing & Weather -->
-          <div class="kbyg-card border-t-amber">
-            <div class="kbyg-header">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2"><path d="M14 4v10.54a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0Z"/></svg>
-              <h4>Weather & Packing</h4>
-            </div>
+          <div class="rule-card rule-amber">
+            <h4>☀️ Weather & Packing Checklist</h4>
             <p>{race.knowBeforeYouGo.packingTips}</p>
           </div>
 
-          <!-- PRM / Accessibility -->
-          <div class="kbyg-card border-t-purple">
-            <div class="kbyg-header">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
-              <h4>Accessibility (PRM)</h4>
-            </div>
-            <p><strong>Viewing:</strong> {race.knowBeforeYouGo.accessibility.wheelchairAccess}</p>
-            <p><strong>Parking:</strong> {race.knowBeforeYouGo.accessibility.parkingShuttles}</p>
+          <div class="rule-card rule-purple">
+            <h4>♿ Accessibility (PRM)</h4>
+            <p><strong>Wheelchair Viewing:</strong> {race.knowBeforeYouGo.accessibility.wheelchairAccess}</p>
+            <p><strong>Accessible Parking:</strong> {race.knowBeforeYouGo.accessibility.parkingShuttles}</p>
           </div>
 
-          <!-- Weekend Extras -->
-          <div class="kbyg-card border-t-indigo">
-            <div class="kbyg-header">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-              <h4>Weekend Extras</h4>
-            </div>
-            <div class="support-badges">
+          <div class="rule-card rule-indigo">
+            <h4>🏎️ Weekend Extras & Support Series</h4>
+            <div class="series-pill-row">
               {race.knowBeforeYouGo.weekendExtras.supportSeries.map((series: string) => (
-                <span class="badge-sub">{series}</span>
+                <span class="series-pill">{series}</span>
               ))}
             </div>
             <p>{race.knowBeforeYouGo.weekendExtras.entertainment}</p>
           </div>
-
         </div>
       </section>
 
     </div>
   </main>
+
+  <!-- STICKY MOBILE BOOKING BAR -->
+  <div class="mobile-booking-bar">
+    <div class="mobile-booking-inner">
+      <div class="mobile-price">
+        <span class="lbl">Tickets From</span>
+        <strong 
+          class="val price-val"
+          data-eur={startingPriceEUR} 
+          data-gbp={startingPriceGBP} 
+          data-usd={startingPriceUSD}
+        >
+          £{startingPriceGBP}
+        </strong>
+      </div>
+      <a href={race.officialBoxOfficeUrl} target="_blank" rel="noopener noreferrer" class="btn-primary">
+        Official Tickets &rarr;
+      </a>
+    </div>
+  </div>
 </Layout>
 
 <script>
-  // Client-side JavaScript to handle live currency conversion
   document.addEventListener('DOMContentLoaded', () => {
+    // 1. Currency Switcher
     const currencySelect = document.getElementById('currency-select') as HTMLSelectElement;
     const priceElements = document.querySelectorAll('.price-val');
 
     if (currencySelect && priceElements.length > 0) {
       currencySelect.addEventListener('change', (e) => {
-        const target = e.target as HTMLSelectElement;
-        const currency = target.value;
+        const currency = (e.target as HTMLSelectElement).value;
         const symbols: Record<string, string> = { EUR: '€', GBP: '£', USD: '$' };
 
         priceElements.forEach(el => {
           const price = el.getAttribute(`data-${currency.toLowerCase()}`);
-          if (price) {
+          if (price && price !== '--') {
             el.innerHTML = `${symbols[currency]}${price}`;
           }
         });
       });
     }
+
+    // 2. Travel Mode Tabs
+    const tabButtons = document.querySelectorAll('.tab-btn');
+    const tabContents = document.querySelectorAll('.travel-tab-content');
+
+    tabButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const targetId = btn.getAttribute('data-target');
+        
+        tabButtons.forEach(b => b.classList.remove('is-active'));
+        tabContents.forEach(c => c.classList.remove('is-active'));
+
+        btn.classList.add('is-active');
+        if (targetId) {
+          document.getElementById(targetId)?.classList.add('is-active');
+        }
+      });
+    });
+
+    // 3. ScrollSpy for Stepper
+    const stepNavLinks = document.querySelectorAll('.step-link');
+    const sections = document.querySelectorAll('.journey-step-section');
+
+    window.addEventListener('scroll', () => {
+      let currentSectionId = '';
+      sections.forEach(section => {
+        const sectionTop = (section as HTMLElement).offsetTop - 180;
+        if (window.scrollY >= sectionTop) {
+          currentSectionId = section.getAttribute('id') || '';
+        }
+      });
+
+      stepNavLinks.forEach(link => {
+        link.classList.remove('is-active');
+        if (link.getAttribute('href') === `#${currentSectionId}`) {
+          link.classList.add('is-active');
+        }
+      });
+    });
   });
 </script>
 
 <style>
   .hub-page {
-    max-width: 1000px;
+    max-width: 1080px;
     margin: 0 auto;
     padding: 3rem 1.5rem 6rem;
+    color: #f1f5f9;
   }
 
-  .back-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    color: #38bdf8;
-    text-decoration: none;
-    font-size: 0.9rem;
-    font-weight: 700;
+  /* Hero Section */
+  .hub-hero {
+    background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+    border: 1px solid #334155;
+    border-radius: 16px;
+    padding: 3rem;
     margin-bottom: 2rem;
-    transition: color 0.2s ease;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
   }
 
-  .back-link:hover {
-    color: #7dd3fc;
-  }
-
-  .hub-header {
-    margin-bottom: 3rem;
+  .hero-top-meta {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
   }
 
   .round-badge {
-    color: #94a3b8;
+    color: #38bdf8;
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.05em;
     font-size: 0.85rem;
-    display: block;
-    margin-bottom: 0.5rem;
   }
 
-  h1 {
-    font-size: 3.5rem;
+  .status-pill {
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    padding: 0.25rem 0.6rem;
+    border-radius: 9999px;
+  }
+
+  .status-onsale { background: rgba(52, 211, 153, 0.15); color: #34d399; border: 1px solid rgba(52, 211, 153, 0.3); }
+  .status-fast { background: rgba(251, 191, 36, 0.15); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.3); }
+  .status-soldout { background: rgba(244, 63, 94, 0.15); color: #f43f5e; border: 1px solid rgba(244, 63, 94, 0.3); }
+  .status-default { background: #334155; color: #cbd5e1; }
+
+  .hub-hero h1 {
+    font-size: 3.25rem;
     font-weight: 900;
     color: #ffffff;
     margin: 0 0 0.5rem 0;
@@ -387,20 +597,33 @@ const getStatusColor = (status: string) => {
     margin: 0 0 2rem 0;
   }
 
-  .header-actions {
+  .hero-cta-strip {
     display: flex;
     align-items: center;
-    gap: 1.5rem;
-    flex-wrap: wrap;
+    gap: 2rem;
+    background: #0f172a;
+    border: 1px solid #334155;
+    padding: 1rem 1.5rem;
+    border-radius: 10px;
+    width: fit-content;
   }
 
-  .status-badge {
-    padding: 0.5rem 1rem;
-    border-radius: 6px;
-    font-weight: 800;
+  .hero-price-tag {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .price-lbl {
+    font-size: 0.75rem;
+    color: #94a3b8;
+    font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
-    font-size: 0.85rem;
+  }
+
+  .price-hero-val {
+    font-size: 1.6rem;
+    font-weight: 900;
+    color: #ffffff;
   }
 
   .btn-primary {
@@ -413,157 +636,177 @@ const getStatusColor = (status: string) => {
     border-radius: 6px;
     font-weight: 800;
     text-decoration: none;
-    transition: background 0.2s ease, transform 0.2s ease;
+    transition: all 0.2s ease;
   }
 
   .btn-primary:hover {
     background: #ff1e16;
     transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(225, 6, 0, 0.35);
   }
 
-  .btn-secondary {
-    display: inline-block;
-    background: #0f172a;
+  .btn-outline {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: transparent;
     color: #f8fafc;
-    border: 1px solid #38bdf8;
-    padding: 0.5rem 1rem;
-    border-radius: 4px;
-    font-size: 0.85rem;
-    font-weight: 700;
+    border: 1px solid #334155;
+    padding: 0.75rem 1.5rem;
+    border-radius: 6px;
+    font-weight: 800;
     text-decoration: none;
     transition: all 0.2s ease;
   }
 
-  .btn-secondary:hover {
-    background: #38bdf8;
-    color: #0f172a;
-  }
-
-  .btn-text {
-    display: inline-block;
+  .btn-outline:hover {
+    border-color: #38bdf8;
     color: #38bdf8;
-    font-size: 0.85rem;
-    font-weight: 700;
-    text-decoration: none;
-    transition: color 0.2s;
+    background: rgba(56, 189, 248, 0.05);
+    transform: translateY(-2px);
   }
 
-  .btn-text:hover {
-    color: #7dd3fc;
-    text-decoration: underline;
-  }
-
-  .mt-2 { margin-top: 0.5rem; }
-  .mt-3 { margin-top: 1rem; }
-  .mt-4 { margin-top: 1.5rem; }
-
-  .sticky-nav {
-    position: sticky;
-    top: 0;
-    background: rgba(15, 23, 42, 0.95);
-    backdrop-filter: blur(8px);
-    border-bottom: 1px solid #334155;
-    border-top: 1px solid #334155;
-    padding: 1rem 0;
-    margin-bottom: 3rem;
-    z-index: 10;
-  }
-
-  .nav-links {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: flex;
-    gap: 2rem;
-    overflow-x: auto;
-    white-space: nowrap;
-  }
-
-  .nav-links a {
-    color: #cbd5e1;
-    text-decoration: none;
-    font-weight: 700;
-    font-size: 0.95rem;
-    transition: color 0.2s ease;
-  }
-
-  .nav-links a:hover {
-    color: #38bdf8;
-  }
-
-  .hub-section {
-    margin-bottom: 4rem;
-    scroll-margin-top: 100px; 
-  }
-
-  .section-header-flex {
+  /* Trust Bar */
+  .trust-bar {
     display: flex;
     justify-content: space-between;
-    align-items: flex-end;
+    background: #0f172a;
+    border: 1px solid #1e293b;
+    border-radius: 8px;
+    padding: 0.85rem 1.5rem;
+    margin-bottom: 2.5rem;
     flex-wrap: wrap;
     gap: 1rem;
-    margin-bottom: 2rem;
   }
 
-  .hub-section h2 {
-    color: #ffffff;
-    font-size: 2rem;
-    font-weight: 800;
-    margin: 0 0 0.5rem 0;
-  }
-  
-  .subsection-title {
-    color: #ffffff;
-    font-size: 1.5rem;
-    font-weight: 800;
-    margin: 3.5rem 0 1.5rem 0;
-  }
-
-  .section-intro {
-    color: #94a3b8;
-    font-size: 1.1rem;
-    margin: 0;
-  }
-
-  .currency-switcher {
+  .trust-cell {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    background: #0f172a;
-    padding: 0.5rem 0.75rem;
-    border-radius: 6px;
-    border: 1px solid #334155;
-  }
-
-  .currency-switcher label {
-    color: #94a3b8;
+    color: #cbd5e1;
     font-size: 0.85rem;
-    font-weight: 600;
-  }
-
-  .currency-dropdown {
-    background: transparent;
-    color: #ffffff;
-    border: none;
     font-weight: 700;
-    font-size: 0.95rem;
-    cursor: pointer;
-    outline: none;
   }
 
-  .currency-dropdown option {
-    background: #0f172a;
+  /* Sticky Stepper Navigation */
+  .sticky-step-nav {
+    position: sticky;
+    top: 0;
+    background: rgba(15, 23, 42, 0.95);
+    backdrop-filter: blur(10px);
+    border-top: 1px solid #334155;
+    border-bottom: 1px solid #334155;
+    padding: 0.75rem 1rem;
+    margin-bottom: 3.5rem;
+    z-index: 20;
+  }
+
+  .step-nav-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    overflow-x: auto;
+    white-space: nowrap;
+    gap: 0.75rem;
+  }
+
+  .step-link {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    text-decoration: none;
+    padding: 0.4rem 0.75rem;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+  }
+
+  .step-num {
+    font-size: 0.75rem;
+    font-weight: 900;
+    color: #64748b;
+  }
+
+  .step-text {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #94a3b8;
+  }
+
+  .step-arrow {
+    color: #334155;
+    font-size: 0.9rem;
+  }
+
+  .step-link.is-active {
+    background: #1e293b;
+  }
+
+  .step-link.is-active .step-num { color: #38bdf8; }
+  .step-link.is-active .step-text { color: #ffffff; }
+
+  /* Sections */
+  .journey-step-section {
+    margin-bottom: 4.5rem;
+    scroll-margin-top: 100px;
+  }
+
+  .step-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .step-title-group {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .step-pill {
+    background: #e10600;
     color: #ffffff;
+    font-size: 0.7rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    letter-spacing: 0.05em;
   }
 
-  .section-divider {
-    border: 0;
-    height: 1px;
-    background: #334155;
-    margin: 3rem 0;
+  .step-title-group h2 {
+    font-size: 1.85rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin: 0;
   }
 
-  .ticket-tiers {
+  .step-intro {
+    color: #94a3b8;
+    font-size: 1rem;
+    margin: 0 0 2rem 0;
+    line-height: 1.5;
+  }
+
+  /* Currency Switcher */
+  .currency-box {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #1e293b;
+    border: 1px solid #334155;
+    padding: 0.35rem 0.65rem;
+    border-radius: 6px;
+  }
+
+  .currency-box label { font-size: 0.8rem; color: #94a3b8; font-weight: 700; }
+  .currency-dropdown { background: transparent; border: none; color: #ffffff; font-weight: 800; outline: none; cursor: pointer; }
+  .currency-dropdown option { background: #0f172a; color: #ffffff; }
+
+  /* Step 1: Tickets */
+  .ticket-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 1.5rem;
@@ -571,352 +814,163 @@ const getStatusColor = (status: string) => {
   }
 
   .ticket-card {
-    background: #1e293b;
-    border: 1px solid #334155;
-    border-radius: 8px;
-    padding: 1.5rem;
+    background: #0f172a;
+    border: 1px solid #1e293b;
+    border-radius: 12px;
     display: flex;
     flex-direction: column;
-  }
-
-  .tier-category {
-    font-size: 0.75rem;
-    font-weight: 800;
-    color: #38bdf8;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
-
-  .ticket-card h3 {
-    color: #ffffff;
-    font-size: 1.3rem;
-    font-weight: 800;
-    margin: 0.25rem 0 1rem 0;
-  }
-
-  .tier-price {
-    color: #94a3b8;
-    font-size: 0.95rem;
-    margin-bottom: 1rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid #334155;
-  }
-
-  .tier-price strong {
-    color: #ffffff;
-    font-size: 1.5rem;
-    font-weight: 900;
-  }
-
-  .tier-desc {
-    color: #cbd5e1;
-    font-size: 0.9rem;
-    line-height: 1.5;
-    margin: 0;
-  }
-
-  .vendors-box {
-    background: #0f172a;
-    border: 1px dashed #475569;
-    padding: 1.5rem;
-    border-radius: 8px;
-  }
-
-  .vendors-box h4 {
-    color: #ffffff;
-    margin: 0 0 1rem 0;
-    font-size: 1.1rem;
-  }
-
-  .vendor-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1rem;
-  }
-
-  .vendor-link {
-    display: flex;
     justify-content: space-between;
-    align-items: center;
-    background: #1e293b;
-    padding: 1rem;
-    border-radius: 6px;
-    text-decoration: none;
-    border: 1px solid #334155;
-    transition: border-color 0.2s;
+    transition: transform 0.2s ease, border-color 0.2s ease;
   }
 
-  .vendor-link:hover {
-    border-color: #38bdf8;
+  .ticket-card:hover {
+    transform: translateY(-4px);
+    border-color: #475569;
   }
 
-  .vendor-link strong {
-    color: #ffffff;
-  }
+  .ticket-top { padding: 1.75rem; }
+  .tier-tag { font-size: 0.72rem; color: #38bdf8; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; }
+  .ticket-card h3 { font-size: 1.4rem; color: #ffffff; font-weight: 800; margin: 0.35rem 0 1rem 0; }
+  .price-row { display: flex; align-items: baseline; gap: 0.35rem; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid #1e293b; }
+  .from-text { font-size: 0.85rem; color: #64748b; font-weight: 700; }
+  .price-row strong { font-size: 1.75rem; font-weight: 900; color: #ffffff; }
+  .tier-desc { color: #cbd5e1; font-size: 0.92rem; line-height: 1.5; margin: 0; }
+  
+  .ticket-bottom { padding: 0 1.75rem 1.75rem; }
+  .btn-check-ticket { display: block; text-align: center; background: #1e293b; border: 1px solid #334155; color: #ffffff; font-weight: 800; font-size: 0.85rem; padding: 0.75rem; border-radius: 6px; text-decoration: none; transition: all 0.2s ease; }
+  .ticket-card:hover .btn-check-ticket { background: #e10600; border-color: #e10600; }
 
-  .vendor-type {
-    font-size: 0.75rem;
-    color: #94a3b8;
-    background: #0f172a;
-    padding: 0.2rem 0.5rem;
-    border-radius: 4px;
-  }
+  /* Vendors Panel */
+  .vendors-panel { background: #0f172a; border: 1px dashed #334155; padding: 1.5rem; border-radius: 10px; }
+  .vendors-panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+  .vendors-panel-header h4 { margin: 0; color: #ffffff; font-size: 1.05rem; }
+  .verified-tag { background: rgba(52, 211, 153, 0.15); color: #34d399; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; padding: 0.2rem 0.5rem; border-radius: 4px; }
+  .vendor-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; }
+  .vendor-card { display: flex; justify-content: space-between; align-items: center; background: #1e293b; padding: 1rem 1.25rem; border-radius: 8px; border: 1px solid #334155; text-decoration: none; transition: border-color 0.2s; }
+  .vendor-card:hover { border-color: #38bdf8; }
+  .vendor-card strong { color: #ffffff; display: block; }
+  .v-type { font-size: 0.75rem; color: #94a3b8; }
+  .v-arrow { color: #38bdf8; font-weight: 800; }
 
-  .airport-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-    gap: 1.5rem;
-  }
+  /* Step 2: Travel Tabs */
+  .travel-tabs-wrapper { margin-bottom: 2rem; border-bottom: 1px solid #334155; }
+  .travel-tabs { display: flex; gap: 1rem; overflow-x: auto; }
+  .tab-btn { background: transparent; border: none; border-bottom: 3px solid transparent; color: #94a3b8; font-weight: 800; font-size: 0.95rem; padding: 0.75rem 1rem; cursor: pointer; transition: all 0.2s ease; white-space: nowrap; }
+  .tab-btn.is-active { color: #38bdf8; border-bottom-color: #38bdf8; }
 
-  .airport-card {
-    background: #1e293b;
-    border: 1px solid #334155;
-    border-radius: 8px;
-    padding: 1.5rem;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-  }
+  .travel-tab-content { display: none; }
+  .travel-tab-content.is-active { display: block; animation: fadeIn 0.3s ease; }
 
-  .airport-header {
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+  .airport-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; }
+  .airport-card { 
+  background: #0f172a; 
+  border: 1px solid #1e293b; 
+  border-radius: 10px; 
+  padding: 1.5rem; 
+  display: flex; 
+  flex-direction: column; 
+  align-items: flex-start; /* This stops the button from stretching full-width! */
+}
+  .airport-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; }
+  .airport-badge { background: #e10600; color: #ffffff; font-weight: 900; font-size: 1.1rem; width: 55px; height: 55px; display: flex; align-items: center; justify-content: center; border-radius: 8px; flex-shrink: 0; }
+  .airport-header h4 { margin: 0 0 0.25rem 0; color: #ffffff; font-size: 1.15rem; }
+  .dist-pill { background: #1e293b; color: #38bdf8; font-size: 0.75rem; font-weight: 700; padding: 0.2rem 0.5rem; border-radius: 4px; }
+  .transit-p { color: #cbd5e1; font-size: 0.92rem; line-height: 1.5; margin: 0 0 1.25rem 0; flex-grow: 1; }
+  .btn-travel-cta { display: block; text-align: center; background: #1e293b; border: 1px solid #38bdf8; color: #38bdf8; font-size: 0.85rem; font-weight: 800; padding: 0.6rem; border-radius: 6px; text-decoration: none; transition: all 0.2s ease; }
+  .btn-travel-cta:hover { background: #38bdf8; color: #0b0f19; }
+
+  .mode-info-card { background: #0f172a; border: 1px solid #1e293b; padding: 2rem; border-radius: 12px; }
+  .mode-info-header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem; }
+  .mode-info-header h3 { margin: 0; color: #ffffff; font-size: 1.3rem; }
+  .mode-info-card p { color: #cbd5e1; line-height: 1.6; margin: 0 0 1.5rem 0; }
+  .rail-perks { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+  .perk-box { background: #1e293b; border: 1px solid #334155; padding: 1rem; border-radius: 8px; display: flex; flex-direction: column; gap: 0.25rem; }
+  .perk-box strong { color: #38bdf8; font-size: 0.85rem; }
+  .perk-box span { color: #cbd5e1; font-size: 0.9rem; }
+  .road-tips-list { 
+  background: #1e293b; 
+  border: 1px solid #334155; 
+  padding: 1.25rem; 
+  border-radius: 8px; 
+  margin-bottom: 1.5rem; /* Adds the missing padding above the CTA */
+}
+.travel-actions {
     display: flex;
     align-items: center;
     gap: 1rem;
-    margin-bottom: 1rem;
-    width: 100%;
-  }
-
-  .airport-code {
-    background: #e10600;
-    color: #ffffff;
-    font-size: 1.25rem;
-    font-weight: 900;
-    width: 60px;
-    height: 60px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 8px;
-    flex-shrink: 0;
-  }
-
-  .airport-card h4 {
-    color: #ffffff;
-    margin: 0 0 0.25rem 0;
-    font-size: 1.15rem;
-  }
-
-  .distance {
-    color: #38bdf8;
-    font-size: 0.85rem;
-    font-weight: 700;
-  }
-
-  .transit-summary {
-    color: #cbd5e1;
-    font-size: 0.95rem;
-    line-height: 1.5;
-    margin: 0;
-  }
-
-  .stay-card {
-    background: #1e293b;
-    border: 1px solid #334155;
-    border-radius: 8px;
-    display: flex;
-    margin-top: 2rem;
-  }
-
-  .stay-areas {
-    padding: 2rem;
-    flex: 1;
-    border-right: 1px solid #334155;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .stay-tips {
-    padding: 2rem;
-    flex: 1;
-    background: rgba(56, 189, 248, 0.05);
-  }
-
-  .stay-card h4 {
-    color: #ffffff;
-    margin: 0 0 1rem 0;
-    font-size: 1.1rem;
-  }
-
-  .stay-areas ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-  }
-
-  .stay-areas li {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    color: #cbd5e1;
-    font-size: 1rem;
-  }
-
-  .stay-tips p {
-    color: #94a3b8;
-    line-height: 1.6;
-    margin: 0;
-  }
-
-  .access-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1.5rem;
-    margin-top: 2rem;
-  }
-
-  .access-card {
-    background: #1e293b;
-    border: 1px solid #334155;
-    border-radius: 8px;
-    padding: 1.5rem;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .access-card.full-width {
-    grid-column: 1 / -1;
-    background: #0f172a;
-    border-left: 4px solid #a78bfa;
-  }
-
-  .access-card svg {
-    margin-bottom: 1rem;
-  }
-
-  .access-card h4 {
-    color: #ffffff;
-    margin: 0 0 0.5rem 0;
-    font-size: 1.1rem;
-  }
-
-  .access-card p {
-    color: #94a3b8;
-    margin: 0;
-    font-size: 0.95rem;
-    line-height: 1.5;
-  }
-
-  .access-card strong {
-    color: #cbd5e1;
-  }
-
-  /* Know Before You Go (KBYG) */
-  .kbyg-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 1.5rem;
-    margin-top: 2rem;
-  }
-
-  .kbyg-card {
-    background: #1e293b;
-    border: 1px solid #334155;
-    border-radius: 8px;
-    padding: 1.5rem;
-  }
-
-  .border-t-blue { border-top: 4px solid #38bdf8; }
-  .border-t-red { border-top: 4px solid #f43f5e; }
-  .border-t-emerald { border-top: 4px solid #34d399; }
-  .border-t-amber { border-top: 4px solid #fbbf24; }
-  .border-t-purple { border-top: 4px solid #a78bfa; }
-  .border-t-indigo { border-top: 4px solid #818cf8; }
-
-  .bg-rose-950\/20 {
-    background: rgba(136, 19, 55, 0.2);
-  }
-
-  .kbyg-header {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    margin-bottom: 1rem;
-  }
-
-  .kbyg-header h4 {
-    color: #ffffff;
-    margin: 0;
-    font-size: 1.1rem;
-  }
-
-  .text-rose-400 {
-    color: #fb7185 !important;
-  }
-
-  .kbyg-card p {
-    color: #cbd5e1;
-    font-size: 0.95rem;
-    line-height: 1.5;
-    margin: 0 0 0.75rem 0;
-  }
-
-  .kbyg-card p:last-child {
-    margin-bottom: 0;
-  }
-
-  .kbyg-card strong {
-    color: #ffffff;
-  }
-
-  .prohibited-list {
-    margin: 0;
-    padding-left: 1.25rem;
-    color: #cbd5e1;
-    font-size: 0.95rem;
-    line-height: 1.6;
-  }
-
-  .prohibited-list li {
-    margin-bottom: 0.4rem;
-  }
-
-  .support-badges {
-    display: flex;
     flex-wrap: wrap;
-    gap: 0.5rem;
-    margin-bottom: 1rem;
   }
+  .tip-item { display: flex; gap: 0.75rem; align-items: flex-start; }
+  .tip-icon { font-size: 1.4rem; }
+  .tip-item strong { color: #ffffff; font-size: 0.95rem; }
+  .tip-item p { margin: 0.25rem 0 0 0; color: #94a3b8; font-size: 0.9rem; }
 
-  .badge-sub {
-    background: rgba(129, 140, 248, 0.15);
-    color: #818cf8;
-    border: 1px solid rgba(129, 140, 248, 0.3);
-    padding: 0.25rem 0.6rem;
-    border-radius: 4px;
-    font-size: 0.8rem;
-    font-weight: 700;
+  /* Step 3: Stay & City Guide Feature */
+  .stay-layout-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 2rem; }
+  .neighborhood-panel h3 { font-size: 1.2rem; color: #ffffff; margin: 0 0 1rem 0; }
+  .hood-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+  .hood-box { background: #0f172a; border: 1px solid #1e293b; padding: 1.25rem; border-radius: 8px; }
+  .hood-header { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; }
+  .hood-header h4 { margin: 0; color: #ffffff; font-size: 1rem; }
+  .hood-link { color: #38bdf8; font-size: 0.8rem; font-weight: 800; text-decoration: none; }
+  .stay-tip-card { background: #0f172a; border: 1px solid #334155; padding: 1.25rem; border-radius: 8px; }
+  .stay-tip-card strong { color: #fbbf24; font-size: 0.85rem; display: block; margin-bottom: 0.25rem; }
+  .stay-tip-card p { margin: 0; color: #94a3b8; font-size: 0.9rem; line-height: 1.5; }
+
+  /* City Guide Feature Card */
+  .city-guide-feature-card { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border: 1px solid #38bdf8; padding: 2rem; border-radius: 12px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 10px 25px rgba(56, 189, 248, 0.1); }
+  .cg-badge { background: rgba(56, 189, 248, 0.15); color: #38bdf8; font-size: 0.72rem; font-weight: 800; text-transform: uppercase; padding: 0.25rem 0.5rem; border-radius: 4px; width: fit-content; margin-bottom: 1rem; }
+  .city-guide-feature-card h3 { font-size: 1.4rem; color: #ffffff; font-weight: 800; margin: 0 0 0.75rem 0; }
+  .city-guide-feature-card p { color: #94a3b8; font-size: 0.95rem; line-height: 1.6; margin: 0 0 1.5rem 0; }
+  .btn-city-guide { display: inline-block; background: #38bdf8; color: #0b0f19; font-weight: 800; font-size: 0.9rem; padding: 0.8rem 1.25rem; border-radius: 6px; text-decoration: none; text-align: center; transition: background 0.2s ease; }
+  .btn-city-guide:hover { background: #7dd3fc; }
+
+  /* Step 4: Access */
+  .access-cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; margin-top: 1.5rem; }
+  .access-item { background: #0f172a; border: 1px solid #1e293b; padding: 1.5rem; border-radius: 10px; display: flex; flex-direction: column; }
+  .access-icon-bubble { font-size: 1.5rem; margin-bottom: 0.75rem; }
+  .access-item h4 { margin: 0 0 0.5rem 0; color: #ffffff; font-size: 1.1rem; }
+  .access-item p { color: #94a3b8; font-size: 0.9rem; line-height: 1.5; margin: 0 0 1rem 0; flex-grow: 1; }
+  .access-link { color: #38bdf8; font-weight: 800; font-size: 0.85rem; text-decoration: none; }
+  .full-width-item { grid-column: 1 / -1; flex-direction: row; gap: 1.25rem; align-items: flex-start; }
+
+  /* Step 5: Rules */
+  .rules-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; }
+  .rule-card { background: #0f172a; border: 1px solid #1e293b; border-radius: 10px; padding: 1.75rem; }
+  .rule-blue { border-top: 4px solid #38bdf8; }
+  .rule-red { border-top: 4px solid #f43f5e; background: rgba(244, 63, 94, 0.04); }
+  .rule-emerald { border-top: 4px solid #34d399; }
+  .rule-amber { border-top: 4px solid #fbbf24; }
+  .rule-purple { border-top: 4px solid #a78bfa; }
+  .rule-indigo { border-top: 4px solid #818cf8; }
+  .rule-card h4 { margin: 0 0 1rem 0; color: #ffffff; font-size: 1.1rem; }
+  .text-red { color: #f43f5e !important; }
+  .rule-card p { color: #cbd5e1; font-size: 0.92rem; line-height: 1.5; margin: 0 0 0.5rem 0; }
+  .rule-card p:last-child { margin-bottom: 0; }
+  .prohibited-bullets { margin: 0; padding-left: 1.25rem; color: #cbd5e1; font-size: 0.9rem; line-height: 1.5; }
+  .series-pill-row { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.75rem; }
+  .series-pill { background: #1e293b; color: #818cf8; font-size: 0.75rem; font-weight: 700; padding: 0.2rem 0.5rem; border-radius: 4px; }
+
+  /* Sticky Mobile Bar */
+  .mobile-booking-bar { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: rgba(15, 23, 42, 0.98); backdrop-filter: blur(10px); border-top: 1px solid #334155; padding: 1rem 1.5rem; z-index: 50; }
+  .mobile-booking-inner { max-width: 1080px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
+  .mobile-price { display: flex; flex-direction: column; }
+  .mobile-price .lbl { font-size: 0.7rem; color: #94a3b8; font-weight: 700; text-transform: uppercase; }
+  .mobile-price strong { font-size: 1.35rem; color: #ffffff; }
+
+  @media (max-width: 900px) {
+    .stay-layout-grid { grid-template-columns: 1fr; }
+    .hero-cta-strip { width: 100%; justify-content: space-between; }
   }
 
   @media (max-width: 768px) {
-    h1 {
-      font-size: 2.5rem;
-    }
-    
-    .stay-card {
-      flex-direction: column;
-    }
-    
-    .stay-areas {
-      border-right: none;
-      border-bottom: 1px solid #334155;
-    }
+    .hub-hero h1 { font-size: 2.35rem; }
+    .hub-hero { padding: 1.75rem; }
+    .trust-bar { flex-direction: column; align-items: flex-start; }
+    .mobile-booking-bar { display: block; }
+    .hub-page { padding-bottom: 7rem; }
+    .full-width-item { flex-direction: column; }
   }
 </style>

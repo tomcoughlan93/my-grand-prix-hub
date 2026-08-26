@@ -2,335 +2,56 @@
 // src/pages/circuit-guides/[slug].astro
 import Layout from '@/layouts/Layout.astro';
 import CircuitWeather from '@/components/CircuitWeather.astro';
-// 1. Import the Master Results Grid from TinaCMS!
 import seasonData from '@/content/results/season-2026.json';
+import { circuitGuidesData, type CircuitGuide } from '@/data/circuitGuides';
 
 export const prerender = true; 
 
 export function getStaticPaths() {
-  return [
-    {
-      params: { slug: 'british-grand-prix' },
-      props: {
-        round: 9, // Corrected to R9
-        raceName: 'British Grand Prix',
-        circuitName: 'Silverstone Circuit',
-        location: 'Silverstone, UK',
-        lat: 52.0786,
-        lon: -1.0169, 
-        flagCode: 'gb',
-        firstSessionDate: '2026-07-03T11:30:00Z', 
-        stats: { firstGP: 1950, laps: 52, length: '5.891 km', distance: '306.198 km', corners: 18, drsZones: 2 },
-        record: { time: '1:27.097', driver: 'Max Verstappen', year: '2020' },
-        description: 'Silverstone is the historic home of British motorsport and the site of the very first Formula 1 World Championship race in 1950. Renowned for its sequence of ultra-fast sweeping corners like Maggotts, Becketts, and Chapel, the track pushes both the aerodynamic limits of the cars and the physical endurance of the drivers. High-speed cornering makes this circuit notoriously demanding on tyres.',
-        sectors: [
-          { id: 1, name: 'Sector 1', color: '#db2777', desc: 'The start-finish straight down to Abbey, through the Village curve, and accelerating down the Wellington Straight.' },
-          { id: 2, name: 'Sector 2', color: '#fbbf24', desc: 'Heavy braking into Brooklands, sweeping through Luffield and Woodcote, before the flat-out blast through Copse.' },
-          { id: 3, name: 'Sector 3', color: '#38bdf8', desc: 'The iconic high-speed Maggotts/Becketts complex leading onto the Hangar Straight, finishing through Stowe and Club.' }
-        ],
-        tyres: [
-          { compound: 'C1', type: 'Hard', borderColor: '#f8fafc' },
-          { compound: 'C2', type: 'Medium', borderColor: '#facc15' },
-          { compound: 'C3', type: 'Soft', borderColor: '#ef4444' }
-        ],
-        grandstands: [
-          { name: 'Becketts', view: 'Arguably the best seats in F1. Watch the cars change direction at mind-bending speeds through the iconic complex.' },
-          { name: 'Club Corner', view: 'Situated on the final corner with views of the pit entry, podium ceremony, and start/finish line.' },
-          { name: 'Luffield', view: 'An extended view of the cars battling through the long right-hand sweeper before accelerating down the straight.' }
-        ],
-        schedule: [
-          { session: 'Practice 1', time: '12:30 Local' },
-          { session: 'Practice 2', time: '16:00 Local' },
-          { session: 'Qualifying', time: '15:00 Local' },
-          { session: 'Grand Prix', time: '15:00 Local' }
-        ],
-        pastWinners: [
-          { year: '2025', driver: 'Lewis Hamilton', team: 'Ferrari' },
-          { year: '2024', driver: 'Lewis Hamilton', team: 'Mercedes' },
-          { year: '2023', driver: 'Max Verstappen', team: 'Red Bull Racing' }
-        ],
-        trackSvg: `<svg width="100%" height="100%" viewBox="0 0 800 600" fill="none" xmlns="http://www.w3.org/2000/svg"><text x="50%" y="50%" fill="#94a3b8" text-anchor="middle" font-family="sans-serif" font-size="20">Silverstone SVG Placeholder</text></svg>`
-      }
-    },
-    {
-      params: { slug: 'dutch-grand-prix' },
-      props: {
-        round: 12, // Corrected to R12
-        raceName: 'Dutch Grand Prix',
-        circuitName: 'Circuit Park Zandvoort',
-        location: 'Zandvoort, Netherlands',
-        lat: 52.3888,
-        lon: 4.5446, 
-        flagCode: 'nl',
-        firstSessionDate: '2026-08-21T10:30:00Z', 
-        stats: { firstGP: 1952, laps: 72, length: '4.259 km', distance: '306.587 km', corners: 14, drsZones: 2 },
-        record: { time: '1:11.097', driver: 'Lewis Hamilton', year: '2021' },
-        description: 'Opened in 1948, Circuit Zandvoort is a historic, old-school track set in the rolling sand dunes next to the North Sea. The seaside circuit is renowned for its unique challenge, combining tight, sweeping low-speed corners with two massive, steeply banked turns—Turn 3 (Hugenholtzbocht) and Turn 14 (Arie Luyendykbocht)—that feature a gradient of up to 19 degrees. Because of its coastal location, sand blown onto the track surface frequently reduces traction and increases tyre wear.',
-        sectors: [
-          { id: 1, name: 'Sector 1', color: '#db2777', desc: 'Starts from the main straight, through Tarzan (T1) and the complex twisting section up to Turn 6.' },
-          { id: 2, name: 'Sector 2', color: '#fbbf24', desc: 'The sweeping high-speed curves through the dunes from Turn 6 down through the hairpin at Turn 10.' },
-          { id: 3, name: 'Sector 3', color: '#38bdf8', desc: 'The technical sequence from Turn 11 through the final banked Arie Luyendykbocht onto the start-finish straight.' }
-        ],
-        tyres: [
-          { compound: 'C2', type: 'Hard', borderColor: '#f8fafc' },
-          { compound: 'C3', type: 'Medium', borderColor: '#facc15' },
-          { compound: 'C4', type: 'Soft', borderColor: '#ef4444' }
-        ],
-        grandstands: [
-          { name: 'Tarzan Incline', view: 'Prime viewing of heavy braking zones into Turn 1 and overtaking action.' },
-          { name: 'Arena Grandstand', view: 'Overlooks the twisting stadium section with incredible atmosphere.' },
-          { name: 'Arie Luyendyk Banking', view: 'Seats right on the massive 18-degree banking as cars accelerate onto the straight.' }
-        ],
-        schedule: [
-          { session: 'Practice 1', time: '12:30 Local' },
-          { session: 'Practice 2', time: '16:00 Local' },
-          { session: 'Qualifying', time: '15:00 Local' },
-          { session: 'Grand Prix', time: '15:00 Local' }
-        ],
-        pastWinners: [
-          { year: '2025', driver: 'Max Verstappen', team: 'Red Bull Racing' },
-          { year: '2024', driver: 'Lando Norris', team: 'McLaren' },
-          { year: '2023', driver: 'Max Verstappen', team: 'Red Bull Racing' }
-        ],
-        trackSvg: `<svg class="track-svg" width="100%" height="100%" viewBox="0 0 872 776" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M121.036 555.357C123.071 550.434 125.18 545.419 127.316 540.298C189.958 390.146 287.498 156.479 314.935 90.3217C321.047 75.5777 335.575 69.168 351.618 75.5777C362.803 80.0444 368.769 87.0439 370.856 99.7036C372.917 112.2 367.684 120.053 362.803 134.257C355.943 154.213 350.162 168.29 341.927 188.169C334.769 205.444 328.21 222.723 327.611 244.168C327.027 265.204 327.142 272.328 326.717 280.806C325.823 298.678 318.962 310.144 298.383 317.739C281.079 324.127 267.894 328.53 256.416 332.677C254.244 333.464 222.331 343.655 230.831 369.121C240.629 398.478 267.704 388.484 269.869 387.84C293.707 380.774 344.508 364.483 366.383 357.654C382.13 352.74 420.664 353.484 449.145 360.634C467.265 365.179 498.212 374.648 526.987 375.378C556.363 376.123 605.125 343.06 618.994 333.231C632.863 323.401 659.404 313.78 680.881 314.617C715.329 315.956 760.953 319.33 776.466 320.424C797.644 321.914 835.282 335.086 845.361 371.656C854.308 404.122 842.978 427.952 832.538 443.293C819.146 462.969 800.328 488.419 791.38 505.398C785.991 515.624 772.291 543.228 760.799 566.573C753.215 581.984 746.643 592.372 709.662 588.798C691.221 587.013 651.881 581.232 611.54 545.312C597.82 533.098 599.013 517.015 604.084 511.06C614.897 498.36 627.347 491.996 640.769 490.21C674.804 485.678 679.84 486.636 724.873 469.657C746.819 461.386 752.699 443.214 749.629 426.766C746.347 409.189 734.118 399.361 712.346 396.382C646.302 387.343 587.571 390.907 539.662 399.958C473.454 412.467 414.98 437.156 356.242 467.273C334.171 478.593 331.191 464.593 324.632 451.188C318.758 439.193 306.081 435.862 294.506 438.974C278.998 443.146 274.926 453.827 276.315 462.505C280.789 490.503 301.664 611.438 307.926 644.797C312.887 671.218 303.454 701.391 264.383 702.584C239.624 703.342 218.26 702.773 184.752 698.116C161.191 694.841 131.253 670.393 120.627 644.501C113.173 626.328 103.63 597.438 121.036 555.357Z" stroke="black" stroke-width="20" stroke-linejoin="round"/>
-              <path d="M215.736 326.987C188.526 392.826 189.306 391.548 127.183 540.975C125.065 546.072 122.973 551.063 120.955 555.962C103.693 597.84 113.156 626.591 120.549 644.676C126.018 658.047 136.643 671.031 148.866 680.885" stroke="#38BDF8" stroke-width="6" stroke-linejoin="round"/>
-              <path d="M467.3 418.623C415.665 433.142 405.137 447.662 356.753 466.96C334.623 478.296 331.635 464.276 325.059 450.854C319.17 438.843 306.459 435.508 294.854 438.624C279.305 442.801 275.223 453.496 276.615 462.186C281.101 490.221 302.03 611.317 308.309 644.72C313.284 671.176 303.826 701.389 264.652 702.584C239.828 703.342 218.408 702.773 184.812 698.11C177.57 697.104 169.727 694.107 162.026 689.686" stroke="#38BDF8" stroke-width="6" stroke-linejoin="round"/>
-              <path d="M704 315C738.447 316.339 760.953 319.33 776.466 320.424C797.644 321.914 835.282 335.086 845.361 371.656C854.308 404.122 842.978 427.952 832.538 443.293C819.146 462.969 800.328 488.419 791.38 505.398C785.991 515.624 772.291 543.228 760.799 566.573C753.215 581.984 746.643 592.372 709.662 588.798C691.221 587.013 651.881 581.232 611.54 545.312C597.82 533.098 599.013 517.015 604.084 511.06C614.897 498.36 624.078 490.786 637.5 489C671.535 484.468 668.467 487.979 713.5 471C735.446 462.729 752.699 443.214 749.629 426.766C746.347 409.189 734.118 399.361 712.346 396.382C647.5 378.5 514.345 397.775 466.845 418.775" stroke="#FBBF24" stroke-width="6" stroke-linejoin="round"/>
-              <path d="M219.521 317.889C282.163 167.738 287.498 156.479 314.935 90.3217C321.047 75.5777 335.575 69.168 351.618 75.5777C362.803 80.0444 368.769 87.0439 370.856 99.7036C372.917 112.2 371.264 112.296 366.383 126.5C359.523 146.456 348.735 167.62 340.5 187.5C333.342 204.775 327.316 218.554 326.717 240C326.134 261.036 325 277 326.717 280.806C325.823 298.678 318.962 310.144 298.383 317.739C281.079 324.127 267.894 328.53 256.416 332.677C254.244 333.464 226.5 342.033 235 367.5C244.798 396.856 267.704 388.484 269.869 387.84C293.708 380.774 344.508 364.483 366.383 357.654C382.13 352.74 420.664 353.484 449.145 360.634C467.265 365.179 498.212 374.648 526.987 375.378C556.363 376.123 605.125 343.06 618.994 333.231C632.863 323.401 672 309 704 315" stroke="#DB2777" stroke-width="6" stroke-linejoin="round"/>
-            </svg>`
-      }
-    },
-    {
-      params: { slug: 'italian-grand-prix' },
-      props: {
-        round: 13, // Corrected to R13
-        raceName: 'Italian Grand Prix',
-        circuitName: 'Autodromo Nazionale Monza',
-        location: 'Monza, Italy',
-        lat: 45.6156,
-        lon: 9.2811, 
-        flagCode: 'it',
-        firstSessionDate: '2026-09-04T11:30:00Z', 
-        stats: { firstGP: 1950, laps: 53, length: '5.793 km', distance: '306.720 km', corners: 11, drsZones: 2 },
-        record: { time: '1:21.046', driver: 'Rubens Barrichello', year: '2004' },
-        description: 'Known as the "Temple of Speed", Monza is the quickest circuit on the calendar. Cars operate in the lowest downforce configuration, spending nearly 80% of the lap at full throttle. The track demands excellent braking stability for the heavy stops at the chicanes, while the iconic Parabolica tests aerodynamic balance at high speeds.',
-        sectors: [
-          { id: 1, name: 'Sector 1', color: '#db2777', desc: 'The long pit straight into the incredibly tight Turn 1/2 chicane and the high-speed run through Curva Grande.' },
-          { id: 2, name: 'Sector 2', color: '#fbbf24', desc: 'Heavy braking for the Della Roggia chicane, through the Lesmos, and down the sweeping straight to Ascari.' },
-          { id: 3, name: 'Sector 3', color: '#38bdf8', desc: 'The high-speed Ascari chicane complex and the legendary sweeping Parabolica onto the main straight.' }
-        ],
-        tyres: [
-          { compound: 'C3', type: 'Hard', borderColor: '#f8fafc' },
-          { compound: 'C4', type: 'Medium', borderColor: '#facc15' },
-          { compound: 'C5', type: 'Soft', borderColor: '#ef4444' }
-        ],
-        grandstands: [
-          { name: 'Prima Variante (T1)', view: 'Incredible heavy braking action, overtaking, and guaranteed lap 1 chaos.' },
-          { name: 'Ascari', view: 'Watch the cars violently change direction at high speed through the complex.' },
-          { name: 'Laterale Parabolica', view: 'A legendary atmosphere with great views of cars accelerating onto the main straight.' }
-        ],
-        schedule: [
-          { session: 'Practice 1', time: '13:30 Local' },
-          { session: 'Practice 2', time: '17:00 Local' },
-          { session: 'Qualifying', time: '16:00 Local' },
-          { session: 'Grand Prix', time: '15:00 Local' }
-        ],
-        pastWinners: [
-          { year: '2025', driver: 'Charles Leclerc', team: 'Ferrari' },
-          { year: '2024', driver: 'Charles Leclerc', team: 'Ferrari' },
-          { year: '2023', driver: 'Max Verstappen', team: 'Red Bull Racing' }
-        ],
-        trackSvg: `<svg width="100%" height="100%" viewBox="0 0 800 600" fill="none" xmlns="http://www.w3.org/2000/svg"><text x="50%" y="50%" fill="#94a3b8" text-anchor="middle" font-family="sans-serif" font-size="20">Monza SVG Placeholder</text></svg>`
-      }
-    },
-    {
-      params: { slug: 'madrid-grand-prix' },
-      props: {
-        round: 14, // Corrected to R14
-        raceName: 'Madrid Grand Prix',
-        circuitName: 'IFEMA Madrid Circuit',
-        location: 'Madrid, Spain',
-        lat: 40.466,
-        lon: -3.616, 
-        flagCode: 'es',
-        firstSessionDate: '2026-09-11T11:30:00Z', 
-        stats: { firstGP: 2026, laps: 55, length: '5.474 km', distance: '301.070 km', corners: 20, drsZones: 2 },
-        record: { time: 'N/A', driver: 'Inaugural Race', year: '2026' },
-        description: 'Making its debut on the 2026 calendar, the IFEMA Madrid Circuit is an innovative semi-street track. Combining permanent track sections with public roads around the IFEMA exhibition centre and Real Madrid\'s training complex, it features a steep banked corner designed to promote side-by-side overtaking.',
-        sectors: [
-          { id: 1, name: 'Sector 1', color: '#db2777', desc: 'The IFEMA complex section featuring sharp 90-degree corners and technical chicanes.' },
-          { id: 2, name: 'Sector 2', color: '#fbbf24', desc: 'The transition to the Valdebebas area, highlighted by the sweeping, high-speed banked curve.' },
-          { id: 3, name: 'Sector 3', color: '#38bdf8', desc: 'The high-speed return blast to the start-finish line under the stadium lights.' }
-        ],
-        tyres: [
-          { compound: 'C2', type: 'Hard', borderColor: '#f8fafc' },
-          { compound: 'C3', type: 'Medium', borderColor: '#facc15' },
-          { compound: 'C4', type: 'Soft', borderColor: '#ef4444' }
-        ],
-        grandstands: [
-          { name: 'Main Grandstand', view: 'Overlooks the pit lane, team garages, and the intense run down to Turn 1.' },
-          { name: 'Valdebebas Banking', view: 'Spectacular views of the unique banked corner where cars are pushed to the limit.' },
-          { name: 'IFEMA Arena', view: 'Close-quarters stadium section action with massive fan zones and screens.' }
-        ],
-        schedule: [
-          { session: 'Practice 1', time: '13:30 Local' },
-          { session: 'Practice 2', time: '17:00 Local' },
-          { session: 'Qualifying', time: '16:00 Local' },
-          { session: 'Grand Prix', time: '15:00 Local' }
-        ],
-        pastWinners: [
-          { year: '2026', driver: 'TBD', team: 'TBD' }
-        ],
-        trackSvg: `<svg width="100%" height="100%" viewBox="0 0 800 600" fill="none" xmlns="http://www.w3.org/2000/svg"><text x="50%" y="50%" fill="#94a3b8" text-anchor="middle" font-family="sans-serif" font-size="20">Madrid SVG Placeholder</text></svg>`
-      }
-    },
-    {
-      params: { slug: 'azerbaijan-grand-prix' },
-      props: {
-        round: 15, // Corrected to R15
-        raceName: 'Azerbaijan Grand Prix',
-        circuitName: 'Baku City Circuit',
-        location: 'Baku, Azerbaijan',
-        lat: 40.3725,
-        lon: 49.8533, 
-        flagCode: 'az',
-        firstSessionDate: '2026-09-24T09:30:00Z', 
-        stats: { firstGP: 2016, laps: 51, length: '6.003 km', distance: '306.049 km', corners: 20, drsZones: 2 },
-        record: { time: '1:43.009', driver: 'Charles Leclerc', year: '2019' },
-        description: 'Baku City Circuit is the fastest street track in Formula 1. It combines a massively long, 2.2km flat-out run along the Caspian Sea coastline with an incredibly tight, slow, and punishing sequence through the medieval Old City, where the track narrows to just 7.6 metres wide at Turn 8.',
-        sectors: [
-          { id: 1, name: 'Sector 1', color: '#db2777', desc: 'Heavy braking into Turn 1 and 2, followed by a sequence of 90-degree city corners.' },
-          { id: 2, name: 'Sector 2', color: '#fbbf24', desc: 'The iconic, incredibly narrow castle section (Turns 8-12) and the winding descent.' },
-          { id: 3, name: 'Sector 3', color: '#38bdf8', desc: 'A combination of fast sweeping corners leading onto the colossal 2.2km main straight.' }
-        ],
-        tyres: [
-          { compound: 'C3', type: 'Hard', borderColor: '#f8fafc' },
-          { compound: 'C4', type: 'Medium', borderColor: '#facc15' },
-          { compound: 'C5', type: 'Soft', borderColor: '#ef4444' }
-        ],
-        grandstands: [
-          { name: 'Absheron (Main)', view: 'Incredible views of the start/finish, pit lane, and cars reaching top speeds.' },
-          { name: 'Azneft (Turn 1)', view: 'The absolute best spot for overtaking and the guaranteed lock-ups at the end of the straight.' },
-          { name: 'Icheri Sheher', view: 'Situated right at the castle gates, watching cars thread the needle.' }
-        ],
-        schedule: [
-          { session: 'Practice 1', time: '13:30 Local' },
-          { session: 'Practice 2', time: '17:00 Local' },
-          { session: 'Qualifying', time: '16:00 Local' },
-          { session: 'Grand Prix', time: '15:00 Local' }
-        ],
-        pastWinners: [
-          { year: '2025', driver: 'Sergio Perez', team: 'Red Bull Racing' },
-          { year: '2024', driver: 'Oscar Piastri', team: 'McLaren' },
-          { year: '2023', driver: 'Sergio Perez', team: 'Red Bull Racing' }
-        ],
-        trackSvg: `<svg width="100%" height="100%" viewBox="0 0 800 600" fill="none" xmlns="http://www.w3.org/2000/svg"><text x="50%" y="50%" fill="#94a3b8" text-anchor="middle" font-family="sans-serif" font-size="20">Baku SVG Placeholder</text></svg>`
-      }
-    },
-    {
-      params: { slug: 'singapore-grand-prix' },
-      props: {
-        round: 16, // Corrected to R16
-        raceName: 'Singapore Grand Prix',
-        circuitName: 'Marina Bay Street Circuit',
-        location: 'Marina Bay, Singapore',
-        lat: 1.2914,
-        lon: 103.864, 
-        flagCode: 'sg',
-        firstSessionDate: '2026-10-09T09:30:00Z', 
-        stats: { firstGP: 2008, laps: 62, length: '4.940 km', distance: '306.143 km', corners: 19, drsZones: 4 },
-        record: { time: '1:35.867', driver: 'Lewis Hamilton', year: '2023' },
-        description: 'The original F1 night race, Marina Bay is a grueling physical and mental test. The intense heat, extreme humidity, and bumpy street surface push drivers to the absolute limit. With the track constantly illuminated by thousands of floodlights, the layout demands pinpoint precision, as the walls are unforgiving.',
-        sectors: [
-          { id: 1, name: 'Sector 1', color: '#db2777', desc: 'The complex Turn 1-3 sequence, leading into the first heavy braking zone at Turn 5.' },
-          { id: 2, name: 'Sector 2', color: '#fbbf24', desc: 'High-speed kinks and the tight Padang section, demanding heavy traction.' },
-          { id: 3, name: 'Sector 3', color: '#38bdf8', desc: 'The revised flat-out blast along Raffles Avenue and the tight chicane to end the lap.' }
-        ],
-        tyres: [
-          { compound: 'C3', type: 'Hard', borderColor: '#f8fafc' },
-          { compound: 'C4', type: 'Medium', borderColor: '#facc15' },
-          { compound: 'C5', type: 'Soft', borderColor: '#ef4444' }
-        ],
-        grandstands: [
-          { name: 'Pit Grandstand', view: 'Perfect views of the pit stops, start/finish line, and the post-race fireworks.' },
-          { name: 'Padang', view: 'Located right next to the concert stage, with cars rushing past the historic city hall.' },
-          { name: 'Bay Grandstand', view: 'Picturesque views of the cars racing underneath the floating platform.' }
-        ],
-        schedule: [
-          { session: 'Practice 1', time: '17:30 Local' },
-          { session: 'Practice 2', time: '21:30 Local' },
-          { session: 'Qualifying', time: '21:00 Local' },
-          { session: 'Grand Prix', time: '20:00 Local' }
-        ],
-        pastWinners: [
-          { year: '2025', driver: 'Lando Norris', team: 'McLaren' },
-          { year: '2024', driver: 'Lando Norris', team: 'McLaren' },
-          { year: '2023', driver: 'Carlos Sainz', team: 'Ferrari' }
-        ],
-        trackSvg: `<svg width="100%" height="100%" viewBox="0 0 800 600" fill="none" xmlns="http://www.w3.org/2000/svg"><text x="50%" y="50%" fill="#94a3b8" text-anchor="middle" font-family="sans-serif" font-size="20">Singapore SVG Placeholder</text></svg>`
-      }
-    }
-  ];
+  return circuitGuidesData.map((circuit: CircuitGuide) => ({
+    params: { slug: circuit.slug },
+    props: { ...circuit },
+  }));
 }
 
-interface Sector { id: number; name: string; color: string; desc: string; }
-interface Tyre { compound: string; type: string; borderColor: string; }
-interface Grandstand { name: string; view: string; }
-interface ScheduleItem { session: string; time: string; }
-interface Winner { year: string; driver: string; team: string; }
+const { 
+  slug,
+  citySlug,
+  raceSlug,
+  round, 
+  raceName, 
+  circuitName, 
+  location, 
+  lat, 
+  lon, 
+  flagCode, 
+  firstSessionDate, 
+  stats, 
+  record, 
+  description, 
+  trackPracticalities,
+  sectors, 
+  tyres, 
+  grandstands, 
+  schedule, 
+  pastWinners, 
+  trackSvg 
+} = Astro.props as CircuitGuide;
 
-interface CircuitProps {
-  round: number;
-  raceName: string;
-  circuitName: string;
-  location: string;
-  lat: number;
-  lon: number;
-  flagCode: string;
-  firstSessionDate: string;
-  stats: { firstGP: number; laps: number; length: string; distance: string; corners: number; drsZones: number; };
-  record: { time: string; driver: string; year: string; };
-  description: string;
-  sectors: Sector[];
-  tyres: Tyre[];
-  grandstands: Grandstand[];
-  schedule: ScheduleItem[];
-  pastWinners: Winner[];
-  trackSvg: string;
-}
-
-const { round, raceName, circuitName, location, lat, lon, flagCode, firstSessionDate, stats, record, description, sectors, tyres, grandstands, schedule, pastWinners, trackSvg } = Astro.props as CircuitProps;
-
-// 2. DYNAMIC PODIUM LOGIC
-// Look through the TinaCMS seasonData to find who finished 1st, 2nd, and 3rd for this specific round!
+// PODIUM LOGIC
 let podium2026 = null;
 
 if (seasonData && seasonData.drivers) {
-  // Construct the string for the round key (e.g., "r12" or "r15")
   const roundKey = `r${round}`;
-  
-  // Find the drivers whose position for this round equals "1", "2", and "3"
   const p1Driver = seasonData.drivers.find((d: any) => String(d[roundKey]) === "1");
   const p2Driver = seasonData.drivers.find((d: any) => String(d[roundKey]) === "2");
   const p3Driver = seasonData.drivers.find((d: any) => String(d[roundKey]) === "3");
 
-  // If all three exist, build the podium object for the HTML template to use
   if (p1Driver && p2Driver && p3Driver) {
     podium2026 = {
-      // Extracts the last name (e.g. "Norris" from "Lando Norris") or defaults to driver code
-      first: { 
-        driver: p1Driver.name ? p1Driver.name.split(' ').pop() : p1Driver.code, 
-        team: p1Driver.team || 'Unknown' 
-      },
-      second: { 
-        driver: p2Driver.name ? p2Driver.name.split(' ').pop() : p2Driver.code, 
-        team: p2Driver.team || 'Unknown' 
-      },
-      third: { 
-        driver: p3Driver.name ? p3Driver.name.split(' ').pop() : p3Driver.code, 
-        team: p3Driver.team || 'Unknown' 
-      }
+      first: { driver: p1Driver.name ? p1Driver.name.split(' ').pop() : p1Driver.code, team: p1Driver.team || 'Unknown' },
+      second: { driver: p2Driver.name ? p2Driver.name.split(' ').pop() : p2Driver.code, team: p2Driver.team || 'Unknown' },
+      third: { driver: p3Driver.name ? p3Driver.name.split(' ').pop() : p3Driver.code, team: p3Driver.team || 'Unknown' }
     };
   }
 }
@@ -409,7 +130,6 @@ if (seasonData && seasonData.drivers) {
             </div>
           </div>
 
-          <!-- RESULTS FALLBACK BLOCK (Shown if timer hits 0 before CMS is updated) -->
           <div id="f1-results" class="results-wrapper" style="display: none;">
             <div id="awaiting-results" class="awaiting-state">
               <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="spin-icon"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
@@ -422,6 +142,7 @@ if (seasonData && seasonData.drivers) {
 
     <div class="guide-grid">
       
+      <!-- LEFT COLUMN -->
       <section class="map-section">
         <div class="info-card map-card">
           <div class="map-header">
@@ -430,7 +151,6 @@ if (seasonData && seasonData.drivers) {
           
           <div class="svg-container">
             <div class="grid-overlay"></div>
-            <!-- Render the dynamic SVG provided by the StaticPaths prop -->
             <div class="dynamic-svg-wrapper" set:html={trackSvg}></div>
           </div>
         </div>
@@ -438,7 +158,7 @@ if (seasonData && seasonData.drivers) {
         <div class="info-card">
           <h3>2026 Sector Breakdown</h3>
           <div class="sectors-list">
-            {sectors.map((sector: Sector) => (
+            {sectors.map((sector: any) => (
               <div class="sector-row">
                 <div class="sector-badge" style={`background-color: ${sector.color}20; color: ${sector.color}; border: 1px solid ${sector.color}50;`}>
                   {sector.name}
@@ -473,9 +193,21 @@ if (seasonData && seasonData.drivers) {
             ))}
           </div>
         </div>
+
+        <!-- MOVED: Cross-Linking Hub to the bottom of the left column -->
+        <div class="cross-link-card">
+          <span class="widget-badge">Plan Your Trip</span>
+          <h3>Heading to {location.split(',')[0]}?</h3>
+          <p>Read our city survival guide or book official grandstand tickets.</p>
+          <div class="cross-link-buttons">
+            <a href={`/circuits-live/city-guides/${citySlug}`} class="btn-secondary">Explore City Guide</a>
+            <a href={`/travel-and-tickets/${raceSlug}`} class="btn-primary">Tickets & Travel</a>
+          </div>
+        </div>
+
       </section>
 
-      <!-- Right Column: Stats, Weather, Tyres & Schedule -->
+      <!-- RIGHT COLUMN -->
       <section class="info-section">
         
         <div class="info-card overview-card">
@@ -483,8 +215,34 @@ if (seasonData && seasonData.drivers) {
           <p>{description}</p>
         </div>
 
-        <!-- Dynamic Weather block relying on lat/lon -->
         <CircuitWeather lat={lat} lon={lon} locationName={circuitName} />
+
+        <div class="info-card">
+          <h3>Trackside Survival Guide</h3>
+          <ul class="practical-list">
+            <li>
+              <span class="prac-icon">📻</span>
+              <div>
+                <strong>Local Track Radio</strong>
+                <span>{trackPracticalities.radioFreq}</span>
+              </div>
+            </li>
+            <li>
+              <span class="prac-icon">🥾</span>
+              <div>
+                <strong>Terrain & Walking</strong>
+                <span>{trackPracticalities.terrain}</span>
+              </div>
+            </li>
+            <li>
+              <span class="prac-icon">☀️</span>
+              <div>
+                <strong>Sun & Shade</strong>
+                <span>{trackPracticalities.shade}</span>
+              </div>
+            </li>
+          </ul>
+        </div>
 
         <div class="info-card">
           <div class="card-header-flex">
@@ -535,7 +293,7 @@ if (seasonData && seasonData.drivers) {
         </div>
 
         <div class="info-card">
-          <h3>Weekend Schedule</h3>
+          <h3>Weekend Schedule <span class="local-time-badge">Track Local Time</span></h3>
           <div class="schedule-list">
             {schedule.map(s => (
               <div class="sched-row">
@@ -554,7 +312,6 @@ if (seasonData && seasonData.drivers) {
 <script is:inline>
   function initCountdown() {
     if (window.f1Interval) clearInterval(window.f1Interval);
-
     const timerElement = document.getElementById('f1-countdown');
     if (!timerElement) return;
 
@@ -566,19 +323,10 @@ if (seasonData && seasonData.drivers) {
     const headerTitle = document.getElementById('countdown-title');
     const pulseDot = document.getElementById('pulse-dot');
     
-    const daysEl = document.getElementById('cd-days');
-    const hoursEl = document.getElementById('cd-hours');
-    const minsEl = document.getElementById('cd-mins');
-    const secsEl = document.getElementById('cd-secs');
-
     const updateTimer = () => {
-      const now = new Date().getTime();
-      const distance = targetDate - now;
-
-      // If Practice 1 has started, swap to Results view
+      const distance = targetDate - new Date().getTime();
       if (distance < 0) {
         clearInterval(window.f1Interval);
-        
         if (timerElement) timerElement.style.display = 'none';
         if (resultsElement) resultsElement.style.display = 'block';
         if (headerTitle) headerTitle.innerText = 'Weekend Concluded';
@@ -589,22 +337,15 @@ if (seasonData && seasonData.drivers) {
         }
         return;
       }
-
-      const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-      const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-      const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-      const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-      if(daysEl) daysEl.innerText = days.toString().padStart(2, '0');
-      if(hoursEl) hoursEl.innerText = hours.toString().padStart(2, '0');
-      if(minsEl) minsEl.innerText = minutes.toString().padStart(2, '0');
-      if(secsEl) secsEl.innerText = seconds.toString().padStart(2, '0');
+      
+      document.getElementById('cd-days').innerText = Math.floor(distance / (1000 * 60 * 60 * 24)).toString().padStart(2, '0');
+      document.getElementById('cd-hours').innerText = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)).toString().padStart(2, '0');
+      document.getElementById('cd-mins').innerText = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)).toString().padStart(2, '0');
+      document.getElementById('cd-secs').innerText = Math.floor((distance % (1000 * 60)) / 1000).toString().padStart(2, '0');
     };
-
     updateTimer(); 
     window.f1Interval = setInterval(updateTimer, 1000); 
   }
-
   document.addEventListener('DOMContentLoaded', initCountdown);
   document.addEventListener('astro:page-load', initCountdown);
 </script>
@@ -959,7 +700,6 @@ if (seasonData && seasonData.drivers) {
     gap: 0.5rem;
   }
 
-  /* Centered driver names using absolute positioning */
   .winner-row {
     display: flex;
     justify-content: space-between;
@@ -1091,6 +831,130 @@ if (seasonData && seasonData.drivers) {
     font-size: 0.9rem;
     line-height: 1.5;
     padding-top: 0.2rem;
+  }
+
+  /* NEW WIDGET STYLES */
+  .local-time-badge {
+    background: #334155;
+    color: #cbd5e1;
+    font-size: 0.65rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    text-transform: uppercase;
+    margin-left: 0.5rem;
+    vertical-align: middle;
+  }
+
+  .practical-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .practical-list li {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+
+  .prac-icon {
+    font-size: 1.5rem;
+    line-height: 1;
+    background: #0f172a;
+    padding: 0.5rem;
+    border-radius: 8px;
+    border: 1px solid #334155;
+  }
+
+  .practical-list div {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .practical-list strong {
+    color: #ffffff;
+    font-size: 0.95rem;
+  }
+
+  .practical-list span {
+    color: #94a3b8;
+    font-size: 0.85rem;
+    line-height: 1.5;
+  }
+
+  .cross-link-card {
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    border: 1px solid #38bdf8;
+    border-radius: 12px;
+    padding: 1.75rem;
+    box-shadow: 0 8px 25px rgba(56, 189, 248, 0.1);
+  }
+
+  .widget-badge {
+    background: rgba(56, 189, 248, 0.15);
+    color: #38bdf8;
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    display: inline-block;
+    margin-bottom: 0.75rem;
+  }
+
+  .cross-link-card h3 {
+    color: #ffffff;
+    font-size: 1.3rem;
+    font-weight: 800;
+    margin: 0 0 0.5rem 0;
+  }
+
+  .cross-link-card p {
+    color: #94a3b8;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin: 0 0 1.25rem 0;
+  }
+
+  .cross-link-buttons {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .cross-link-buttons a {
+    flex-grow: 1;
+    text-align: center;
+    padding: 0.75rem 1rem;
+    border-radius: 6px;
+    font-weight: 800;
+    font-size: 0.85rem;
+    text-decoration: none;
+    transition: all 0.2s ease;
+  }
+
+  .btn-primary {
+    background: #e10600;
+    color: #ffffff;
+  }
+
+  .btn-primary:hover {
+    background: #ff1e16;
+  }
+
+  .btn-secondary {
+    background: #0f172a;
+    border: 1px solid #38bdf8;
+    color: #38bdf8;
+  }
+
+  .btn-secondary:hover {
+    background: #38bdf8;
+    color: #0f172a;
   }
 
   @media (max-width: 900px) {

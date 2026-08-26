@@ -1,207 +1,269 @@
 ---
 // src/pages/circuits-live/city-guides/[slug].astro
-import Layout from '@/layouts/Layout.astro';
+import Layout from '../../../layouts/Layout.astro';
+import { cityGuidesData, type CityGuide } from '../../../data/cityGuides';
 
 export const prerender = true;
 
-// --- DATA MODEL ---
 export function getStaticPaths() {
-  return [
-    {
-      params: { slug: 'amsterdam' },
-      props: {
-        city: 'Amsterdam',
-        race: 'Dutch Grand Prix',
-        country: 'Netherlands',
-        heroImage: 'https://images.unsplash.com/photo-1517736996303-4e64a4f87311?q=80&w=1200&auto=format&fit=crop',
-        intro: 'Amsterdam is the ultimate hub for the Dutch Grand Prix. While Zandvoort is a coastal town, the vast majority of fans stay in Amsterdam and commute to the track, combining world-class nightlife and culture with the electric atmosphere of the Orange Army.',
-        quickFacts: {
-          currency: 'Euro (€)',
-          language: 'Dutch (English universally spoken)',
-          airport: 'Schiphol Airport (AMS)'
-        },
-        trackTransport: {
-          title: 'Getting to Zandvoort',
-          description: 'The commute is incredibly efficient during race weekend. The NS Sprinter train runs every 5 minutes from Amsterdam Centraal directly to Zandvoort aan Zee. The journey takes about 30 minutes, followed by a 15-minute walk to the circuit gates.',
-          icon: '🚆'
-        },
-        neighborhoods: [
-          {
-            name: 'City Centre (Centrum)',
-            vibe: 'Action & Nightlife',
-            desc: 'Perfect if you want to be in the middle of the party. It offers the fastest access to Central Station for your morning track commute, but hotels are pricey and it gets very crowded.',
-            links: [
-              { name: 'Booking.com', url: 'https://www.booking.com/district/nl/amsterdam/amsterdam-city-centre.html', type: 'book' },
-              { name: 'Airbnb', url: 'https://www.airbnb.com/s/Amsterdam-Centrum--Amsterdam--Netherlands', type: 'book' }
-            ]
-          },
-          {
-            name: 'De Pijp',
-            vibe: 'Trendy & Local',
-            desc: 'A fantastic neighborhood packed with great brunch spots, bars, and the famous Albert Cuyp Market. You will need to take a quick tram or bike ride to Central Station first.',
-            links: [
-              { name: 'Booking.com', url: 'https://www.booking.com/district/nl/amsterdam/oud-zuid.html', type: 'book' },
-              { name: 'Airbnb', url: 'https://www.airbnb.com/s/De-Pijp--Amsterdam--Netherlands', type: 'book' }
-            ]
-          }
-        ],
-        foodAndDrink: [
-          {
-            name: 'Foodhallen',
-            type: 'Indoor Street Food',
-            desc: 'A massive indoor market in an old tram depot. Perfect for large groups of fans who all want to eat something different.',
-            links: [
-              { name: 'Directions', url: 'https://maps.app.goo.gl/FoodhallenAmsterdam', type: 'map' },
-              { name: 'Website', url: 'https://foodhallen.nl/amsterdam', type: 'web' }
-            ]
-          },
-          {
-            name: 'Leidseplein',
-            type: 'Bar District',
-            desc: 'The heart of Amsterdam\'s pub scene. During race week, expect this area to be completely taken over by fans in orange.',
-            links: [
-              { name: 'Directions', url: 'https://maps.app.goo.gl/Leidseplein', type: 'map' }
-            ]
-          }
-        ],
-        sightseeing: [
-          {
-            name: 'Rijksmuseum & Vondelpark',
-            desc: 'Spend your Thursday or Monday exploring the museum district and relaxing in the city\'s most famous park.',
-            links: [
-              { name: 'Museum Tickets', url: 'https://www.rijksmuseum.nl/en/tickets', type: 'ticket' },
-              { name: 'Directions', url: 'https://maps.app.goo.gl/Rijksmuseum', type: 'map' }
-            ]
-          },
-          {
-            name: 'Canal Boat Tour',
-            desc: 'A cliché, but absolutely the best way to see the city. Book an evening cruise with drinks included for the best experience.',
-            links: [
-              { name: 'Book a Tour', url: 'https://www.getyourguide.com/amsterdam-l36/cruises-boat-tours-tc48/', type: 'ticket' }
-            ]
-          }
-        ]
-      }
-    }
-  ];
+  return cityGuidesData.map((city: CityGuide) => ({
+    params: { slug: city.slug },
+    props: { ...city },
+  }));
 }
 
-const { city, race, country, heroImage, intro, quickFacts, trackTransport, neighborhoods, foodAndDrink, sightseeing } = Astro.props;
-
-// SVG Icon Helper for Action Buttons
-const getActionIcon = (type: string) => {
-  if (type === 'map') {
-    return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>`;
-  }
-  if (type === 'web') {
-    return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>`;
-  }
-  if (type === 'ticket') {
-    return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7V4h16v3c-1.1 0-2 .9-2 2s.9 2 2 2v3H4v-3c1.1 0 2-.9 2-2s-.9-2-2-2V7z"></path><line x1="9" y1="8" x2="15" y2="8"></line><line x1="9" y1="12" x2="15" y2="12"></line></svg>`;
-  }
-  // Default (Book/External)
-  return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14 21 3"/></svg>`;
-};
+const { 
+  city, 
+  raceSlug, 
+  race, 
+  circuitName, 
+  country, 
+  heroImage, 
+  intro, 
+  quickFacts, 
+  trackCommuteSummary,
+  morningSupplies,
+  cityTransport,
+  practicalities,
+  weatherAndVibe,
+  itinerary, 
+  extendedStay,
+  neighborhoods, 
+  foodAndDrink,
+  watchParties,
+  sightseeing 
+} = Astro.props as CityGuide;
 ---
 
 <Layout 
-  title={`${city} Travel Guide | ${race} | My Grand Prix Hub`}
-  description={`F1 fan travel guide to ${city}. Discover where to stay, eat, and how to travel to the ${race}.`}
+  title={`${city} Fan City Guide | ${race} | My Grand Prix Hub`}
+  description={`F1 fan guide to ${city}. Where to stay, post-session dining, non-clashing weekend itinerary, and fast transit routes to ${circuitName}.`}
 >
   <main class="page-container">
     
     <!-- BACK LINK -->
     <a href="/circuits-live/city-guides" class="back-link">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-      Back to City Guides
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      Back to All City Guides
     </a>
 
-    <!-- HERO SECTION -->
-    <header class="hero-section">
+    <!-- HERO HEADER -->
+    <header class="city-hero">
       <div class="hero-bg">
-        <img src={heroImage} alt={`${city} city skyline`} />
-        <div class="hero-overlay"></div>
+        <img src={heroImage} alt={`${city} city`} />
+        <div class="hero-gradient"></div>
       </div>
       <div class="hero-content">
-        <span class="race-badge">🏎️ {race}</span>
+        <div class="hero-meta">
+          <span class="race-tag">🏎️ Official Host City &bull; {race}</span>
+        </div>
         <h1>{city}</h1>
-        <p class="country-tag">📍 {country}</p>
+        <p class="subtitle">📍 {country} &bull; Base for {circuitName}</p>
       </div>
     </header>
 
-    <!-- CONTENT GRID -->
+    <!-- STICKY JUMP NAVIGATION -->
+    <nav class="sticky-subnav" id="city-nav">
+      <div class="subnav-inner">
+        <a href="#commute" class="subnav-link is-active">🚆 Track Commute</a>
+        <a href="#itinerary" class="subnav-link">🗓️ Race Weekend Plan</a>
+        <a href="#neighborhoods" class="subnav-link">🏨 Where to Stay</a>
+        <a href="#dining" class="subnav-link">🍻 Food & Hangouts</a>
+        <a href="#explore" class="subnav-link">🏛️ City Sights</a>
+      </div>
+    </nav>
+
+    <!-- MAIN TWO-COLUMN CONTENT -->
     <div class="content-grid">
       
-      <!-- LEFT COLUMN: Main Guide Content -->
+      <!-- LEFT COLUMN -->
       <div class="main-column">
         
-        <section class="guide-section intro-section">
-          <p class="intro-text">{intro}</p>
+        <!-- INTRO -->
+        <section class="guide-card intro-card">
+          <p>{intro}</p>
         </section>
 
-        <!-- TRACK TRANSPORT SPOTLIGHT -->
-        <section class="guide-section transport-spotlight">
-          <div class="spotlight-icon">{trackTransport.icon}</div>
-          <div class="spotlight-text">
-            <h2>{trackTransport.title}</h2>
-            <p>{trackTransport.description}</p>
+        <!-- COMMUTE SPOTLIGHT -->
+        <section id="commute" class="guide-card commute-card">
+          <div class="card-header">
+            <div class="icon-circle bg-sky">🚆</div>
+            <div>
+              <span class="eyebrow">Fast Morning Transit</span>
+              <h2>{trackCommuteSummary.title}</h2>
+            </div>
+          </div>
+
+          <div class="commute-metrics">
+            <div class="metric-box">
+              <span class="lbl">Train Travel Time</span>
+              <strong class="val text-sky">{trackCommuteSummary.time}</strong>
+            </div>
+            <div class="metric-box">
+              <span class="lbl">Weekend Frequency</span>
+              <strong class="val">{trackCommuteSummary.frequency}</strong>
+            </div>
+          </div>
+
+          <p class="commute-details">{trackCommuteSummary.details}</p>
+
+          <!-- NEW: MORNING SUPPLIES CALLOUT -->
+          <div class="supplies-callout">
+            <div class="supplies-icon">🏪</div>
+            <div class="supplies-text">
+              <strong>Morning Track Supplies:</strong> 
+              Look for a <em>{morningSupplies.location}</em>. {morningSupplies.tip}
+            </div>
           </div>
         </section>
 
-        <!-- WHERE TO STAY -->
-        <section class="guide-section">
-          <div class="section-heading">
-            <span class="icon">🏨</span>
-            <h2>Where to Stay</h2>
+        <!-- F1-AWARE WEEKEND ITINERARY -->
+        <section id="itinerary" class="guide-card">
+          <div class="section-title-wrap">
+            <span class="eyebrow">Non-Clashing Schedule</span>
+            <h2>The Perfect F1 City Weekend</h2>
+            <p class="section-desc">Designed around official track sessions so you can explore the city without missing lights out.</p>
           </div>
-          <div class="cards-grid">
-            {neighborhoods.map(hood => (
-              <div class="info-card">
-                <div class="card-text-content">
-                  <span class="vibe-pill">{hood.vibe}</span>
-                  <h3>{hood.name}</h3>
-                  <p>{hood.desc}</p>
+
+          <div class="timeline-container">
+            {itinerary.map((item: any) => (
+              <div class="timeline-item">
+                <div class="timeline-marker">
+                  <span class="day-bubble">{item.day.slice(0, 3)}</span>
+                  <div class="timeline-line"></div>
                 </div>
-                
-                {hood.links && hood.links.length > 0 && (
-                  <div class="action-links">
-                    {hood.links.map((link: any) => (
-                      <a href={link.url} target="_blank" rel="noopener noreferrer" class={`btn-action action-${link.type}`}>
-                        <span class="btn-icon" set:html={getActionIcon(link.type)}></span>
-                        {link.name}
-                      </a>
-                    ))}
+                <div class="timeline-body">
+                  <div class="timeline-meta">
+                    <span class="day-full">{item.day}</span>
+                    <span class="timing-badge">{item.timing}</span>
                   </div>
-                )}
+                  <h3>{item.title}</h3>
+                  <p>{item.activity}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <!-- EXTENDED STAY & MOTORSPORT FIX -->
+          <div class="extended-stay-box">
+            <div class="es-header">
+              <h3>{extendedStay.title}</h3>
+              <p>{extendedStay.desc}</p>
+            </div>
+            <div class="es-grid">
+              <div class="es-col">
+                <h4 class="es-col-title">🏛️ Local Culture</h4>
+                <ul class="es-list">
+                  {extendedStay.culture.map((item: any) => (
+                    <li>
+                      <strong>{item.name}:</strong>
+                      <span>{item.desc}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div class="es-col">
+                <h4 class="es-col-title">🏁 Motorsport Fix</h4>
+                <ul class="es-list">
+                  {extendedStay.motorsport.map((item: any) => (
+                    <li>
+                      <strong>{item.name}:</strong>
+                      <span>{item.desc}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- WHERE TO STAY & NEIGHBORHOODS -->
+        <section id="neighborhoods" class="guide-card">
+          <div class="section-title-wrap">
+            <span class="eyebrow">Hotel & Base Guide</span>
+            <h2>Best Areas to Stay in {city}</h2>
+            <p class="section-desc">Ranked by atmosphere, evening dining, and morning transit convenience to {circuitName}.</p>
+          </div>
+
+          <div class="neighborhoods-grid">
+            {neighborhoods.map((hood: any) => (
+              <div class="hood-card">
+                <div class="hood-top">
+                  <div class="hood-header">
+                    <span class="vibe-tag">{hood.vibe}</span>
+                    <span class="commute-badge">⏱️ {hood.commuteTime}</span>
+                  </div>
+                  <h3>{hood.name}</h3>
+                  <p class="hood-route"><strong>Transit Route:</strong> {hood.transitRoute}</p>
+                  <p class="hood-desc">{hood.desc}</p>
+                </div>
+                <a href={hood.bookingUrl} target="_blank" rel="noopener noreferrer" class="btn-hood-book">
+                  Search Hotels in {hood.name.split('(')[0]} &rarr;
+                </a>
               </div>
             ))}
           </div>
         </section>
 
-        <!-- FOOD & DRINK -->
-        <section class="guide-section">
-          <div class="section-heading">
-            <span class="icon">🍻</span>
-            <h2>Food & Nightlife</h2>
+        <!-- FOOD, PUBS & WATCH PARTIES -->
+        <section id="dining" class="guide-card">
+          <div class="section-title-wrap">
+            <span class="eyebrow">Post-Session Hangouts</span>
+            <h2>Food, Pubs & F1 Atmosphere</h2>
           </div>
-          <div class="list-layout">
-            {foodAndDrink.map(place => (
-              <div class="list-item">
-                <div class="item-header">
-                  <h3>{place.name}</h3>
-                  <span class="type-tag">{place.type}</span>
+
+          <div class="dining-list">
+            {foodAndDrink.map((spot: any) => (
+              <div class="dining-item">
+                <div class="dining-info">
+                  <div class="dining-type-badge">{spot.type}</div>
+                  <h3>{spot.name}</h3>
+                  <p>{spot.desc}</p>
                 </div>
-                <p>{place.desc}</p>
-                
-                {place.links && place.links.length > 0 && (
-                  <div class="action-links">
-                    {place.links.map((link: any) => (
-                      <a href={link.url} target="_blank" rel="noopener noreferrer" class={`btn-action action-${link.type}`}>
-                        <span class="btn-icon" set:html={getActionIcon(link.type)}></span>
-                        {link.name}
-                      </a>
-                    ))}
-                  </div>
+                {spot.mapUrl && (
+                  <a href={spot.mapUrl} target="_blank" rel="noopener noreferrer" class="btn-map-link">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                    Map
+                  </a>
+                )}
+              </div>
+            ))}
+          </div>
+
+          <!-- NEW: WATCH PARTIES & FAN ZONES -->
+          <div class="watch-parties-wrapper">
+            <h3 class="subsection-title">Official Fan Zones & Pub Screenings</h3>
+            <p class="subsection-desc">Looking to soak up the atmosphere in the city without a track ticket?</p>
+            
+            <div class="watch-parties-grid">
+              {watchParties.map((party: any) => (
+                <div class="wp-card">
+                  <span class="wp-tag">{party.type}</span>
+                  <h4>{party.name}</h4>
+                  <p>{party.desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <!-- CITY SIGHTS -->
+        <section id="explore" class="guide-card">
+          <div class="section-title-wrap">
+            <span class="eyebrow">Thursday / Monday Slots</span>
+            <h2>Top Sights (Non-Track Days)</h2>
+          </div>
+
+          <div class="sight-grid">
+            {sightseeing.map((sight: any) => (
+              <div class="sight-card">
+                <span class="slot-pill">🗓️ {sight.timeSlot}</span>
+                <h3>{sight.name}</h3>
+                <p>{sight.desc}</p>
+                {sight.ticketUrl && (
+                  <a href={sight.ticketUrl} target="_blank" rel="noopener noreferrer" class="btn-sight-ticket">
+                    Tickets & Information &rarr;
+                  </a>
                 )}
               </div>
             ))}
@@ -210,66 +272,140 @@ const getActionIcon = (type: string) => {
 
       </div>
 
-      <!-- RIGHT COLUMN: Sidebar -->
+      <!-- RIGHT COLUMN: SIDEBAR WIDGETS -->
       <aside class="sidebar-column">
         
-        <!-- QUICK FACTS -->
+        <!-- QUICK FACTS WIDGET -->
         <div class="sidebar-widget facts-widget">
-          <h3>Quick Facts</h3>
+          <h3>City Quick Facts</h3>
           <ul class="facts-list">
             <li>
-              <span class="fact-label">Currency</span>
-              <span class="fact-val">{quickFacts.currency}</span>
+              <span class="lbl">Currency</span>
+              <strong class="val">{quickFacts.currency}</strong>
             </li>
             <li>
-              <span class="fact-label">Language</span>
-              <span class="fact-val">{quickFacts.language}</span>
+              <span class="lbl">Local Transit Payments</span>
+              <strong class="val">{quickFacts.transitCard}</strong>
             </li>
             <li>
-              <span class="fact-label">Main Airport</span>
-              <span class="fact-val">{quickFacts.airport}</span>
+              <span class="lbl">Language</span>
+              <strong class="val">{quickFacts.language}</strong>
+            </li>
+            <li>
+              <span class="lbl">Primary Airport</span>
+              <strong class="val">{quickFacts.airport}</strong>
             </li>
           </ul>
         </div>
 
-        <!-- SIGHTSEEING -->
-        <div class="sidebar-widget sightseeing-widget">
-          <h3>Things to Do</h3>
-          <div class="sightseeing-list">
-            {sightseeing.map(site => (
-              <div class="sight-item">
-                <h4>{site.name}</h4>
-                <p>{site.desc}</p>
-                
-                {site.links && site.links.length > 0 && (
-                  <div class="action-links">
-                    {site.links.map((link: any) => (
-                      <a href={link.url} target="_blank" rel="noopener noreferrer" class={`btn-action action-${link.type}`}>
-                        <span class="btn-icon" set:html={getActionIcon(link.type)}></span>
-                        {link.name}
-                      </a>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
+        <!-- NEW: LOCAL KNOW-HOW (Weather & Practicalities) -->
+        <div class="sidebar-widget facts-widget">
+          <h3>Local Know-How</h3>
+          <ul class="facts-list">
+            <li>
+              <span class="lbl">Weather & Packing Vibe</span>
+              <span class="val-desc">{weatherAndVibe.climate} {weatherAndVibe.dressCode}</span>
+            </li>
+            <li>
+              <span class="lbl">Tap Water</span>
+              <span class="val-desc">{practicalities.tapWater}</span>
+            </li>
+            <li>
+              <span class="lbl">Tipping Culture</span>
+              <span class="val-desc">{practicalities.tipping}</span>
+            </li>
+            <li>
+              <span class="lbl">Power Adaptors</span>
+              <span class="val-desc">{practicalities.powerPlugs}</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- NEW: CITY TRANSPORT (Rideshare & Night Transit) -->
+        <div class="sidebar-widget facts-widget">
+          <h3>Getting Around Town</h3>
+          <ul class="facts-list">
+            <li>
+              <span class="lbl">Taxis & Rideshare</span>
+              <span class="val-desc">{cityTransport.rideshare}</span>
+            </li>
+            <li>
+              <span class="lbl">Late Night / Post-Pub Transit</span>
+              <span class="val-desc">{cityTransport.nightTransit}</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- CROSS LINK TO TICKETS & TRAVEL HUB (Sticky) -->
+        <div class="sidebar-widget promo-widget">
+          <span class="widget-badge">Trip Planning Hub</span>
+          <h3>Attending the {race}?</h3>
+          <p>Book grandstand tickets, verify gate rules, and check official ticket resellers on our dedicated logistics hub.</p>
+          <a href={`/travel-and-tickets/${raceSlug}`} class="btn-primary w-full justify-center">
+            {race} Tickets & Travel &rarr;
+          </a>
         </div>
 
       </aside>
-    </div>
 
+    </div>
   </main>
 </Layout>
 
-<style is:global>
-  /* Base Layout */
+<script>
+  function initScrollSpy() {
+    const navLinks = document.querySelectorAll('.subnav-link');
+    const sections = document.querySelectorAll('.guide-card[id]');
+
+    if (navLinks.length === 0 || sections.length === 0) return;
+
+    const onScroll = () => {
+      let currentId = '';
+      
+      sections.forEach(section => {
+        if (section.getBoundingClientRect().top <= 120) {
+          currentId = section.getAttribute('id') || '';
+        }
+      });
+
+      const isAtBottom = (window.innerHeight + window.scrollY) >= document.documentElement.offsetHeight - 50;
+      
+      if (isAtBottom) {
+        currentId = sections[sections.length - 1].getAttribute('id') || '';
+      }
+
+      if (!currentId && sections.length > 0) {
+        currentId = sections[0].getAttribute('id') || '';
+      }
+
+      navLinks.forEach(link => {
+        link.classList.remove('is-active');
+        if (currentId && link.getAttribute('href') === `#${currentId}`) {
+          link.classList.add('is-active');
+        }
+      });
+    };
+
+    window.removeEventListener('scroll', onScroll);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll(); 
+  }
+
+  document.addEventListener('DOMContentLoaded', initScrollSpy);
+  document.addEventListener('astro:page-load', initScrollSpy);
+</script>
+
+<style>
   .page-container {
-    max-width: 1200px;
+    max-width: 1140px;
     margin: 0 auto;
-    padding: 2rem 1.5rem 6rem 1.5rem;
+    padding: 2rem 1.5rem 6rem;
+    color: #f8fafc;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   }
+
+  .w-full { width: 100%; }
+  .justify-center { justify-content: center; }
 
   .back-link {
     display: inline-flex;
@@ -277,210 +413,248 @@ const getActionIcon = (type: string) => {
     gap: 0.5rem;
     color: #94a3b8;
     text-decoration: none;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     font-weight: 700;
-    margin-bottom: 2rem;
+    margin-bottom: 1.5rem;
     transition: color 0.2s ease;
   }
-  .back-link:hover { color: #ffffff; }
+  .back-link:hover { color: #38bdf8; }
 
   /* Hero Section */
-  .hero-section {
+  .city-hero {
     position: relative;
-    height: 400px;
+    height: 380px;
     border-radius: 16px;
     overflow: hidden;
-    margin-bottom: 3.5rem;
+    margin-bottom: 2rem;
     display: flex;
     align-items: flex-end;
-    padding: 3rem;
+    padding: 2.5rem;
     border: 1px solid #334155;
     box-shadow: 0 10px 30px rgba(0,0,0,0.3);
   }
-
   .hero-bg { position: absolute; inset: 0; z-index: 1; }
   .hero-bg img { width: 100%; height: 100%; object-fit: cover; }
-  .hero-overlay {
+  .hero-gradient {
     position: absolute; inset: 0;
-    background: linear-gradient(to top, rgba(15, 23, 42, 1) 0%, rgba(15, 23, 42, 0.4) 50%, transparent 100%);
+    background: linear-gradient(to top, rgba(15, 23, 42, 0.98) 0%, rgba(15, 23, 42, 0.4) 60%, transparent 100%);
   }
-
-  .hero-content { position: relative; z-index: 2; max-width: 800px; }
-
-  .race-badge {
-    display: inline-block;
-    background: #e10600; color: #ffffff; font-size: 0.85rem; font-weight: 800;
-    text-transform: uppercase; padding: 0.4rem 1rem; border-radius: 6px;
-    letter-spacing: 0.05em; margin-bottom: 1rem;
+  .hero-content { position: relative; z-index: 2; }
+  .race-tag {
+    background: #e10600; color: #ffffff; font-size: 0.75rem; font-weight: 800;
+    text-transform: uppercase; padding: 0.35rem 0.75rem; border-radius: 4px;
+    display: inline-block; margin-bottom: 0.75rem; letter-spacing: 0.05em;
   }
-
   .hero-content h1 {
-    font-size: 4.5rem; font-weight: 900; color: #ffffff;
-    margin: 0 0 0.5rem 0; letter-spacing: -0.02em; line-height: 1;
+    font-size: 4rem; font-weight: 900; margin: 0 0 0.25rem 0;
+    color: #ffffff; letter-spacing: -0.02em; line-height: 1;
   }
+  .subtitle { color: #94a3b8; font-size: 1.15rem; margin: 0; }
 
-  .country-tag { color: #38bdf8; font-size: 1.25rem; font-weight: 700; margin: 0; }
+  /* Sticky Sub-Navigation */
+  .sticky-subnav {
+    position: sticky;
+    top: 0;
+    background: rgba(15, 23, 42, 0.95);
+    backdrop-filter: blur(10px);
+    border-top: 1px solid #334155;
+    border-bottom: 1px solid #334155;
+    padding: 0.75rem 1rem;
+    margin-bottom: 2.5rem;
+    z-index: 20;
+    border-radius: 8px;
+  }
+  .subnav-inner {
+    display: flex; gap: 1.25rem; overflow-x: auto; white-space: nowrap;
+  }
+  .subnav-link {
+    color: #94a3b8; text-decoration: none; font-size: 0.85rem; font-weight: 700;
+    padding: 0.35rem 0.75rem; border-radius: 6px; transition: all 0.2s ease;
+  }
+  .subnav-link.is-active { background: #1e293b; color: #38bdf8; }
 
-  /* Content Architecture */
+  /* Layout */
   .content-grid {
-    display: grid;
-    grid-template-columns: 1fr 380px;
-    gap: 3rem;
-    align-items: start;
+    display: grid; grid-template-columns: 1fr 340px; gap: 2.5rem;
   }
-
-  .guide-section { margin-bottom: 3.5rem; }
-
-  .intro-text { font-size: 1.2rem; line-height: 1.7; color: #e2e8f0; margin: 0; }
-
-  .section-heading {
-    display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.5rem;
-    border-bottom: 2px solid #334155; padding-bottom: 0.75rem;
+  .main-column {
+    display: flex; flex-direction: column; gap: 2.5rem;
   }
-  .section-heading h2 { font-size: 1.8rem; color: #ffffff; font-weight: 800; margin: 0; }
-  .section-heading .icon { font-size: 1.8rem; }
+  .guide-card {
+    background: #0f172a; border: 1px solid #1e293b; border-radius: 12px;
+    padding: 2rem; scroll-margin-top: 80px;
+  }
+  .intro-card p { font-size: 1.15rem; line-height: 1.7; color: #e2e8f0; margin: 0; }
+  .section-title-wrap { margin-bottom: 1.75rem; }
+  .eyebrow {
+    color: #38bdf8; font-size: 0.75rem; font-weight: 800; text-transform: uppercase;
+    letter-spacing: 0.05em; display: block; margin-bottom: 0.25rem;
+  }
+  .section-title-wrap h2 { font-size: 1.65rem; font-weight: 800; color: #ffffff; margin: 0 0 0.5rem 0; }
+  .section-desc { color: #94a3b8; font-size: 0.95rem; margin: 0; }
 
-  /* Transport Spotlight */
-  .transport-spotlight {
+  /* Commute & New Supplies Callout */
+  .commute-card { border-left: 4px solid #38bdf8; }
+  .card-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; }
+  .icon-circle {
+    width: 48px; height: 48px; border-radius: 10px; display: flex;
+    align-items: center; justify-content: center; font-size: 1.5rem;
+  }
+  .bg-sky { background: rgba(56, 189, 248, 0.15); }
+  .card-header h2 { font-size: 1.4rem; color: #ffffff; margin: 0; font-weight: 800; }
+  .commute-metrics {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; background: #1e293b;
+    border: 1px solid #334155; padding: 1.25rem; border-radius: 8px; margin-bottom: 1.25rem;
+  }
+  .metric-box { display: flex; flex-direction: column; }
+  .metric-box .lbl { font-size: 0.75rem; color: #94a3b8; font-weight: 700; text-transform: uppercase; }
+  .metric-box .val { font-size: 1.25rem; font-weight: 900; }
+  .text-sky { color: #38bdf8; }
+  .commute-details { color: #cbd5e1; font-size: 0.95rem; line-height: 1.6; margin: 0; }
+  
+  .supplies-callout {
+    display: flex; gap: 1rem; align-items: center; background: rgba(250, 204, 21, 0.1);
+    border: 1px solid rgba(250, 204, 21, 0.3); padding: 1rem; border-radius: 8px; margin-top: 1.5rem;
+  }
+  .supplies-icon { font-size: 1.5rem; }
+  .supplies-text { color: #f8fafc; font-size: 0.9rem; line-height: 1.5; }
+  .supplies-text strong { color: #facc15; }
+
+  /* Timeline */
+  .timeline-container { display: flex; flex-direction: column; }
+  .timeline-item { display: flex; gap: 1.5rem; }
+  .timeline-marker { display: flex; flex-direction: column; align-items: center; }
+  .day-bubble {
+    background: #1e293b; border: 1px solid #38bdf8; color: #38bdf8; font-size: 0.75rem;
+    font-weight: 900; padding: 0.35rem 0.5rem; border-radius: 6px; text-transform: uppercase;
+  }
+  .timeline-line { flex-grow: 1; width: 2px; background: #1e293b; margin: 0.5rem 0; }
+  .timeline-body { padding-bottom: 2rem; }
+  .timeline-meta { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.25rem; }
+  .day-full { font-weight: 800; color: #ffffff; font-size: 0.95rem; }
+  .timing-badge {
+    background: #1e293b; color: #94a3b8; font-size: 0.75rem;
+    font-weight: 700; padding: 0.15rem 0.45rem; border-radius: 4px;
+  }
+  .timeline-body h3 { color: #38bdf8; font-size: 1.15rem; margin: 0 0 0.35rem 0; font-weight: 800; }
+  .timeline-body p { color: #cbd5e1; font-size: 0.92rem; line-height: 1.5; margin: 0; }
+
+  /* Extended Stay */
+  .extended-stay-box {
+    margin-top: 1rem; background: #111827; border: 1px dashed #475569;
+    border-radius: 12px; padding: 2rem;
+  }
+  .es-header { margin-bottom: 1.5rem; }
+  .es-header h3 { color: #38bdf8; font-size: 1.3rem; font-weight: 800; margin: 0 0 0.5rem 0; }
+  .es-header p { color: #cbd5e1; font-size: 0.95rem; margin: 0; line-height: 1.5; }
+  .es-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+  .es-col { background: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 1.5rem; }
+  .es-col-title { color: #ffffff; font-size: 1.05rem; margin: 0 0 1rem 0; font-weight: 800; }
+  .es-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 1rem; }
+  .es-list li { display: flex; flex-direction: column; gap: 0.25rem; font-size: 0.9rem; line-height: 1.5; color: #94a3b8; }
+  .es-list strong { color: #e2e8f0; font-size: 0.95rem; }
+
+  /* Neighborhoods */
+  .neighborhoods-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem; }
+  .hood-card {
+    background: #1e293b; border: 1px solid #334155; border-radius: 10px;
+    display: flex; flex-direction: column; justify-content: space-between; overflow: hidden;
+  }
+  .hood-top { padding: 1.5rem; }
+  .hood-header { 
+    display: flex; justify-content: space-between; align-items: flex-start;
+    gap: 1rem; margin-bottom: 0.75rem; flex-wrap: wrap; 
+  }
+  .vibe-tag { color: #fbbf24; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; line-height: 1.4; }
+  .commute-badge { 
+    background: #0f172a; border: 1px solid #38bdf8; color: #38bdf8; font-size: 0.75rem; 
+    font-weight: 800; padding: 0.2rem 0.5rem; border-radius: 4px; flex-shrink: 0; white-space: nowrap; 
+  }
+  .hood-card h3 { color: #ffffff; font-size: 1.25rem; margin: 0 0 0.5rem 0; font-weight: 800; }
+  .hood-route { background: #0f172a; padding: 0.5rem 0.75rem; border-radius: 6px; font-size: 0.8rem; color: #94a3b8; margin: 0 0 0.75rem 0; }
+  .hood-route strong { color: #f8fafc; }
+  .hood-desc { color: #cbd5e1; font-size: 0.9rem; line-height: 1.5; margin: 0; }
+  .btn-hood-book {
+    background: #0f172a; border-top: 1px solid #334155; color: #38bdf8; text-align: center;
+    padding: 0.85rem; font-size: 0.85rem; font-weight: 800; text-decoration: none; transition: background 0.2s;
+  }
+  .btn-hood-book:hover { background: #38bdf8; color: #0b0f19; }
+
+  /* Dining */
+  .dining-list { display: flex; flex-direction: column; gap: 1rem; }
+  .dining-item {
+    background: #1e293b; border: 1px solid #334155; padding: 1.25rem 1.5rem;
+    border-radius: 8px; display: flex; justify-content: space-between; align-items: center; gap: 1.5rem;
+  }
+  .dining-type-badge { font-size: 0.72rem; color: #34d399; font-weight: 800; text-transform: uppercase; margin-bottom: 0.25rem; }
+  .dining-info h3 { margin: 0 0 0.25rem 0; color: #ffffff; font-size: 1.15rem; font-weight: 800; }
+  .dining-info p { margin: 0; color: #94a3b8; font-size: 0.9rem; line-height: 1.5; }
+  .btn-map-link {
+    display: inline-flex; align-items: center; gap: 0.35rem; background: #0f172a;
+    border: 1px solid #334155; color: #cbd5e1; padding: 0.5rem 0.85rem; border-radius: 6px;
+    font-size: 0.8rem; font-weight: 700; text-decoration: none; white-space: nowrap;
+  }
+  .btn-map-link:hover { border-color: #38bdf8; color: #38bdf8; }
+
+  /* New: Watch Parties & Fan Zones */
+  .watch-parties-wrapper { margin-top: 3rem; }
+  .subsection-title { color: #ffffff; font-size: 1.35rem; font-weight: 800; margin: 0 0 0.25rem 0; }
+  .subsection-desc { color: #94a3b8; font-size: 0.95rem; margin: 0 0 1.5rem 0; }
+  .watch-parties-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem; }
+  .wp-card { background: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 1.5rem; display: flex; flex-direction: column; }
+  .wp-tag { font-size: 0.75rem; color: #a78bfa; font-weight: 700; text-transform: uppercase; margin-bottom: 0.5rem; }
+  .wp-card h4 { color: #ffffff; font-size: 1.1rem; margin: 0 0 0.5rem 0; font-weight: 800; }
+  .wp-card p { color: #cbd5e1; font-size: 0.9rem; line-height: 1.5; margin: 0; }
+
+  /* Sights */
+  .sight-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem; }
+  .sight-card { background: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 1.5rem; display: flex; flex-direction: column; }
+  .slot-pill { font-size: 0.75rem; color: #818cf8; font-weight: 700; margin-bottom: 0.5rem; }
+  .sight-card h3 { color: #ffffff; font-size: 1.15rem; margin: 0 0 0.5rem 0; font-weight: 800; }
+  .sight-card p { color: #94a3b8; font-size: 0.9rem; line-height: 1.5; margin: 0 0 1.25rem 0; flex-grow: 1; }
+  .btn-sight-ticket { color: #38bdf8; font-size: 0.85rem; font-weight: 800; text-decoration: none; }
+
+  /* Sidebar Widgets */
+  .sidebar-column { display: flex; flex-direction: column; gap: 1.5rem; }
+  .sidebar-widget { background: #0f172a; border: 1px solid #1e293b; border-radius: 12px; padding: 1.75rem; }
+  .promo-widget {
     background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-    border: 1px solid #38bdf8; border-radius: 12px; padding: 2rem;
-    display: flex; gap: 1.5rem; align-items: flex-start;
+    border: 1px solid #e10600; box-shadow: 0 8px 25px rgba(225, 6, 0, 0.15);
+    position: sticky; top: 5.5rem;
   }
-
-  .spotlight-icon { font-size: 3rem; line-height: 1; }
-  .spotlight-text h2 { color: #38bdf8; font-size: 1.5rem; margin: 0 0 0.75rem 0; font-weight: 800; }
-  .spotlight-text p { color: #cbd5e1; font-size: 1.05rem; line-height: 1.6; margin: 0; }
-
-  /* Cards Grid (Hotels/Neighborhoods) */
-  .cards-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1.5rem;
+  .widget-badge {
+    background: rgba(225, 6, 0, 0.15); color: #e10600; font-size: 0.72rem; font-weight: 800;
+    text-transform: uppercase; padding: 0.2rem 0.5rem; border-radius: 4px; display: inline-block; margin-bottom: 0.75rem;
   }
-
-  .info-card {
-    background: #0f172a; border: 1px solid #334155; padding: 1.5rem;
-    border-radius: 8px; display: flex; flex-direction: column; justify-content: space-between;
-    transition: transform 0.2s;
+  .promo-widget h3 { color: #ffffff; font-size: 1.3rem; font-weight: 800; margin: 0 0 0.5rem 0; }
+  .promo-widget p { color: #94a3b8; font-size: 0.9rem; line-height: 1.5; margin: 0 0 1.25rem 0; }
+  .btn-primary {
+    display: inline-flex; align-items: center; gap: 0.5rem; background: #e10600; color: #ffffff;
+    padding: 0.75rem 1.25rem; border-radius: 6px; font-weight: 800; font-size: 0.9rem;
+    text-decoration: none; transition: all 0.2s ease;
   }
-  .info-card:hover { transform: translateY(-4px); border-color: #475569; }
+  .btn-primary:hover { background: #ff1e16; transform: translateY(-2px); }
 
-  .vibe-pill {
-    display: inline-block; background: #334155; color: #e2e8f0;
-    font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
-    padding: 0.25rem 0.6rem; border-radius: 4px; margin-bottom: 1rem; letter-spacing: 0.05em;
-  }
-
-  .info-card h3 { color: #ffffff; font-size: 1.25rem; margin: 0 0 0.75rem 0; font-weight: 800; }
-  .info-card p { color: #94a3b8; font-size: 0.95rem; line-height: 1.6; margin: 0 0 1.5rem 0; }
-
-  /* Action Buttons (Premium Pills) */
-  .action-links {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    margin-top: 1rem;
-  }
-
-  .btn-action {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-    padding: 0.5rem 0.85rem;
-    border-radius: 6px;
-    font-size: 0.8rem;
-    font-weight: 700;
-    text-decoration: none;
-    transition: all 0.2s ease;
-  }
-
-  .btn-icon { display: flex; align-items: center; justify-content: center; }
-
-  /* Specific Button Colors */
-  .action-book {
-    background: rgba(56, 189, 248, 0.1);
-    color: #38bdf8;
-    border: 1px solid rgba(56, 189, 248, 0.3);
-  }
-  .action-book:hover { background: #38bdf8; color: #0f172a; border-color: #38bdf8; }
-
-  .action-map {
-    background: rgba(52, 211, 153, 0.1);
-    color: #34d399;
-    border: 1px solid rgba(52, 211, 153, 0.3);
-  }
-  .action-map:hover { background: #34d399; color: #0f172a; border-color: #34d399; }
-
-  .action-web {
-    background: rgba(250, 204, 21, 0.1);
-    color: #facc15;
-    border: 1px solid rgba(250, 204, 21, 0.3);
-  }
-  .action-web:hover { background: #facc15; color: #0f172a; border-color: #facc15; }
-
-  .action-ticket {
-    background: rgba(225, 6, 0, 0.1);
-    color: #ff4d4d;
-    border: 1px solid rgba(225, 6, 0, 0.3);
-  }
-  .action-ticket:hover { background: #e10600; color: #ffffff; border-color: #e10600; }
-
-
-  /* List Layout (Food/Drink) */
-  .list-layout { display: flex; flex-direction: column; gap: 1.25rem; }
-
-  .list-item {
-    background: #0f172a; border: 1px solid #334155; border-left: 4px solid #facc15;
-    padding: 1.5rem; border-radius: 8px;
-  }
-
-  .item-header {
-    display: flex; justify-content: space-between; align-items: center;
-    margin-bottom: 0.5rem; flex-wrap: wrap; gap: 0.5rem;
-  }
-
-  .item-header h3 { color: #ffffff; font-size: 1.25rem; margin: 0; font-weight: 800; }
-  .type-tag { font-size: 0.8rem; color: #facc15; font-weight: 700; }
-  .list-item p { color: #94a3b8; font-size: 0.95rem; line-height: 1.6; margin: 0; }
-
-  /* Sidebar */
-  .sidebar-column { display: flex; flex-direction: column; gap: 2rem; position: sticky; top: 2rem; }
-
-  .sidebar-widget {
-    background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 2rem;
-  }
-
-  .sidebar-widget h3 {
-    color: #ffffff; font-size: 1.35rem; font-weight: 800; margin: 0 0 1.5rem 0;
-    border-bottom: 1px solid #334155; padding-bottom: 0.75rem;
-  }
-
-  /* Facts List */
-  .facts-list {
-    list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 1.25rem;
-  }
-  .facts-list li { display: flex; flex-direction: column; gap: 0.25rem; }
-  .fact-label { color: #64748b; font-size: 0.8rem; text-transform: uppercase; font-weight: 800; letter-spacing: 0.05em; }
-  .fact-val { color: #f8fafc; font-size: 1.05rem; font-weight: 600; }
-  .fact-val.highlight { color: #38bdf8; }
-
-  /* Sightseeing List */
-  .sightseeing-list { display: flex; flex-direction: column; gap: 1.5rem; }
-  .sight-item h4 { color: #e2e8f0; font-size: 1.1rem; margin: 0 0 0.4rem 0; font-weight: 700; }
-  .sight-item p { color: #94a3b8; font-size: 0.95rem; line-height: 1.5; margin: 0; }
+  /* Quick Facts & Sidebar Lists */
+  .facts-widget h3 { color: #ffffff; font-size: 1.2rem; font-weight: 800; margin: 0 0 1.25rem 0; border-bottom: 1px solid #1e293b; padding-bottom: 0.75rem; }
+  .facts-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 1rem; }
+  .facts-list li { display: flex; flex-direction: column; gap: 0.15rem; }
+  .facts-list .lbl { font-size: 0.75rem; color: #64748b; font-weight: 800; text-transform: uppercase; }
+  .facts-list .val { font-size: 0.95rem; color: #f1f5f9; font-weight: 700; }
+  .facts-list .val-desc { font-size: 0.9rem; color: #cbd5e1; line-height: 1.4; } /* Lighter styling for the paragraph facts */
 
   /* Responsive Design */
   @media (max-width: 900px) {
     .content-grid { grid-template-columns: 1fr; }
-    .sidebar-column { position: relative; top: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
-    .hero-section { height: 350px; padding: 2rem; }
-    .hero-content h1 { font-size: 3.5rem; }
+    .sidebar-column { position: static; }
+    .promo-widget { position: static; }
+    .city-hero { height: 300px; padding: 1.75rem; }
+    .hero-content h1 { font-size: 3rem; }
+    .es-grid { grid-template-columns: 1fr; }
   }
 
-  @media (max-width: 768px) {
-    .sidebar-column { grid-template-columns: 1fr; }
-    .transport-spotlight { flex-direction: column; gap: 1rem; }
-    .hero-section { height: 300px; padding: 1.5rem; }
-    .hero-content h1 { font-size: 2.8rem; }
+  @media (max-width: 600px) {
+    .dining-item { flex-direction: column; align-items: flex-start; }
+    .commute-metrics { grid-template-columns: 1fr; }
   }
-</style>cccom
+</style>
