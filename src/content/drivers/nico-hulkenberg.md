@@ -3,11 +3,16 @@ name: Nico Hülkenberg
 code: HUL
 number: 27
 team: Audi F1 Team
-teamKey: audi
-teamColor: '#00e700'
+teamColor: "#00e700"
 countryCode: de
-nationality: GER
+nationality: German
 worldTitles: 0
+dob: "19 August 1987"
+birthplace: "Emmerich am Rhein, Germany"
+debut: "2010 Bahrain Grand Prix"
+socials:
+  instagram: "https://instagram.com/hulkhulkenberg"
+  x: "https://x.com/HulkHulkenberg"
 ---
 
-Veteran German driver leading Audi F1 Team.
+The ultimate dependable veteran. Returning to his roots with a German manufacturer, Nico Hülkenberg provides essential development feedback and steadfast qualifying speed for Audi's ambitious new works program.

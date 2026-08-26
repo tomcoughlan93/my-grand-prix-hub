@@ -72,9 +72,9 @@ export default defineConfig({
           { type: "rich-text", name: "body", label: "Guide Content", isBody: true },
         ],
       },
-      // 5. Driver Profiles (NEW)
+      // 5. Driver Profiles (UPDATED)
       {
-        name: "driver",
+        name: "drivers",
         label: "Drivers",
         path: "src/content/drivers",
         format: "md",
@@ -107,13 +107,6 @@ export default defineConfig({
           },
           {
             type: "string",
-            name: "teamKey",
-            label: "Team Key (for CSS styling)",
-            description: "e.g. mclaren, ferrari, redbull, mercedes, astonmartin, williams, alpine, rb, audi, haas, cadillac",
-            required: true,
-          },
-          {
-            type: "string",
             name: "teamColor",
             label: "Team Hex Color",
             description: "e.g. #ff8000",
@@ -129,8 +122,8 @@ export default defineConfig({
           {
             type: "string",
             name: "nationality",
-            label: "Nationality Tag",
-            description: "e.g. GBR, NED, MON, AUS",
+            label: "Nationality",
+            description: "e.g. British, Dutch, Monegasque",
             required: true,
           },
           {
@@ -138,6 +131,33 @@ export default defineConfig({
             name: "worldTitles",
             label: "World Championship Titles",
             description: "Enter 0 for drivers who haven't won a title yet.",
+          },
+          {
+            type: "string",
+            name: "dob",
+            label: "Date of Birth",
+            description: "e.g. 13 November 1999"
+          },
+          {
+            type: "string",
+            name: "birthplace",
+            label: "Place of Birth",
+            description: "e.g. Bristol, United Kingdom"
+          },
+          {
+            type: "string",
+            name: "debut",
+            label: "F1 Debut",
+            description: "e.g. 2019 Australian Grand Prix"
+          },
+          {
+            type: "object",
+            name: "socials",
+            label: "Social Links",
+            fields: [
+              { type: "string", name: "instagram", label: "Instagram URL" },
+              { type: "string", name: "x", label: "X (Twitter) URL" }
+            ]
           },
           {
             type: "rich-text",

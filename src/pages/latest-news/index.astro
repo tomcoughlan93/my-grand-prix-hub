@@ -1,15 +1,21 @@
 ---
-// src/pages/latest-news/index.astro
 import Layout from '@/layouts/Layout.astro';
 import Parser from 'rss-parser';
 import { getCollection } from 'astro:content';
 
-// --- 1. FETCH INTERNAL EXCLUSIVES ---
-const allHubNews = await getCollection('news');
-const sortedHubNews = allHubNews.sort((a, b) => new Date(b.data.date).valueOf() - new Date(a.data.date).valueOf());
+// --- 1. FETCH INTERNAL EXCLUSIVES (With Safe Fallback) ---
+let sortedHubNews: any[] = [];
+try {
+  const allHubNews = await getCollection('news');
+  if (allHubNews) {
+    sortedHubNews = allHubNews.sort((a, b) => new Date(b.data.date).valueOf() - new Date(a.data.date).valueOf());
+  }
+} catch (e) {
+  console.warn('Notice: Could not load internal news collection.');
+}
 
-// --- 2. FETCH EXTERNAL RSS FEED ---
-interface CustomFeedItem { /* ... existing interface ... */
+// --- 2. RSS PARSER SETUP (Upgraded Version) ---
+interface CustomFeedItem {
   mediaContent?: any;
   mediaThumbnail?: any;
   enclosure?: { url?: string };
@@ -21,6 +27,7 @@ interface CustomFeedItem { /* ... existing interface ... */
   title?: string;
   link?: string;
   pubDate?: string;
+  image?: any;
 }
 
 const parser: Parser<{}, CustomFeedItem> = new Parser({
@@ -28,9 +35,10 @@ const parser: Parser<{}, CustomFeedItem> = new Parser({
     item: [
       ['media:content', 'mediaContent', { keepArray: true }],
       ['media:thumbnail', 'mediaThumbnail', { keepArray: true }],
-      ['enclosure', 'enclosure'],
+      ['media:group', 'mediaGroup', { keepArray: true }],
       ['content:encoded', 'contentEncoded'],
       ['description', 'description'],
+      ['image', 'image']
     ],
   },
 });
@@ -39,7 +47,7 @@ const VERIFIED_FEEDS = [
   { name: 'BBC Sport F1', url: 'https://feeds.bbci.co.uk/sport/formula1/rss.xml' },
   { name: 'Autosport', url: 'https://www.autosport.com/rss/f1/news/' },
   { name: 'Motorsport.com', url: 'https://www.motorsport.com/rss/f1/news/' },
-  { name: 'RacingNews365', url: 'https://racingnews365.com/feed/news.xml' }, // Fixed URL!
+  { name: 'RacingNews365', url: 'https://racingnews365.com/feed/news.xml' },
   { name: 'Crash.net F1', url: 'https://www.crash.net/rss/f1' },
 ];
 
@@ -53,7 +61,6 @@ interface NewsItem {
   dateObj: Date;
 }
 
-// Keep your existing cleanSnippet and extractImage functions here exactly as they were
 function cleanSnippet(str?: string): string {
   if (!str) return '';
   const text = str.replace(/<[^>]*>?/gm, '').replace(/&quot;/g, '"').replace(/&amp;/g, '&').replace(/&#039;/g, "'").replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/\s+/g, ' ').trim();
@@ -62,25 +69,52 @@ function cleanSnippet(str?: string): string {
 
 function extractImage(item: CustomFeedItem, sourceName: string): string | undefined {
   let url: string | undefined = undefined;
-  if (item.enclosure?.url) url = item.enclosure.url;
-  else if (item.mediaContent && Array.isArray(item.mediaContent)) {
+
+  if (item.enclosure && item.enclosure.url) url = item.enclosure.url;
+
+  if (!url && item.mediaContent && Array.isArray(item.mediaContent)) {
     const found = item.mediaContent.find((m: any) => m.$?.url || m.url);
     if (found) url = found.$?.url || found.url;
   }
-  else if (item.mediaThumbnail && Array.isArray(item.mediaThumbnail)) {
+  if (!url && item.mediaThumbnail && Array.isArray(item.mediaThumbnail)) {
     const found = item.mediaThumbnail.find((t: any) => t.$?.url || t.url);
     if (found) url = found.$?.url || found.url;
   }
+  if (!url && (item as any).mediaGroup && Array.isArray((item as any).mediaGroup)) {
+    const group = (item as any).mediaGroup[0];
+    if (group && group['media:content'] && Array.isArray(group['media:content'])) {
+      const found = group['media:content'].find((m: any) => m.$?.url || m.url);
+      if (found) url = found.$?.url || found.url;
+    }
+  }
+  if (!url && item.image) {
+    if (typeof item.image === 'string') url = item.image;
+    else if (item.image.url) url = item.image.url;
+    else if (item.image.$ && item.image.$.url) url = item.image.$.url;
+  }
   if (!url) {
-    const html = item.contentEncoded || item.content || item.summary || item.description || '';
-    const match = html.match(/<img[^>]+src=["']([^"']+)["']/i);
+    const htmlString = [item.contentEncoded, item.content, item.summary, item.description, item.contentSnippet].filter(Boolean).join(' ');
+    const dataSrcMatch = htmlString.match(/<img[^>]+data-src\s*=\s*["']([^"']+)["']/i);
+    if (dataSrcMatch && dataSrcMatch[1]) url = dataSrcMatch[1];
+    else {
+      const srcMatch = htmlString.match(/<img[^>]+src\s*=\s*["']([^"']+)["']/i);
+      if (srcMatch && srcMatch[1]) url = srcMatch[1];
+    }
+  }
+  if (!url) {
+    const itemStr = JSON.stringify(item);
+    const regex = /(https?:\/\/[^"'\s>]+?\.(?:jpg|jpeg|png|webp)(?:\?[^"'\s>]*)?)/i;
+    const match = itemStr.match(regex);
     if (match && match[1]) url = match[1];
   }
   if (!url) return undefined;
-  if (sourceName === 'BBC Sport F1') url = url.replace(/\/\d+x\d+\//g, '/976x549/').replace(/\/p\d+\//g, '/p0976/').replace(/\/(144|240|320|480)\//g, '/976/');
+  if (sourceName === 'BBC Sport F1') {
+    url = url.replace(/\/\d+x\d+\//g, '/976x549/').replace(/\/p\d+\//g, '/p0976/').replace(/\/(144|240|320|480)\//g, '/976/');
+  }
   return url;
 }
 
+// --- 3. FETCH AND SORT EXTERNAL RSS FEEDS ---
 let articles: NewsItem[] = [];
 
 try {
@@ -88,22 +122,30 @@ try {
     try {
       const feed = await parser.parseURL(src.url);
       const validItems: NewsItem[] = [];
+      
       for (const item of feed.items || []) {
-        const imageUrl = extractImage(item, src.name);
         const hasValidDate = item.pubDate && !isNaN(new Date(item.pubDate).getTime());
-        if (!imageUrl || !hasValidDate) continue;
+        if (!hasValidDate) continue;
+
+        const imageUrl = extractImage(item, src.name);
+        
+        // Skip RN365 articles if the image parser failed to find one
+        if (src.name === 'RacingNews365' && !imageUrl) continue;
+        if (!imageUrl) continue; // Require images for all layout cards
         
         const dateObj = new Date(item.pubDate!);
+        
         validItems.push({
           title: item.title || 'F1 News Headline',
           link: item.link || '#',
-          pubDate: dateObj.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }),
+          pubDate: dateObj.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }).toUpperCase(),
           source: src.name,
-          snippet: cleanSnippet(item.contentSnippet || item.content || item.summary || item.description),
+          snippet: cleanSnippet(item.contentEncoded || item.content || item.summary || item.description || item.contentSnippet),
           imageUrl,
           dateObj,
         });
-        if (validItems.length >= 6) break;
+        
+        if (validItems.length >= 8) break; // Grab slightly more from each feed
       }
       return validItems;
     } catch (err) {
@@ -127,17 +169,20 @@ try {
       <p>The latest headlines, paddock updates, and technical analysis.</p>
     </header>
 
-    <!-- SECTION 1: EXCLUSIVES (AI GENERATED) -->
+    <!-- SECTION 1: EXCLUSIVES (INTERNAL CONTENT) -->
     {sortedHubNews.length > 0 && (
       <section class="exclusive-section">
-        <h2 class="section-title">From The Hub Desk</h2>
+        <div class="section-title-row">
+          <h2>From The Hub Desk</h2>
+          <span class="section-badge">Exclusives</span>
+        </div>
         <div class="exclusive-grid">
           {sortedHubNews.map((article) => (
             <a href={`/news/${article.id}`} class="exclusive-card">
               <div class="card-content">
-                <span class="exclusive-badge">Exclusive Feature</span>
+                <span class="exclusive-badge">★ Hub Feature</span>
                 <h3>{article.data.title}</h3>
-                <p>{article.data.description || 'In-depth preview and analysis.'}</p>
+                <p>{article.data.description || 'In-depth preview and analysis from the My Grand Prix Hub team.'}</p>
                 <span class="read-more">Read Full Article →</span>
               </div>
             </a>
@@ -148,29 +193,32 @@ try {
 
     <!-- SECTION 2: EXTERNAL RSS FEED -->
     <section class="rss-section">
-      <h2 class="section-title">Around The Paddock</h2>
+      <div class="section-title-row">
+        <h2>Around The Paddock</h2>
+        <span class="section-badge">Global Feed</span>
+      </div>
       
       {articles.length === 0 ? (
-        <div class="empty-state"><p>Unable to load news feed at this moment.</p></div>
+        <div class="news-empty-state">
+          <p>Currently scouting the paddock for the latest updates. Check back soon!</p>
+        </div>
       ) : (
         <div class="news-grid">
           {articles.map((item) => (
-            <article class="news-card">
+            <a href={item.link} target="_blank" rel="noopener noreferrer" class="news-card">
               <div class="card-image-wrap">
                 <img src={item.imageUrl} alt={item.title} loading="lazy" class="card-image" />
               </div>
-              <div class="card-body">
-                <div class="card-meta">
-                  <span class="source-tag">{item.source}</span>
-                  <span class="pub-time">{item.pubDate}</span>
+              <div class="news-content">
+                <div class="news-meta">
+                  <span class="feed-source">{item.source}</span>
+                  <span class="news-date">{item.pubDate}</span>
                 </div>
-                <h2><a href={item.link} target="_blank" rel="noopener noreferrer">{item.title}</a></h2>
-                {item.snippet && <p class="snippet">{item.snippet}</p>}
-                <a href={item.link} target="_blank" rel="noopener noreferrer" class="read-link">
-                  Read on {item.source} ↗
-                </a>
+                <h3 class="news-title">{item.title}</h3>
+                {item.snippet && <p class="news-excerpt">{item.snippet}</p>}
+                <span class="read-more">Read on {item.source} ↗</span>
               </div>
-            </article>
+            </a>
           ))}
         </div>
       )}
@@ -180,38 +228,247 @@ try {
 </Layout>
 
 <style>
-  /* Keep all your existing styles! */
-  .page-container { max-width: 1200px; margin: 0 auto; padding: 3rem 1.5rem 4rem 1.5rem; }
-  .section-header { margin-bottom: 2.5rem; }
-  .badge { background: #e10600; color: white; padding: 0.25rem 0.6rem; border-radius: 4px; font-weight: 700; font-size: 0.75rem; text-transform: uppercase; }
-  h1 { font-size: 2.5rem; color: #f8fafc; margin: 0.75rem 0 0.5rem 0; font-weight: 800; }
-  .section-header p { color: #94a3b8; font-size: 1.15rem; }
+  .page-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 3rem 1.5rem 6rem;
+    color: #f1f5f9;
+    box-sizing: border-box;
+  }
+
+  /* Header Styles */
+  .section-header {
+    margin-bottom: 3.5rem;
+  }
   
-  .section-title { font-size: 1.5rem; color: #f8fafc; margin-bottom: 1.5rem; padding-bottom: 0.5rem; border-bottom: 2px solid #334155; }
-  .exclusive-section { margin-bottom: 4rem; }
+  .badge {
+    background: #e10600;
+    color: white;
+    padding: 0.35rem 0.75rem;
+    border-radius: 9999px;
+    font-weight: 800;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
   
-  /* New Styles for AI Articles */
-  .exclusive-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; }
-  .exclusive-card { background: linear-gradient(145deg, #1e293b, #0f172a); border: 1px solid #475569; border-radius: 8px; text-decoration: none; display: flex; transition: transform 0.2s, border-color 0.2s; }
-  .exclusive-card:hover { transform: translateY(-4px); border-color: #e10600; }
-  .card-content { padding: 2rem; display: flex; flex-direction: column; }
-  .exclusive-badge { color: #e10600; font-weight: 800; font-size: 0.8rem; text-transform: uppercase; margin-bottom: 1rem; }
-  .exclusive-card h3 { color: #ffffff; font-size: 1.4rem; margin: 0 0 1rem 0; line-height: 1.3; }
-  .exclusive-card p { color: #cbd5e1; font-size: 1rem; margin-bottom: 1.5rem; flex-grow: 1; }
-  .read-more { color: #38bdf8; font-weight: 600; font-size: 0.9rem; }
+  h1 {
+    font-size: 3.25rem;
+    color: #ffffff;
+    margin: 1rem 0 0.5rem 0;
+    font-weight: 900;
+    letter-spacing: -0.03em;
+  }
   
-  /* Your existing RSS grid styles */
-  .news-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.75rem; }
-  .news-card { background: #1e293b; border: 1px solid #334155; border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; transition: transform 0.2s; }
-  .news-card:hover { transform: translateY(-4px); border-color: #e10600; }
-  .card-image-wrap { height: 190px; overflow: hidden; background: #0b0f19; }
-  .card-image { width: 100%; height: 100%; object-fit: cover; }
-  .card-body { padding: 1.5rem; display: flex; flex-direction: column; flex-grow: 1; }
-  .card-meta { display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 0.75rem; }
-  .source-tag { color: #38bdf8; font-weight: 700; text-transform: uppercase; }
-  .pub-time { color: #64748b; }
-  .news-card h2 { font-size: 1.2rem; margin: 0 0 0.75rem 0; }
-  .news-card h2 a { color: #f8fafc; text-decoration: none; }
-  .snippet { color: #94a3b8; font-size: 0.9rem; margin-bottom: 1.25rem; flex-grow: 1; }
-  .read-link { color: #e10600; font-weight: 600; font-size: 0.85rem; text-decoration: none; margin-top: auto; }
+  .section-header p {
+    color: #94a3b8;
+    font-size: 1.15rem;
+    max-width: 600px;
+    line-height: 1.5;
+  }
+  
+  /* Shared Section Titles */
+  .section-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid #334155;
+    padding-bottom: 0.75rem;
+  }
+
+  .section-title-row h2 {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin: 0;
+  }
+
+  .section-badge {
+    background: #0f172a;
+    color: #38bdf8;
+    border: 1px solid #334155;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    text-transform: uppercase;
+  }
+
+  /* Exclusive Internal Section */
+  .exclusive-section {
+    margin-bottom: 4rem;
+  }
+  
+  .exclusive-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+  }
+  
+  .exclusive-card {
+    background: linear-gradient(145deg, #1e293b, #0f172a);
+    border: 1px solid #475569;
+    border-radius: 12px;
+    text-decoration: none;
+    display: flex;
+    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    min-height: 200px;
+  }
+  
+  .exclusive-card:hover {
+    transform: translateY(-4px);
+    border-color: #e10600;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+  }
+  
+  .card-content {
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .exclusive-badge {
+    color: #e10600;
+    font-weight: 800;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+    letter-spacing: 0.05em;
+  }
+  
+  .exclusive-card h3 {
+    color: #ffffff;
+    font-size: 1.5rem;
+    margin: 0 0 1rem 0;
+    line-height: 1.3;
+    font-weight: 900;
+  }
+  
+  .exclusive-card p {
+    color: #cbd5e1;
+    font-size: 1rem;
+    margin-bottom: 1.5rem;
+    flex-grow: 1;
+    line-height: 1.6;
+  }
+  
+  /* Unified RSS News Grid */
+  .rss-section {
+    margin-bottom: 4rem;
+  }
+
+  .news-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 1.75rem;
+  }
+
+  .news-card {
+    background: #0f172a;
+    border: 1px solid #1e293b;
+    border-radius: 12px;
+    text-decoration: none;
+    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .news-card:hover {
+    transform: translateY(-4px);
+    border-color: #475569;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+  }
+
+  .card-image-wrap {
+    height: 180px;
+    overflow: hidden;
+    background: #0b0f19;
+    border-bottom: 1px solid #1e293b;
+  }
+
+  .card-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .news-content {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+  }
+
+  .news-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .feed-source {
+    color: #38bdf8;
+  }
+
+  .news-date {
+    color: #64748b;
+  }
+
+  .news-title {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: #f8fafc;
+    margin: 0 0 0.75rem 0;
+    line-height: 1.4;
+  }
+
+  .news-excerpt {
+    font-size: 0.9rem;
+    color: #94a3b8;
+    line-height: 1.5;
+    margin: 0 0 1.5rem 0;
+    flex-grow: 1;
+  }
+
+  .read-more {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #e10600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    transition: color 0.2s ease;
+    margin-top: auto;
+  }
+
+  .news-card:hover .read-more {
+    color: #f87171;
+  }
+
+  .news-empty-state {
+    background: #0f172a;
+    border: 1px dashed #334155;
+    padding: 3rem 1.5rem;
+    border-radius: 12px;
+    text-align: center;
+  }
+
+  .news-empty-state p {
+    color: #64748b;
+    font-size: 0.95rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 0;
+  }
+
+  @media (max-width: 768px) {
+    h1 { font-size: 2.5rem; }
+  }
 </style>

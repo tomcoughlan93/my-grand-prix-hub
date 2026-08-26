@@ -1,13 +1,18 @@
 ---
 name: Max Verstappen
 code: VER
-number: 3
+number: 1
 team: Red Bull Racing
-teamKey: redbull
-teamColor: '#3671c6'
+teamColor: "#3671c6"
 countryCode: nl
-nationality: NED
+nationality: Dutch
 worldTitles: 4
+dob: "30 September 1997"
+birthplace: "Hasselt, Belgium"
+debut: "2015 Australian Grand Prix"
+socials:
+  instagram: "https://instagram.com/maxverstappen1"
+  x: "https://x.com/Max33Verstappen"
 ---
 
-Multiple-time Formula 1 World Champion competing for Red Bull Racing.
+A generational talent with a ruthless winning mentality, Max Verstappen's total mastery of the Red Bull machinery has solidified his status as one of the sport's all-time greats.

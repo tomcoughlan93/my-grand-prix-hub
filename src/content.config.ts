@@ -1,3 +1,4 @@
+// src/content.config.ts
 import { defineCollection, z } from 'astro:content';
 import { glob } from 'astro/loaders';
 
@@ -70,11 +71,17 @@ const drivers = defineCollection({
     code: z.string(),
     number: z.number(),
     team: z.string(),
-    teamKey: z.string(),
     teamColor: z.string(),
     countryCode: z.string(),
     nationality: z.string(),
-    worldTitles: z.number().optional().default(0), // <-- Add this line!
+    worldTitles: z.number().optional().default(0),
+    dob: z.string().optional(),
+    birthplace: z.string().optional(),
+    debut: z.string().optional(),
+    socials: z.object({
+      instagram: z.string().optional(),
+      x: z.string().optional(),
+    }).optional(),
   }),
 });
 
@@ -114,5 +121,5 @@ export const collections = {
   creators,
   drivers,
   teams,
-  news, // <-- Added here!
+  news, 
 };

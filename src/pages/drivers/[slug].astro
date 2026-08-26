@@ -1,7 +1,8 @@
 ---
-// src/pages/drivers/[slug].astro
 import Layout from '@/layouts/Layout.astro';
 import seasonData from '@/content/results/season-2026.json';
+import { TEAMS } from '@/data/teams';
+import Parser from 'rss-parser';
 
 export async function getStaticPaths() {
   const driverFiles = import.meta.glob('/src/content/drivers/*.md', { eager: true });
@@ -20,35 +21,161 @@ export async function getStaticPaths() {
 
 const { driver, Content } = Astro.props;
 
-// 2026 Calendar Map for the Season Timeline
-const ROUND_DATA = [
-  { round: 1, name: 'AUS', flag: 'au', gp: 'Australian GP' },
-  { round: 2, name: 'CHN', flag: 'cn', gp: 'Chinese GP' },
-  { round: 3, name: 'JPN', flag: 'jp', gp: 'Japanese GP' },
-  { round: 4, name: 'MIA', flag: 'us', gp: 'Miami GP' },
-  { round: 5, name: 'CAN', flag: 'ca', gp: 'Canadian GP' },
-  { round: 6, name: 'MON', flag: 'mc', gp: 'Monaco GP' },
-  { round: 7, name: 'ESP', flag: 'es', gp: 'Spanish GP' },
-  { round: 8, name: 'AUT', flag: 'at', gp: 'Austrian GP' },
-  { round: 9, name: 'GBR', flag: 'gb', gp: 'British GP' },
-  { round: 10, name: 'BEL', flag: 'be', gp: 'Belgian GP' },
-  { round: 11, name: 'HUN', flag: 'hu', gp: 'Hungarian GP' },
-  { round: 12, name: 'NED', flag: 'nl', gp: 'Dutch GP' },
-  { round: 13, name: 'ITA', flag: 'it', gp: 'Italian GP' },
-  { round: 14, name: 'MAD', flag: 'es', gp: 'Madrid GP' },
-  { round: 15, name: 'AZE', flag: 'az', gp: 'Azerbaijan GP' },
-  { round: 16, name: 'SIN', flag: 'sg', gp: 'Singapore GP' },
-  { round: 17, name: 'USA', flag: 'us', gp: 'United States GP' },
-  { round: 18, name: 'MEX', flag: 'mx', gp: 'Mexico City GP' },
-  { round: 19, name: 'BRA', flag: 'br', gp: 'São Paulo GP' },
-  { round: 20, name: 'LVG', flag: 'us', gp: 'Las Vegas GP' },
-  { round: 21, name: 'QAT', flag: 'qa', gp: 'Qatar GP' },
-  { round: 22, name: 'ABU', flag: 'ae', gp: 'Abu Dhabi GP' },
+// --- 1. FIND TEAMMATE LOGIC ---
+const code = driver.code.toUpperCase().trim();
+const currentTeam = TEAMS.find(t => t.d1 === code || t.d2 === code);
+let teammate: any = null;
+
+if (currentTeam) {
+  if (currentTeam.d1 === code) {
+    teammate = { name: currentTeam.d2Name, code: currentTeam.d2, number: currentTeam.d2Number, slug: currentTeam.d2Slug };
+  } else {
+    teammate = { name: currentTeam.d1Name, code: currentTeam.d1, number: currentTeam.d1Number, slug: currentTeam.d1Slug };
+  }
+}
+
+// --- 2. RSS PARSER (DRIVER SPECIFIC) ---
+interface CustomFeedItem {
+  mediaContent?: any;
+  mediaThumbnail?: any;
+  enclosure?: { url?: string };
+  contentEncoded?: string;
+  description?: string;
+  content?: string;
+  summary?: string;
+  contentSnippet?: string;
+  title?: string;
+  link?: string;
+  pubDate?: string;
+  image?: any;
+}
+
+const parser: Parser<{}, CustomFeedItem> = new Parser({
+  customFields: {
+    item: [
+      ['media:content', 'mediaContent', { keepArray: true }],
+      ['media:thumbnail', 'mediaThumbnail', { keepArray: true }],
+      ['media:group', 'mediaGroup', { keepArray: true }],
+      ['content:encoded', 'contentEncoded'],
+      ['description', 'description'],
+      ['image', 'image']
+    ],
+  },
+});
+
+const VERIFIED_FEEDS = [
+  { name: 'BBC Sport F1', url: 'https://feeds.bbci.co.uk/sport/formula1/rss.xml' },
+  { name: 'Autosport', url: 'https://www.autosport.com/rss/f1/news/' },
+  { name: 'Motorsport.com', url: 'https://www.motorsport.com/rss/f1/news/' },
+  { name: 'RacingNews365', url: 'https://racingnews365.com/feed/news.xml' },
+  { name: 'Crash.net F1', url: 'https://www.crash.net/rss/f1' },
 ];
 
-// 1. Pull Driver Season Results from Master Grid
-const code = driver.code.toUpperCase().trim();
-// Add "as any" to the end of this line to bypass the dynamic key error
+function cleanSnippet(str?: string): string {
+  if (!str) return '';
+  const text = str.replace(/<[^>]*>?/gm, '').replace(/&quot;/g, '"').replace(/&amp;/g, '&').replace(/&#039;/g, "'").replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/\s+/g, ' ').trim();
+  return text.length > 130 ? text.substring(0, 127) + '...' : text;
+}
+
+function extractImage(item: CustomFeedItem, sourceName: string): string | undefined {
+  let url: string | undefined = undefined;
+  if (item.enclosure && item.enclosure.url) url = item.enclosure.url;
+  if (!url && item.mediaContent && Array.isArray(item.mediaContent)) {
+    const found = item.mediaContent.find((m: any) => m.$?.url || m.url);
+    if (found) url = found.$?.url || found.url;
+  }
+  if (!url && item.mediaThumbnail && Array.isArray(item.mediaThumbnail)) {
+    const found = item.mediaThumbnail.find((t: any) => t.$?.url || t.url);
+    if (found) url = found.$?.url || found.url;
+  }
+  if (!url && (item as any).mediaGroup && Array.isArray((item as any).mediaGroup)) {
+    const group = (item as any).mediaGroup[0];
+    if (group && group['media:content'] && Array.isArray(group['media:content'])) {
+      const found = group['media:content'].find((m: any) => m.$?.url || m.url);
+      if (found) url = found.$?.url || found.url;
+    }
+  }
+  if (!url && item.image) {
+    if (typeof item.image === 'string') url = item.image;
+    else if (item.image.url) url = item.image.url;
+    else if (item.image.$ && item.image.$.url) url = item.image.$.url;
+  }
+  if (!url) {
+    const htmlString = [item.contentEncoded, item.content, item.summary, item.description, item.contentSnippet].filter(Boolean).join(' ');
+    const dataSrcMatch = htmlString.match(/<img[^>]+data-src\s*=\s*["']([^"']+)["']/i);
+    if (dataSrcMatch && dataSrcMatch[1]) url = dataSrcMatch[1];
+    else {
+      const srcMatch = htmlString.match(/<img[^>]+src\s*=\s*["']([^"']+)["']/i);
+      if (srcMatch && srcMatch[1]) url = srcMatch[1];
+    }
+  }
+  if (!url) {
+    const itemStr = JSON.stringify(item);
+    const regex = /(https?:\/\/[^"'\s>]+?\.(?:jpg|jpeg|png|webp)(?:\?[^"'\s>]*)?)/i;
+    const match = itemStr.match(regex);
+    if (match && match[1]) url = match[1];
+  }
+  if (!url) return undefined;
+  if (sourceName === 'BBC Sport F1') url = url.replace(/\/\d+x\d+\//g, '/976x549/').replace(/\/p\d+\//g, '/p0976/').replace(/\/(144|240|320|480)\//g, '/976/');
+  return url;
+}
+
+let driverNews: any[] = [];
+try {
+  const feedPromises = VERIFIED_FEEDS.map(async (src) => {
+    try {
+      const feed = await parser.parseURL(src.url);
+      const validItems = [];
+      for (const item of feed.items || []) {
+        const hasValidDate = item.pubDate && !isNaN(new Date(item.pubDate).getTime());
+        if (!hasValidDate) continue;
+        const imageUrl = extractImage(item, src.name);
+        if (src.name === 'RacingNews365' && !imageUrl) continue;
+        const rawDescription = item.contentEncoded || item.content || item.summary || item.description || item.contentSnippet || '';
+        validItems.push({
+          title: item.title || 'F1 News Headline',
+          link: item.link || '#',
+          pubDateStr: new Date(item.pubDate!).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }),
+          source: src.name,
+          snippet: cleanSnippet(rawDescription),
+          imageUrl: imageUrl || null,
+          timestamp: new Date(item.pubDate!).getTime(),
+        });
+      }
+      return validItems;
+    } catch (err) { return []; }
+  });
+
+  const rssResults = await Promise.all(feedPromises);
+  const globalRssFeed = rssResults.flat().sort((a, b) => b.timestamp - a.timestamp);
+
+  // Filter for THIS driver specifically
+  const lastName = driver.name.split(' ').pop() || '';
+  const escapeRegExp = (str: string) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const driverRegex = new RegExp(`\\b(${escapeRegExp(driver.name)}|${escapeRegExp(lastName)})\\b`, 'i');
+
+  const matchedNews = globalRssFeed.filter((article: any) => {
+    return driverRegex.test(article.title) || driverRegex.test(article.snippet);
+  });
+
+  driverNews = matchedNews.slice(0, 3);
+} catch (e) {}
+
+// --- 3. CALENDAR & SEASON RESULTS ---
+const ROUND_DATA = [
+  { round: 1, name: 'AUS', flag: 'au', gp: 'Australian GP' }, { round: 2, name: 'CHN', flag: 'cn', gp: 'Chinese GP' },
+  { round: 3, name: 'JPN', flag: 'jp', gp: 'Japanese GP' }, { round: 4, name: 'MIA', flag: 'us', gp: 'Miami GP' },
+  { round: 5, name: 'CAN', flag: 'ca', gp: 'Canadian GP' }, { round: 6, name: 'MON', flag: 'mc', gp: 'Monaco GP' },
+  { round: 7, name: 'ESP', flag: 'es', gp: 'Spanish GP' }, { round: 8, name: 'AUT', flag: 'at', gp: 'Austrian GP' },
+  { round: 9, name: 'GBR', flag: 'gb', gp: 'British GP' }, { round: 10, name: 'BEL', flag: 'be', gp: 'Belgian GP' },
+  { round: 11, name: 'HUN', flag: 'hu', gp: 'Hungarian GP' }, { round: 12, name: 'NED', flag: 'nl', gp: 'Dutch GP' },
+  { round: 13, name: 'ITA', flag: 'it', gp: 'Italian GP' }, { round: 14, name: 'MAD', flag: 'es', gp: 'Madrid GP' },
+  { round: 15, name: 'AZE', flag: 'az', gp: 'Azerbaijan GP' }, { round: 16, name: 'SIN', flag: 'sg', gp: 'Singapore GP' },
+  { round: 17, name: 'USA', flag: 'us', gp: 'United States GP' }, { round: 18, name: 'MEX', flag: 'mx', gp: 'Mexico City GP' },
+  { round: 19, name: 'BRA', flag: 'br', gp: 'São Paulo GP' }, { round: 20, name: 'LVG', flag: 'us', gp: 'Las Vegas GP' },
+  { round: 21, name: 'QAT', flag: 'qa', gp: 'Qatar GP' }, { round: 22, name: 'ABU', flag: 'ae', gp: 'Abu Dhabi GP' },
+];
+
 const gridDriver = seasonData?.drivers?.find((d: any) => String(d.code).toUpperCase().trim() === code) as any;
 const seasonResults: (string | number)[] = [];
 let seasonPodiums = 0;
@@ -74,45 +201,27 @@ for (let i = 1; i <= 22; i++) {
   }
 }
 
-// 2. Fetch Live Championship Stats (with Fallbacks)
-let currentStanding = {
-  pos: '--',
-  points: 0,
-  wins: seasonWins,
-};
-
+// --- 4. API STANDINGS ---
+let currentStanding = { pos: '--', points: 0, wins: seasonWins };
 try {
-  const res = await fetch('https://api.jolpi.ca/ergast/f1/current/driverStandings.json', {
-    headers: { 'User-Agent': 'Mozilla/5.0' },
-  });
+  const res = await fetch('https://api.jolpi.ca/ergast/f1/current/driverStandings.json', { headers: { 'User-Agent': 'Mozilla/5.0' } });
   if (res.ok) {
     const data = await res.json();
     const dList = data?.MRData?.StandingsTable?.StandingsLists?.[0]?.DriverStandings;
     if (dList) {
-      const match = dList.find(
-        (item: any) =>
-          (item.Driver.code && item.Driver.code.toUpperCase() === code) ||
-          item.Driver.familyName.toLowerCase().includes(driver.name.split(' ').pop()?.toLowerCase() || '')
-      );
+      const match = dList.find((item: any) => (item.Driver.code && item.Driver.code.toUpperCase() === code) || item.Driver.familyName.toLowerCase().includes(driver.name.split(' ').pop()?.toLowerCase() || ''));
       if (match) {
-        currentStanding = {
-          pos: match.position,
-          points: parseFloat(match.points) || 0,
-          wins: parseInt(match.wins) || seasonWins,
-        };
+        currentStanding = { pos: match.position, points: parseFloat(match.points) || 0, wins: parseInt(match.wins) || seasonWins };
       }
     }
   }
-} catch {
-  // Graceful offline fallback
-}
+} catch {}
 
 function getFormBadgeClass(result: number | string): string {
   const resStr = String(result).toUpperCase().trim();
   if (resStr === 'RET') return 'badge-ret';
-  if (resStr === 'DNS' || resStr === 'DSQ') return 'badge-dns'; // <-- Add this line!
+  if (resStr === 'DNS' || resStr === 'DSQ') return 'badge-dns';
   if (resStr === '-' || resStr === '') return 'badge-dnp';
-  
   const num = parseInt(resStr, 10);
   if (!isNaN(num)) {
     if (num === 1) return 'badge-p1';
@@ -129,19 +238,18 @@ function getFormBadgeClass(result: number | string): string {
   description={`Official 2026 driver profile for ${driver.name}. Career biography, race results timeline, championship standing, and statistics.`}
 >
   <main class="driver-profile-container">
-    <!-- Breadcrumb navigation -->
+    
     <nav class="breadcrumb-nav">
       <a href="/championship/standings">Standings</a>
+      <span class="sep">/</span>
+      <a href={`/teams/${currentTeam?.slug}`}>{driver.team}</a>
       <span class="sep">/</span>
       <span class="current">{driver.name}</span>
     </nav>
 
-    <!-- Typography & Color Hero -->
     <header class="driver-hero" style={`--team-accent: ${driver.teamColor};`}>
       <div class="hero-glow"></div>
-      
-      <!-- Watermarked Driver Number -->
-      <span class="hero-number-bg">#{driver.number}</span>
+      <span class={`hero-number-bg ${driver.number < 10 ? 'single-digit' : ''}`}>#{driver.number}</span>
 
       <div class="hero-content">
         <div class="hero-meta-top">
@@ -150,13 +258,7 @@ function getFormBadgeClass(result: number | string): string {
             <span class="team-name">{driver.team}</span>
           </div>
           <div class="nat-pill">
-            <img
-              src={`https://flagcdn.com/w20/${driver.countryCode}.png`}
-              width="16"
-              height="12"
-              alt={driver.nationality}
-              class="flag-img"
-            />
+            <img src={`https://flagcdn.com/w20/${driver.countryCode}.png`} width="16" height="12" alt={driver.nationality} class="flag-img" />
             <span>{driver.nationality}</span>
           </div>
         </div>
@@ -166,56 +268,98 @@ function getFormBadgeClass(result: number | string): string {
           <span class="driver-tag">{driver.code}</span>
         </div>
 
-        <!-- Dynamic Season Stat Strip -->
         <div class="season-stats-strip">
           <div class="stat-card">
             <span class="stat-label">2026 Championship</span>
-            <div class="stat-val-group">
-              <span class="stat-val">{currentStanding.pos !== '--' ? `P${currentStanding.pos}` : '--'}</span>
-            </div>
+            <div class="stat-val-group"><span class="stat-val">{currentStanding.pos !== '--' ? `P${currentStanding.pos}` : '--'}</span></div>
           </div>
-
-          <!-- WORLD TITLES CARD -->
           <div class="stat-card">
             <span class="stat-label">World Titles</span>
-            <div class="stat-val-group">
-              <span class="stat-val">{driver.worldTitles}</span>
-            </div>
+            <div class="stat-val-group"><span class="stat-val">{driver.worldTitles}</span></div>
           </div>
-
           <div class="stat-card">
             <span class="stat-label">Points</span>
-            <div class="stat-val-group">
-              <span class="stat-val">{currentStanding.points}</span>
-              <span class="stat-sub">PTS</span>
-            </div>
+            <div class="stat-val-group"><span class="stat-val">{currentStanding.points}</span><span class="stat-sub">PTS</span></div>
           </div>
-
           <div class="stat-card">
             <span class="stat-label">Wins</span>
-            <div class="stat-val-group">
-              <span class="stat-val">{currentStanding.wins}</span>
-            </div>
+            <div class="stat-val-group"><span class="stat-val">{currentStanding.wins}</span></div>
           </div>
-
           <div class="stat-card">
             <span class="stat-label">Podiums</span>
-            <div class="stat-val-group">
-              <span class="stat-val">{seasonPodiums}</span>
-            </div>
+            <div class="stat-val-group"><span class="stat-val">{seasonPodiums}</span></div>
           </div>
-
           <div class="stat-card">
             <span class="stat-label">Top 10 Finishes</span>
-            <div class="stat-val-group">
-              <span class="stat-val">{seasonPointsFinishes}</span>
+            <div class="stat-val-group"><span class="stat-val">{seasonPointsFinishes}</span></div>
+          </div>
+        </div> 
+      </div> 
+    </header> 
+
+    <!-- Content Grid (Bio/Vitals on left, Teammate on right) -->
+    <div class="profile-layout-grid">
+      
+      <div class="main-column">
+        <!-- Vitals Grid -->
+        {(driver.dob || driver.birthplace || driver.debut) && (
+          <section class="profile-section">
+            <div class="section-title-row">
+              <h2>Driver Profile</h2>
+              <div class="social-links">
+                {driver.socials?.x && <a href={driver.socials.x} target="_blank" rel="noopener noreferrer" title="X (Twitter)"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>}
+                {driver.socials?.instagram && <a href={driver.socials.instagram} target="_blank" rel="noopener noreferrer" title="Instagram"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg></a>}
+              </div>
+            </div>
+            
+            <div class="vitals-grid">
+              {driver.dob && <div class="vital-item"><span class="v-label">Date of Birth</span><span class="v-val">{driver.dob}</span></div>}
+              {driver.birthplace && <div class="vital-item"><span class="v-label">Place of Birth</span><span class="v-val">{driver.birthplace}</span></div>}
+              {driver.debut && <div class="vital-item"><span class="v-label">F1 Debut</span><span class="v-val">{driver.debut}</span></div>}
+            </div>
+          </section>
+        )}
+
+        <!-- Biography -->
+        <section class="profile-section">
+          <div class="section-title-row">
+            <h2>Career Notes</h2>
+          </div>
+          <div class="bio-card">
+            <div class="prose-content">
+              <Content />
             </div>
           </div>
-        </div> <!-- Closes season-stats-strip -->
-      </div> <!-- Closes hero-content -->
-    </header> <!-- Closes driver-hero -->
+        </section>
+      </div>
 
-    <!-- 2026 Season Timeline (Automated from Master Grid) -->
+      <aside class="sidebar-column">
+        <!-- Across The Garage -->
+        {teammate && (
+          <section class="profile-section">
+            <div class="section-title-row">
+              <h2>Teammate</h2>
+              <span class="section-badge">Across The Garage</span>
+            </div>
+            
+            <a href={`/drivers/${teammate.slug}`} class="typo-driver-card" style={`--accent: ${driver.teamColor}`}>
+              <div class={`driver-bg-number ${teammate.number < 10 ? 'single-digit' : ''}`}>{teammate.number}</div>
+              <div class="driver-card-content">
+                <div class="d-info-top">
+                  <span class="d-tag">{teammate.code}</span>
+                </div>
+                <div class="d-info-bottom">
+                  <h3>{teammate.name}</h3>
+                  <span class="view-profile-btn">View Profile →</span>
+                </div>
+              </div>
+            </a>
+          </section>
+        )}
+      </aside>
+    </div>
+
+    <!-- 2026 Season Timeline -->
     <section class="profile-section">
       <div class="section-title-row">
         <h2>2026 Grand Prix Results</h2>
@@ -228,12 +372,7 @@ function getFormBadgeClass(result: number | string): string {
             const raceInfo = ROUND_DATA[index];
             return (
               <div class="season-race-box" title={raceInfo.gp}>
-                <img
-                  src={`https://flagcdn.com/w20/${raceInfo.flag}.png`}
-                  alt={raceInfo.name}
-                  class="race-card-flag"
-                  loading="lazy"
-                />
+                <img src={`https://flagcdn.com/w20/${raceInfo.flag}.png`} alt={raceInfo.name} class="race-card-flag" loading="lazy" />
                 <span class="race-round">{raceInfo.name}</span>
                 <span class={`form-circle ${getFormBadgeClass(res)}`}>{res}</span>
               </div>
@@ -243,422 +382,156 @@ function getFormBadgeClass(result: number | string): string {
       </div>
     </section>
 
-    <!-- Biography & Editorial Section -->
+    <!-- Latest Driver News -->
     <section class="profile-section">
       <div class="section-title-row">
-        <h2>Biography & Career Notes</h2>
+        <h2>Latest {driver.name.split(' ').pop()} News</h2>
+        <span class="section-badge">Around The Paddock</span>
       </div>
-      <div class="bio-card">
-        <div class="prose-content">
-          <Content />
+
+      {driverNews && driverNews.length > 0 ? (
+        <div class="news-grid">
+          {driverNews.map((article: any) => (
+            <a href={article.link} target="_blank" rel="noopener noreferrer" class="news-card">
+              {article.imageUrl && (
+                <div class="card-image-wrap">
+                  <img src={article.imageUrl} alt={article.title} loading="lazy" class="card-image" />
+                </div>
+              )}
+              <div class="news-content">
+                <div class="news-meta">
+                  <span class="feed-source" style={`color: ${driver.teamColor}`}>{article.source}</span>
+                  <span class="news-date">{article.pubDateStr}</span>
+                </div>
+                <h3 class="news-title">{article.title}</h3>
+                {article.snippet && <p class="news-excerpt">{article.snippet}</p>}
+                <span class="read-more">Read on {article.source} ↗</span>
+              </div>
+            </a>
+          ))}
         </div>
-      </div>
+      ) : (
+        <div class="news-empty-state">
+          <p>Currently scouting the paddock for the latest updates on {driver.name}.</p>
+        </div>
+      )}
     </section>
+
   </main>
 </Layout>
 
 <style>
-  .driver-profile-container {
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 2.5rem 1.5rem 6rem;
-    color: #f1f5f9;
-    box-sizing: border-box;
-  }
-
-  .breadcrumb-nav {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 0.85rem;
-    color: #64748b;
-    margin-bottom: 1.5rem;
-    font-weight: 600;
-  }
-
-  .breadcrumb-nav a {
-    color: #38bdf8;
-    text-decoration: none;
-  }
-
-  .breadcrumb-nav a:hover {
-    text-decoration: underline;
-  }
-
-  .breadcrumb-nav .sep {
-    color: #334155;
-  }
-
-  .breadcrumb-nav .current {
-    color: #94a3b8;
-  }
+  .driver-profile-container { max-width: 1100px; margin: 0 auto; padding: 2.5rem 1.5rem 6rem; color: #f1f5f9; box-sizing: border-box; }
+  .breadcrumb-nav { display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; color: #64748b; margin-bottom: 1.5rem; font-weight: 600; }
+  .breadcrumb-nav a { color: #38bdf8; text-decoration: none; }
+  .breadcrumb-nav a:hover { text-decoration: underline; }
+  .breadcrumb-nav .sep { color: #334155; }
+  .breadcrumb-nav .current { color: #94a3b8; }
 
   /* Hero Section */
-  .driver-hero {
-    position: relative;
-    background: #0f172a;
-    border: 1px solid #1e293b;
-    border-radius: 16px;
-    overflow: hidden;
-    padding: 3rem;
-    margin-bottom: 3.5rem;
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+  .driver-hero { position: relative; background: #0f172a; border: 1px solid #1e293b; border-radius: 16px; overflow: hidden; padding: 3rem; margin-bottom: 3.5rem; box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4); }
+  .hero-glow { position: absolute; top: -50px; right: -50px; width: 320px; height: 320px; background: radial-gradient(circle, var(--team-accent) 0%, rgba(15, 23, 42, 0) 70%); opacity: 0.18; pointer-events: none; }
+  .hero-number-bg { position: absolute; right: -2%; bottom: -1.5rem; font-size: 14rem; font-weight: 900; line-height: 1; color: var(--team-accent); opacity: 0.08; font-style: italic; user-select: none; pointer-events: none; font-variant-numeric: tabular-nums; transition: right 0.3s; }
+  .hero-number-bg.single-digit { right: 5%; }
+  
+  .hero-content { position: relative; z-index: 2; }
+  .hero-meta-top { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.25rem; flex-wrap: wrap; }
+  .team-pill { display: inline-flex; align-items: center; gap: 0.5rem; background: #1e293b; border: 1px solid #334155; padding: 0.35rem 0.75rem; border-radius: 9999px; font-size: 0.85rem; font-weight: 700; color: #ffffff; }
+  .team-dot { width: 8px; height: 8px; border-radius: 50%; }
+  .nat-pill { display: inline-flex; align-items: center; gap: 0.4rem; background: #1e293b; border: 1px solid #334155; padding: 0.35rem 0.65rem; border-radius: 9999px; font-size: 0.8rem; font-weight: 700; color: #94a3b8; }
+  .flag-img { border-radius: 2px; }
+  
+  .hero-title-row { display: flex; align-items: center; gap: 1rem; margin-bottom: 2.5rem; flex-wrap: wrap; }
+  .hero-title-row h1 { font-size: 3.25rem; font-weight: 900; color: #ffffff; letter-spacing: -0.03em; margin: 0; }
+  .driver-tag { background: #1e293b; color: #38bdf8; font-size: 1rem; font-weight: 800; padding: 0.25rem 0.6rem; border-radius: 6px; border: 1px solid #334155; }
+
+  /* Stat Strip */
+  .season-stats-strip { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; max-width: 720px; }
+  .stat-card { background: #1e293b; border: 1px solid #334155; padding: 1rem 1.25rem; border-radius: 10px; display: flex; flex-direction: column; justify-content: space-between; gap: 0.5rem; }
+  .stat-label { font-size: 0.72rem; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
+  .stat-val-group { display: flex; align-items: baseline; gap: 0.35rem; }
+  .stat-val { font-size: 1.75rem; font-weight: 900; color: #ffffff; font-variant-numeric: tabular-nums; }
+  .stat-sub { font-size: 0.75rem; font-weight: 800; color: #e10600; }
+
+  /* Page Layout Grid */
+  .profile-layout-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 2rem; margin-bottom: 1rem; }
+  
+  /* Sections */
+  .profile-section { margin-bottom: 3.5rem; }
+  .section-title-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; border-bottom: 1px solid #334155; padding-bottom: 0.75rem; }
+  .section-title-row h2 { font-size: 1.5rem; font-weight: 800; color: #ffffff; margin: 0; }
+  .section-badge { background: #0f172a; color: #38bdf8; border: 1px solid #334155; font-size: 0.75rem; font-weight: 700; padding: 0.25rem 0.5rem; border-radius: 4px; text-transform: uppercase; }
+
+  /* Vitals & Socials */
+  .social-links { display: flex; gap: 0.75rem; }
+  .social-links a { color: #64748b; display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; background: #1e293b; border: 1px solid #334155; transition: all 0.2s ease; }
+  .social-links a:hover { color: #ffffff; border-color: var(--team-accent); background: var(--team-accent); }
+  
+  .vitals-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; }
+  .vital-item { background: #0f172a; border: 1px solid #1e293b; padding: 1.25rem; border-radius: 8px; display: flex; flex-direction: column; gap: 0.4rem; }
+  .v-label { font-size: 0.75rem; color: #64748b; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; }
+  .v-val { font-size: 1.05rem; color: #f8fafc; font-weight: 700; }
+
+  /* Typography Teammate Card */
+  .typo-driver-card { position: relative; background: #0f172a; border: 1px solid #1e293b; border-radius: 12px; padding: 2rem; text-decoration: none; overflow: hidden; display: flex; min-height: 160px; transition: all 0.3s ease; }
+  .typo-driver-card:hover { border-color: var(--accent); transform: translateY(-4px); box-shadow: 0 12px 30px rgba(0,0,0,0.4); }
+  .driver-bg-number { position: absolute; right: -2%; bottom: -15%; font-size: 11rem; font-weight: 900; line-height: 0.8; color: var(--accent); opacity: 0.08; font-style: italic; user-select: none; pointer-events: none; transition: all 0.4s ease; }
+  .driver-bg-number.single-digit { right: 5%; }
+  .typo-driver-card:hover .driver-bg-number { transform: scale(1.1) rotate(-5deg); opacity: 0.15; }
+  .driver-card-content { position: relative; z-index: 2; display: flex; flex-direction: column; justify-content: space-between; width: 100%; }
+  .d-tag { background: #1e293b; color: #94a3b8; font-size: 0.75rem; font-weight: 800; padding: 0.25rem 0.6rem; border-radius: 6px; border: 1px solid #334155; }
+  .d-info-bottom h3 { color: #f8fafc; font-size: 1.5rem; font-weight: 900; margin: 0 0 0.5rem 0; letter-spacing: -0.02em; }
+  .view-profile-btn { display: inline-block; color: var(--accent); font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; }
+
+  /* Timeline & Bio */
+  .timeline-card, .bio-card { background: #0f172a; border: 1px solid #1e293b; border-radius: 12px; padding: 1.5rem; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25); }
+  .full-season-grid { display: flex; flex-direction: row; flex-wrap: nowrap; gap: 0.75rem; overflow-x: auto; padding-bottom: 0.75rem; }
+  .full-season-grid::-webkit-scrollbar { height: 6px; }
+  .full-season-grid::-webkit-scrollbar-track { background: #0f172a; border-radius: 4px; }
+  .full-season-grid::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+  .full-season-grid::-webkit-scrollbar-thumb:hover { background: #475569; }
+  .season-race-box { display: flex; flex-direction: column; align-items: center; justify-content: space-between; background: #1e293b; border: 1px solid #334155; padding: 0.75rem 0.5rem; border-radius: 8px; min-width: 58px; height: 105px; box-sizing: border-box; flex-shrink: 0; }
+  .race-card-flag { width: 20px; height: 14px; object-fit: cover; border-radius: 2px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5); }
+  .race-round { font-size: 0.65rem; color: #94a3b8; font-weight: 800; line-height: 1; margin: 0.25rem 0; }
+  
+  .form-circle { width: 28px; height: 28px; min-width: 28px; min-height: 28px; max-width: 28px; max-height: 28px; border-radius: 50% !important; display: flex; align-items: center; justify-content: center; font-size: 0.78rem; font-weight: 800; font-variant-numeric: tabular-nums; box-sizing: border-box; text-align: center; flex-shrink: 0; margin-top: auto; }
+  .badge-p1 { background: #ffd700; color: #000000; font-weight: 900; box-shadow: 0 0 6px rgba(255, 215, 0, 0.45); border: 1px solid transparent; }
+  .badge-p2 { background: #cbd5e1; color: #0f172a; font-weight: 900; border: 1px solid transparent; }
+  .badge-p3 { background: #d97706; color: #ffffff; font-weight: 900; border: 1px solid transparent; }
+  .badge-points { background: #0f172a; color: #38bdf8; border: 1px solid #334155; }
+  .badge-out { background: #090e1a; color: #64748b; border: 1px solid #1e293b; }
+  .badge-ret { background: rgba(225, 6, 0, 0.25); color: #f87171; border: 1px solid rgba(225, 6, 0, 0.5); font-size: 0.6rem; }
+  .badge-dns { background: rgba(100, 116, 139, 0.25); color: #94a3b8; border: 1px solid rgba(100, 116, 139, 0.5); font-size: 0.6rem; }
+  .badge-dnp { background: transparent; color: #475569; border: 1px dashed #334155; }
+
+  .prose-content { color: #cbd5e1; font-size: 1.05rem; line-height: 1.75; }
+  .prose-content :global(p) { margin-bottom: 1.25rem; }
+  .prose-content :global(h3) { color: #ffffff; font-size: 1.3rem; margin-top: 1.75rem; margin-bottom: 0.75rem; font-weight: 700; }
+
+  /* News Grid */
+  .news-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; }
+  .news-card { background: #0f172a; border: 1px solid #1e293b; border-radius: 12px; text-decoration: none; transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease; display: flex; flex-direction: column; overflow: hidden; }
+  .news-card:hover { transform: translateY(-4px); border-color: #475569; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
+  .card-image-wrap { height: 160px; overflow: hidden; background: #0b0f19; border-bottom: 1px solid #1e293b; }
+  .card-image { width: 100%; height: 100%; object-fit: cover; }
+  .news-content { padding: 1.5rem; display: flex; flex-direction: column; flex-grow: 1; }
+  .news-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; }
+  .news-date { color: #64748b; }
+  .news-title { font-size: 1.15rem; font-weight: 800; color: #f8fafc; margin: 0 0 0.75rem 0; line-height: 1.4; }
+  .news-excerpt { font-size: 0.9rem; color: #94a3b8; line-height: 1.5; margin: 0 0 1.5rem 0; flex-grow: 1; }
+  .read-more { font-size: 0.8rem; font-weight: 700; color: #38bdf8; text-transform: uppercase; letter-spacing: 0.05em; transition: color 0.2s ease; }
+  .news-card:hover .read-more { color: #7dd3fc; }
+  .news-empty-state { background: #0f172a; border: 1px dashed #334155; padding: 3rem 1.5rem; border-radius: 12px; text-align: center; }
+  .news-empty-state p { color: #64748b; font-size: 0.95rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin: 0; }
+
+  @media (max-width: 900px) {
+    .profile-layout-grid { grid-template-columns: 1fr; }
   }
 
-  .hero-glow {
-    position: absolute;
-    top: -50px;
-    right: -50px;
-    width: 320px;
-    height: 320px;
-    background: radial-gradient(circle, var(--team-accent) 0%, rgba(15, 23, 42, 0) 70%);
-    opacity: 0.18;
-    pointer-events: none;
-  }
-
-  .hero-number-bg {
-    position: absolute;
-    right: 2rem;
-    bottom: -1.5rem;
-    font-size: 14rem;
-    font-weight: 900;
-    line-height: 1;
-    color: var(--team-accent);
-    opacity: 0.08;
-    user-select: none;
-    pointer-events: none;
-    font-family: inherit;
-    font-variant-numeric: tabular-nums;
-  }
-
-  .hero-content {
-    position: relative;
-    z-index: 2;
-  }
-
-  .hero-meta-top {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    margin-bottom: 1.25rem;
-    flex-wrap: wrap;
-  }
-
-  .team-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    background: #1e293b;
-    border: 1px solid #334155;
-    padding: 0.35rem 0.75rem;
-    border-radius: 9999px;
-    font-size: 0.85rem;
-    font-weight: 700;
-    color: #ffffff;
-  }
-
-  .team-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-  }
-
-  .nat-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-    background: #1e293b;
-    border: 1px solid #334155;
-    padding: 0.35rem 0.65rem;
-    border-radius: 9999px;
-    font-size: 0.8rem;
-    font-weight: 700;
-    color: #94a3b8;
-  }
-
-  .flag-img {
-    border-radius: 2px;
-  }
-
-  .hero-title-row {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    margin-bottom: 2.5rem;
-    flex-wrap: wrap;
-  }
-
-  .hero-title-row h1 {
-    font-size: 3.25rem;
-    font-weight: 900;
-    color: #ffffff;
-    letter-spacing: -0.03em;
-    margin: 0;
-  }
-
-  .driver-tag {
-    background: #1e293b;
-    color: #38bdf8;
-    font-size: 1rem;
-    font-weight: 800;
-    padding: 0.25rem 0.6rem;
-    border-radius: 6px;
-    border: 1px solid #334155;
-  }
-
-  /* Stat Strip (3x2 Grid) */
-  .season-stats-strip {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 1rem;
-    max-width: 720px;
-  }
-
-  .stat-card {
-    background: #1e293b;
-    border: 1px solid #334155;
-    padding: 1rem 1.25rem;
-    border-radius: 10px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    gap: 0.5rem;
-  }
-
-  .stat-label {
-    font-size: 0.72rem;
-    color: #64748b;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
-
-  .stat-val-group {
-    display: flex;
-    align-items: baseline;
-    gap: 0.35rem;
-  }
-
-  .stat-val {
-    font-size: 1.75rem;
-    font-weight: 900;
-    color: #ffffff;
-    font-variant-numeric: tabular-nums;
-  }
-
-  .stat-sub {
-    font-size: 0.75rem;
-    font-weight: 800;
-    color: #e10600;
-  }
-
-  /* Profile Sections */
-  .profile-section {
-    margin-bottom: 3.5rem;
-  }
-
-  .section-title-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 1.25rem;
-    border-bottom: 1px solid #334155;
-    padding-bottom: 0.75rem;
-  }
-
-  .section-title-row h2 {
-    font-size: 1.5rem;
-    font-weight: 800;
-    color: #ffffff;
-    margin: 0;
-  }
-
-  .section-badge {
-    background: #0f172a;
-    color: #38bdf8;
-    border: 1px solid #334155;
-    font-size: 0.75rem;
-    font-weight: 700;
-    padding: 0.25rem 0.5rem;
-    border-radius: 4px;
-    text-transform: uppercase;
-  }
-
-  .timeline-card,
-  .bio-card {
-    background: #0f172a;
-    border: 1px solid #1e293b;
-    border-radius: 12px;
-    padding: 1.5rem;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
-  }
-
-  /* Horizontal Grid */
-  .full-season-grid {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    gap: 0.75rem;
-    overflow-x: auto;
-    padding-bottom: 0.75rem;
-  }
-
-  .full-season-grid::-webkit-scrollbar {
-    height: 6px;
-  }
-  .full-season-grid::-webkit-scrollbar-track {
-    background: #0f172a;
-    border-radius: 4px;
-  }
-  .full-season-grid::-webkit-scrollbar-thumb {
-    background: #334155;
-    border-radius: 4px;
-  }
-  .full-season-grid::-webkit-scrollbar-thumb:hover {
-    background: #475569;
-  }
-
-  .season-race-box {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: space-between;
-    background: #1e293b;
-    border: 1px solid #334155;
-    padding: 0.75rem 0.5rem;
-    border-radius: 8px;
-    min-width: 58px;
-    height: 105px; /* Locks all cards to identical height */
-    box-sizing: border-box;
-    flex-shrink: 0;
-  }
-
-  .race-card-flag {
-    width: 20px;
-    height: 14px;
-    object-fit: cover;
-    border-radius: 2px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
-  }
-
-  .race-round {
-    font-size: 0.65rem;
-    color: #94a3b8;
-    font-weight: 800;
-    line-height: 1;
-    margin: 0.25rem 0;
-  }
-
-  /* Form Circles */
-  .form-circle {
-    width: 28px;
-    height: 28px;
-    min-width: 28px;
-    min-height: 28px;
-    max-width: 28px;
-    max-height: 28px;
-    border-radius: 50% !important;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.78rem;
-    font-weight: 800;
-    font-variant-numeric: tabular-nums;
-    box-sizing: border-box;
-    text-align: center;
-    flex-shrink: 0;
-    margin-top: auto; /* Pins every badge to the bottom edge */
-  }
-
-  .badge-p1 {
-    background: #ffd700;
-    color: #000000;
-    font-weight: 900;
-    box-shadow: 0 0 6px rgba(255, 215, 0, 0.45);
-    border: 1px solid transparent;
-  }
-
-  .badge-p2 {
-    background: #cbd5e1;
-    color: #0f172a;
-    font-weight: 900;
-    border: 1px solid transparent;
-  }
-
-  .badge-p3 {
-    background: #d97706;
-    color: #ffffff;
-    font-weight: 900;
-    border: 1px solid transparent;
-  }
-
-  .badge-points {
-    background: #0f172a;
-    color: #38bdf8;
-    border: 1px solid #334155;
-  }
-
-  .badge-out {
-    background: #090e1a;
-    color: #64748b;
-    border: 1px solid #1e293b;
-  }
-
-  .badge-ret {
-    background: rgba(225, 6, 0, 0.25);
-    color: #f87171;
-    border: 1px solid rgba(225, 6, 0, 0.5);
-    font-size: 0.6rem; 
-  }
-
-  /* NEW: DNS / DSQ Badge */
-  .badge-dns {
-    background: rgba(100, 116, 139, 0.25);
-    color: #94a3b8;
-    border: 1px solid rgba(100, 116, 139, 0.5);
-    font-size: 0.6rem; /* Critical for fitting 3 letters */
-  }
-
-  .badge-dnp {
-    background: transparent;
-    color: #475569;
-    border: 1px dashed #334155;
-  }
-
-  /* Biography Prose */
-  .prose-content {
-    color: #cbd5e1;
-    font-size: 1.05rem;
-    line-height: 1.75;
-  }
-
-  .prose-content :global(p) {
-    margin-bottom: 1.25rem;
-  }
-
-  .prose-content :global(h3) {
-    color: #ffffff;
-    font-size: 1.3rem;
-    margin-top: 1.75rem;
-    margin-bottom: 0.75rem;
-    font-weight: 700;
-  }
-
-  /* Responsive Mobile Overrides */
   @media (max-width: 768px) {
-    .driver-hero {
-      padding: 1.75rem;
-    }
-    .hero-title-row h1 {
-      font-size: 2.25rem;
-    }
-    .hero-number-bg {
-      font-size: 9rem;
-      right: 1rem;
-      bottom: 0;
-    }
-    .season-stats-strip {
-      grid-template-columns: repeat(2, 1fr);
-    }
+    .driver-hero { padding: 1.75rem; }
+    .hero-title-row h1 { font-size: 2.25rem; }
+    .hero-number-bg { font-size: 9rem; right: 1rem; bottom: 0; }
+    .season-stats-strip { grid-template-columns: repeat(2, 1fr); }
   }
 </style>
