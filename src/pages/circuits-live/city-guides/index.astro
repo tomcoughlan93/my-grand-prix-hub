@@ -1,7 +1,22 @@
 ---
 // src/pages/circuits-live/city-guides/index.astro
 import Layout from '@/layouts/Layout.astro';
-import { cityGuidesData, type CityGuide } from '@/data/cityGuides';
+import { cityGuidesData } from '@/data/cityGuides/index';
+import type { CityGuide } from '@/data/types';
+
+// Map F1 countries to regional filters
+const regionMap: Record<string, string> = {
+  'Australia': 'Asia-Pacific', 'China': 'Asia-Pacific', 'Japan': 'Asia-Pacific', 'Singapore': 'Asia-Pacific',
+  'Bahrain': 'Middle East', 'Qatar': 'Middle East', 'United Arab Emirates': 'Middle East',
+  'United States': 'Americas', 'Canada': 'Americas', 'Mexico': 'Americas', 'Brazil': 'Americas',
+  'United Kingdom': 'Europe', 'Netherlands': 'Europe', 'Italy': 'Europe', 'Spain': 'Europe', 'Monaco': 'Europe',
+  'Austria': 'Europe', 'Belgium': 'Europe', 'Hungary': 'Europe', 'Azerbaijan': 'Europe'
+};
+
+const cities = cityGuidesData.map(city => ({
+  ...city,
+  region: regionMap[city.country] || 'Other'
+}));
 ---
 
 <Layout 
@@ -10,19 +25,42 @@ import { cityGuidesData, type CityGuide } from '@/data/cityGuides';
 >
   <main class="page-container">
     
-    <!-- HEADER -->
-    <header class="hub-header">
-      <span class="badge">Trackside City Hubs</span>
-      <h1>F1 Fan City Guides</h1>
-      <p class="subtitle">
-        Planning your Grand Prix trip? Discover the best base neighborhoods, evening dining, fan-favorite sports bars, and morning circuit transit for every host city.
-      </p>
-    </header>
+    <div class="header-container">
+      <header class="section-header">
+        <span class="badge">Trackside City Hubs</span>
+        <h1 class="gradient-title">F1 Fan City Guides</h1>
+        <p>Planning your Grand Prix trip? Discover the best base neighborhoods, evening dining, fan-favorite sports bars, and morning circuit transit.</p>
+      </header>
+
+      <!-- LIVE SEARCH BAR -->
+      <div class="search-wrapper">
+        <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input 
+          type="text" 
+          id="city-search" 
+          placeholder="Search by city, country, or race..." 
+          autocomplete="off"
+        />
+      </div>
+    </div>
+
+    <!-- REGIONAL FILTER BAR -->
+    <div class="publisher-filters" id="region-filters">
+      <button class="filter-btn is-active" data-region="All">All Cities</button>
+      <button class="filter-btn" data-region="Europe">Europe</button>
+      <button class="filter-btn" data-region="Americas">Americas</button>
+      <button class="filter-btn" data-region="Asia-Pacific">Asia-Pacific</button>
+      <button class="filter-btn" data-region="Middle East">Middle East</button>
+    </div>
 
     <!-- CITY CARDS GRID -->
-    <div class="city-grid">
-      {cityGuidesData.map((city: CityGuide) => (
-        <article class="city-card">
+    <div class="city-grid" id="city-grid">
+      {cities.map((city) => (
+        <article 
+          class="city-card js-city-card"
+          data-region={city.region}
+          data-search={`${city.city.toLowerCase()} ${city.country.toLowerCase()} ${city.race.toLowerCase()} ${city.circuitName.toLowerCase()}`}
+        >
           <div class="card-image-wrap">
             <img src={city.heroImage} alt={`${city.city} skyline`} loading="lazy" />
             <div class="card-overlay"></div>
@@ -61,59 +99,188 @@ import { cityGuidesData, type CityGuide } from '@/data/cityGuides';
           </div>
         </article>
       ))}
+      
+      <div id="no-results" class="empty-state hidden">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <p>No city guides found matching your search.</p>
+      </div>
     </div>
 
   </main>
 </Layout>
 
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.getElementById('city-search') as HTMLInputElement;
+    const filterBtns = document.querySelectorAll('.filter-btn');
+    const cityCards = document.querySelectorAll('.js-city-card');
+    const noResults = document.getElementById('no-results');
+
+    let currentSearch = '';
+    let currentRegion = 'All';
+
+    function updateGrid() {
+      let visibleCount = 0;
+
+      cityCards.forEach(card => {
+        const searchData = card.getAttribute('data-search') || '';
+        const regionData = card.getAttribute('data-region') || '';
+        
+        const matchesSearch = searchData.includes(currentSearch);
+        const matchesRegion = currentRegion === 'All' || regionData === currentRegion;
+
+        if (matchesSearch && matchesRegion) {
+          (card as HTMLElement).style.display = 'flex';
+          visibleCount++;
+        } else {
+          (card as HTMLElement).style.display = 'none';
+        }
+      });
+
+      if (noResults) {
+        noResults.classList.toggle('hidden', visibleCount !== 0);
+      }
+    }
+
+    if (searchInput) {
+      searchInput.addEventListener('input', (e) => {
+        currentSearch = (e.target as HTMLInputElement).value.toLowerCase().trim();
+        updateGrid();
+      });
+    }
+
+    filterBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        filterBtns.forEach(b => b.classList.remove('is-active'));
+        btn.classList.add('is-active');
+        currentRegion = btn.getAttribute('data-region') || 'All';
+        updateGrid();
+      });
+    });
+  });
+</script>
+
 <style>
   .page-container {
-    max-width: 1140px;
+    max-width: 1200px;
     margin: 0 auto;
-    padding: 3.5rem 1.5rem 6rem;
-    color: #f8fafc;
+    padding: 4rem 1.5rem 6rem 1.5rem;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   }
 
-  .hub-header {
-    text-align: center;
-    margin-bottom: 3.5rem;
+  .header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 2.5rem;
+    flex-wrap: wrap;
+    gap: 2rem;
+  }
+
+  .section-header {
+    max-width: 600px;
   }
 
   .badge {
     display: inline-block;
-    background: #e10600;
+    background-color: #e10600;
     color: #ffffff;
-    font-size: 0.8rem;
+    font-size: 0.85rem;
     font-weight: 800;
     text-transform: uppercase;
-    padding: 0.35rem 0.85rem;
-    border-radius: 4px;
+    padding: 0.4rem 1rem;
+    border-radius: 6px;
     letter-spacing: 0.08em;
-    margin-bottom: 1rem;
+    margin-bottom: 1.25rem;
   }
 
-  .hub-header h1 {
-    font-size: 3.25rem;
-    margin: 0 0 0.75rem 0;
-    font-weight: 900;
-    color: #ffffff;
-    letter-spacing: -0.03em;
-    line-height: 1.1;
+  .gradient-title { 
+    font-size: 3.5rem; 
+    margin: 0 0 1rem 0; 
+    font-weight: 900; 
+    letter-spacing: -0.03em; 
+    line-height: 1.1; 
+    background: linear-gradient(to right, #ffffff, #94a3b8);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
   }
 
-  .subtitle {
+  .section-header p {
     color: #94a3b8;
     font-size: 1.15rem;
-    margin: 0 auto;
-    max-width: 680px;
     line-height: 1.6;
+    margin: 0;
+  }
+
+  /* Live Search Bar */
+  .search-wrapper {
+    position: relative;
+    width: 100%;
+    max-width: 350px;
+  }
+
+  .search-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #64748b;
+  }
+
+  #city-search {
+    width: 100%;
+    background: #0f172a;
+    border: 1px solid #334155;
+    color: #ffffff;
+    padding: 0.85rem 1rem 0.85rem 2.85rem;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-family: inherit;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    box-sizing: border-box;
+  }
+
+  #city-search:focus {
+    outline: none;
+    border-color: #38bdf8;
+    box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15);
+  }
+
+  /* Regional Filters */
+  .publisher-filters {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 2.5rem;
+    flex-wrap: wrap;
+  }
+
+  .filter-btn {
+    background: #0f172a;
+    border: 1px solid #334155;
+    color: #94a3b8;
+    padding: 0.4rem 0.85rem;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .filter-btn:hover {
+    background: #1e293b;
+    color: #cbd5e1;
+  }
+
+  .filter-btn.is-active {
+    background: rgba(56, 189, 248, 0.15);
+    border-color: #38bdf8;
+    color: #38bdf8;
   }
 
   /* City Grid */
   .city-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
     gap: 2rem;
   }
 
@@ -169,6 +336,7 @@ import { cityGuidesData, type CityGuide } from '@/data/cityGuides';
     padding: 0.3rem 0.6rem;
     border-radius: 4px;
     letter-spacing: 0.05em;
+    z-index: 2;
   }
 
   .card-content {
@@ -218,7 +386,6 @@ import { cityGuidesData, type CityGuide } from '@/data/cityGuides';
     color: #cbd5e1;
   }
 
-  /* Perfectly clamps the intro to 4 lines without cutting words */
   .card-intro {
     color: #cbd5e1;
     font-size: 0.92rem;
@@ -231,7 +398,6 @@ import { cityGuidesData, type CityGuide } from '@/data/cityGuides';
     overflow: hidden;
   }
 
-  /* Swapped from Grid to a stacked layout */
   .card-highlights {
     background: #1e293b;
     border: 1px solid #334155;
@@ -262,7 +428,7 @@ import { cityGuidesData, type CityGuide } from '@/data/cityGuides';
     color: #64748b;
     font-weight: 800;
     text-transform: uppercase;
-    white-space: nowrap; /* Keeps label on one line */
+    white-space: nowrap;
   }
 
   .hl-val {
@@ -270,7 +436,6 @@ import { cityGuidesData, type CityGuide } from '@/data/cityGuides';
     color: #f1f5f9;
     font-weight: 700;
     text-align: right;
-    /* Removed white-space: nowrap so long airports can wrap nicely on the right side */
   }
 
   .card-actions {
@@ -311,9 +476,55 @@ import { cityGuidesData, type CityGuide } from '@/data/cityGuides';
     border-color: #e10600;
   }
 
+  /* Empty State */
+  .empty-state {
+    grid-column: 1 / -1;
+    background: #1e293b;
+    border: 1px dashed #475569;
+    padding: 4rem 2rem;
+    text-align: center;
+    border-radius: 12px;
+    color: #94a3b8;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .empty-state.hidden {
+    display: none !important;
+  }
+
+  .empty-state p {
+    margin: 0;
+    font-size: 1.05rem;
+  }
+
+  @media (max-width: 768px) {
+    .header-container {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .search-wrapper {
+      max-width: 100%;
+    }
+    
+    .publisher-filters {
+      overflow-x: auto;
+      padding-bottom: 0.5rem;
+      flex-wrap: nowrap;
+      -webkit-overflow-scrolling: touch;
+    }
+    
+    .filter-btn {
+      white-space: nowrap;
+    }
+  }
+
   @media (max-width: 600px) {
-    .hub-header h1 {
-      font-size: 2.4rem;
+    .gradient-title {
+      font-size: 2.5rem;
     }
   }
 </style>

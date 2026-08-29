@@ -24,7 +24,7 @@ const races = [
   { 
     id: 'us-gp', 
     name: "United States Grand Prix", 
-    round: 19, 
+    round: 18, 
     flagCode: "us", 
     dates: "Oct 23 - 25, 2026",
     isSprint: true,
@@ -38,6 +38,7 @@ const broadcasters = [
     id: 'uk-sky',
     country: 'United Kingdom', 
     flag: 'gb', 
+    region: 'Europe',
     network: 'Sky Sports F1', 
     app: 'NOW / Sky Go', 
     url: 'https://www.skysports.com/f1',
@@ -73,6 +74,7 @@ const broadcasters = [
     id: 'uk-c4',
     country: 'United Kingdom (Highlights)', 
     flag: 'gb', 
+    region: 'Europe',
     network: 'Channel 4', 
     app: 'Channel 4 Streaming', 
     url: 'https://www.channel4.com/programmes/formula-1',
@@ -94,6 +96,7 @@ const broadcasters = [
     id: 'us-appletv',
     country: 'United States', 
     flag: 'us', 
+    region: 'Americas',
     network: 'Apple TV', 
     app: 'Apple TV App', 
     url: 'https://tv.apple.com/us/channel/formula-1/tvs.sbd.241000',
@@ -129,6 +132,7 @@ const broadcasters = [
     id: 'ca-tsn',
     country: 'Canada', 
     flag: 'ca', 
+    region: 'Americas',
     network: 'TSN / RDS / Noovo', 
     app: 'TSN+', 
     url: 'https://www.tsn.ca/auto-racing/f1',
@@ -163,6 +167,7 @@ const broadcasters = [
     id: 'au-fox',
     country: 'Australia', 
     flag: 'au', 
+    region: 'Asia/Pacific',
     network: 'Fox Sports / Kayo', 
     app: 'Kayo Sports', 
     url: 'https://kayosports.com.au/',
@@ -197,6 +202,7 @@ const broadcasters = [
     id: 'nl-viaplay',
     country: 'Netherlands', 
     flag: 'nl', 
+    region: 'Europe',
     network: 'Viaplay', 
     app: 'Viaplay App', 
     url: 'https://viaplay.com/nl-nl/',
@@ -232,6 +238,7 @@ const broadcasters = [
     id: 'de-sky',
     country: 'Germany', 
     flag: 'de', 
+    region: 'Europe',
     network: 'Sky Deutschland / RTL', 
     app: 'WOW / Sky Go', 
     url: 'https://sport.sky.de/formel1',
@@ -266,6 +273,7 @@ const broadcasters = [
     id: 'it-sky',
     country: 'Italy', 
     flag: 'it', 
+    region: 'Europe',
     network: 'Sky Italia', 
     app: 'NOW / Sky Go', 
     url: 'https://sport.sky.it/formula-1',
@@ -300,6 +308,7 @@ const broadcasters = [
     id: 'es-dazn',
     country: 'Spain', 
     flag: 'es', 
+    region: 'Europe',
     network: 'DAZN', 
     app: 'DAZN App', 
     url: 'https://www.dazn.com/',
@@ -334,6 +343,7 @@ const broadcasters = [
     id: 'fr-canal',
     country: 'France', 
     flag: 'fr', 
+    region: 'Europe',
     network: 'Canal+', 
     app: 'MyCanal', 
     url: 'https://www.canalplus.com/sport/',
@@ -368,6 +378,7 @@ const broadcasters = [
     id: 'br-globo',
     country: 'Brazil', 
     flag: 'br', 
+    region: 'Americas',
     network: 'TV Globo', 
     app: 'Globoplay', 
     url: 'https://ge.globo.com/motor/formula-1/',
@@ -402,6 +413,7 @@ const broadcasters = [
     id: 'jp-fuji',
     country: 'Japan', 
     flag: 'jp', 
+    region: 'Asia/Pacific',
     network: 'Fuji TV', 
     app: 'Fuji TV Next', 
     url: 'https://otn.fujitv.co.jp/b_hp/923200029.html',
@@ -436,6 +448,7 @@ const broadcasters = [
     id: 'mena-bein',
     country: 'Middle East & MENA', 
     flag: 'ae', 
+    region: 'Middle East & Africa',
     network: 'beIN SPORTS', 
     app: 'TOD App', 
     url: 'https://www.tod.tv/',
@@ -470,6 +483,7 @@ const broadcasters = [
     id: 'nz-sky',
     country: 'New Zealand', 
     flag: 'nz', 
+    region: 'Asia/Pacific',
     network: 'Sky NZ', 
     app: 'Sky Sport Now', 
     url: 'https://www.skysportnow.co.nz/',
@@ -504,6 +518,7 @@ const broadcasters = [
     id: 'in-fancode',
     country: 'India', 
     flag: 'in', 
+    region: 'Asia/Pacific',
     network: 'FanCode / TATA Play', 
     app: 'FanCode App', 
     url: 'https://www.fancode.com/',
@@ -538,6 +553,7 @@ const broadcasters = [
     id: 'za-super',
     country: 'South Africa', 
     flag: 'za', 
+    region: 'Middle East & Africa',
     network: 'SuperSport', 
     app: 'DStv Stream', 
     url: 'https://supersport.com/motorsport',
@@ -569,37 +585,37 @@ const broadcasters = [
     }
   },
   // --- GLOBAL DIRECTORY ENTRIES (No local schedules attached) ---
-  { id: 'africa-ss', country: 'Africa', flag: 'za', network: 'SuperSport', app: '', url: '', type: 'Live', f1tvPro: true, timezone: 'Various', schedules: {} },
-  { id: 'al-digitalb', country: 'Albania', flag: 'al', network: 'DigitAlb', app: '', url: '', type: 'Live', f1tvPro: true, timezone: 'CET (UTC+1)', schedules: {} },
-  { id: 'am-fastsports', country: 'Armenia', flag: 'am', network: 'FastSports', app: '', url: '', type: 'Live', f1tvPro: true, timezone: 'AMT (UTC+4)', schedules: {} },
-  { id: 'at-servus', country: 'Austria', flag: 'at', network: 'Servus TV / ORF / Sky', app: 'ServusTV On', url: '', type: 'Live', f1tvPro: true, timezone: 'CEST (UTC+2)', schedules: {} },
-  { id: 'az-idman', country: 'Azerbaijan', flag: 'az', network: 'Idman Azerbaijan', app: '', url: '', type: 'Live', f1tvPro: true, timezone: 'AZT (UTC+4)', schedules: {} },
-  { id: 'be-rtbf', country: 'Belgium', flag: 'be', network: 'RTBF / Play Sports', app: 'RTBF Auvio', url: '', type: 'Live', f1tvPro: true, timezone: 'CEST (UTC+2)', schedules: {} },
-  { id: 'ba-arena', country: 'Bosnia', flag: 'ba', network: 'Arena Sport', app: '', url: '', type: 'Live', f1tvPro: true, timezone: 'CET (UTC+1)', schedules: {} },
-  { id: 'gr-ant1', country: 'Greece', flag: 'gr', network: 'ANT1 / ANT1+', app: 'ANT1+', url: '', type: 'Live', f1tvPro: true, timezone: 'EEST (UTC+3)', schedules: {} },
-  { id: 'hk-bein', country: 'Hong Kong', flag: 'hk', network: 'beIN SPORTS / Now Sports 1 & 2', app: 'beIN CONNECT', url: '', type: 'Live', f1tvPro: true, timezone: 'HKT (UTC+8)', schedules: {} },
-  { id: 'hu-m4', country: 'Hungary', flag: 'hu', network: 'M4 (MTVA Sports Channel)', app: '', url: '', type: 'Live', f1tvPro: true, timezone: 'CEST (UTC+2)', schedules: {} },
-  { id: 'is-viaplay', country: 'Iceland', flag: 'is', network: 'Viaplay', app: 'Viaplay App', url: '', type: 'Live', f1tvPro: true, timezone: 'GMT (UTC+0)', schedules: {} },
-  { id: 'id-bein', country: 'Indonesia', flag: 'id', network: 'beIN SPORTS', app: 'beIN CONNECT', url: '', type: 'Live', f1tvPro: true, timezone: 'WIB (UTC+7)', schedules: {} },
-  { id: 'in-flight', country: 'In-Ship & In-Flight', flag: 'un', network: 'Sport 24 / Sport 24 Extra', app: '', url: '', type: 'Live', f1tvPro: false, timezone: 'Various', schedules: {} },
-  { id: 'il-sport5', country: 'Israel', flag: 'il', network: 'Sport 5', app: '', url: '', type: 'Live', f1tvPro: true, timezone: 'IDT (UTC+3)', schedules: {} },
-  { id: 'xk-arena', country: 'Kosovo', flag: 'xk', network: 'Arena Sport', app: '', url: '', type: 'Live', f1tvPro: true, timezone: 'CET (UTC+1)', schedules: {} },
-  { id: 'no-viaplay', country: 'Norway', flag: 'no', network: 'V sport 1 / Viaplay', app: 'Viaplay App', url: '', type: 'Live', f1tvPro: true, timezone: 'CEST (UTC+2)', schedules: {} },
-  { id: 'pg-tvwan', country: 'Papua New Guinea & Pacific Islands', flag: 'pg', network: 'TVWAN Sports', app: '', url: '', type: 'Live', f1tvPro: false, timezone: 'Various', schedules: {} },
-  { id: 'ph-bein', country: 'Philippines', flag: 'ph', network: 'beIN SPORTS', app: 'beIN CONNECT', url: '', type: 'Live', f1tvPro: true, timezone: 'PHT (UTC+8)', schedules: {} },
-  { id: 'pl-eleven', country: 'Poland', flag: 'pl', network: 'Eleven Sports', app: '', url: '', type: 'Live', f1tvPro: true, timezone: 'CEST (UTC+2)', schedules: {} },
-  { id: 'pt-dazn', country: 'Portugal', flag: 'pt', network: 'DAZN', app: 'DAZN App', url: '', type: 'Live', f1tvPro: true, timezone: 'WEST (UTC+1)', schedules: {} },
-  { id: 'ro-antena', country: 'Romania', flag: 'ro', network: 'Antena', app: '', url: '', type: 'Live', f1tvPro: true, timezone: 'EEST (UTC+3)', schedules: {} },
-  { id: 'rs-arena', country: 'Serbia', flag: 'rs', network: 'Arena Sport', app: '', url: '', type: 'Live', f1tvPro: true, timezone: 'CET (UTC+1)', schedules: {} },
-  { id: 'sg-bein', country: 'Singapore', flag: 'sg', network: 'beIN SPORTS', app: 'beIN SPORTS CONNECT', url: '', type: 'Live', f1tvPro: false, timezone: 'SGT (UTC+8)', schedules: {} },
-  { id: 'si-kanal', country: 'Slovenia', flag: 'si', network: 'Kanal A / VOYO', app: 'VOYO', url: '', type: 'Live', f1tvPro: true, timezone: 'CEST (UTC+2)', schedules: {} },
-  { id: 'kr-coupang', country: 'South Korea', flag: 'kr', network: 'Coupang Play', app: 'Coupang Play', url: '', type: 'Live', f1tvPro: false, timezone: 'KST (UTC+9)', schedules: {} },
-  { id: 'se-viaplay', country: 'Sweden', flag: 'se', network: 'Viaplay', app: 'Viaplay App', url: '', type: 'Live', f1tvPro: true, timezone: 'CEST (UTC+2)', schedules: {} },
-  { id: 'ch-srf', country: 'Switzerland', flag: 'ch', network: 'SRF / RSI / RTS / Sky', app: '', url: '', type: 'Live', f1tvPro: true, timezone: 'CEST (UTC+2)', schedules: {} },
-  { id: 'th-bein', country: 'Thailand', flag: 'th', network: 'beIN SPORTS', app: 'beIN CONNECT', url: '', type: 'Live', f1tvPro: true, timezone: 'ICT (UTC+7)', schedules: {} },
-  { id: 'tr-bein', country: 'Turkey', flag: 'tr', network: 'beIN SPORTS', app: 'TOD App', url: '', type: 'Live', f1tvPro: true, timezone: 'TRT (UTC+3)', schedules: {} },
-  { id: 'ua-setanta', country: 'Ukraine', flag: 'ua', network: 'Setanta Ukraine', app: '', url: '', type: 'Live', f1tvPro: true, timezone: 'EEST (UTC+3)', schedules: {} },
-  { id: 'vn-tv360', country: 'Vietnam', flag: 'vn', network: 'TV360', app: 'TV360', url: '', type: 'Live', f1tvPro: true, timezone: 'ICT (UTC+7)', schedules: {} }
+  { id: 'africa-ss', country: 'Africa', flag: 'za', region: 'Middle East & Africa', network: 'SuperSport', app: '', url: '', type: 'Live', f1tvPro: true, timezone: 'Various', schedules: {} },
+  { id: 'al-digitalb', country: 'Albania', flag: 'al', region: 'Europe', network: 'DigitAlb', app: '', url: '', type: 'Live', f1tvPro: true, timezone: 'CET (UTC+1)', schedules: {} },
+  { id: 'am-fastsports', country: 'Armenia', flag: 'am', region: 'Asia/Pacific', network: 'FastSports', app: '', url: '', type: 'Live', f1tvPro: true, timezone: 'AMT (UTC+4)', schedules: {} },
+  { id: 'at-servus', country: 'Austria', flag: 'at', region: 'Europe', network: 'Servus TV / ORF / Sky', app: 'ServusTV On', url: '', type: 'Live', f1tvPro: true, timezone: 'CEST (UTC+2)', schedules: {} },
+  { id: 'az-idman', country: 'Azerbaijan', flag: 'az', region: 'Middle East & Africa', network: 'Idman Azerbaijan', app: '', url: '', type: 'Live', f1tvPro: true, timezone: 'AZT (UTC+4)', schedules: {} },
+  { id: 'be-rtbf', country: 'Belgium', flag: 'be', region: 'Europe', network: 'RTBF / Play Sports', app: 'RTBF Auvio', url: '', type: 'Live', f1tvPro: true, timezone: 'CEST (UTC+2)', schedules: {} },
+  { id: 'ba-arena', country: 'Bosnia', flag: 'ba', region: 'Europe', network: 'Arena Sport', app: '', url: '', type: 'Live', f1tvPro: true, timezone: 'CET (UTC+1)', schedules: {} },
+  { id: 'gr-ant1', country: 'Greece', flag: 'gr', region: 'Europe', network: 'ANT1 / ANT1+', app: 'ANT1+', url: '', type: 'Live', f1tvPro: true, timezone: 'EEST (UTC+3)', schedules: {} },
+  { id: 'hk-bein', country: 'Hong Kong', flag: 'hk', region: 'Asia/Pacific', network: 'beIN SPORTS / Now Sports 1 & 2', app: 'beIN CONNECT', url: '', type: 'Live', f1tvPro: true, timezone: 'HKT (UTC+8)', schedules: {} },
+  { id: 'hu-m4', country: 'Hungary', flag: 'hu', region: 'Europe', network: 'M4 (MTVA Sports Channel)', app: '', url: '', type: 'Live', f1tvPro: true, timezone: 'CEST (UTC+2)', schedules: {} },
+  { id: 'is-viaplay', country: 'Iceland', flag: 'is', region: 'Europe', network: 'Viaplay', app: 'Viaplay App', url: '', type: 'Live', f1tvPro: true, timezone: 'GMT (UTC+0)', schedules: {} },
+  { id: 'id-bein', country: 'Indonesia', flag: 'id', region: 'Asia/Pacific', network: 'beIN SPORTS', app: 'beIN CONNECT', url: '', type: 'Live', f1tvPro: true, timezone: 'WIB (UTC+7)', schedules: {} },
+  { id: 'in-flight', country: 'In-Ship & In-Flight', flag: 'un', region: 'Global', network: 'Sport 24 / Sport 24 Extra', app: '', url: '', type: 'Live', f1tvPro: false, timezone: 'Various', schedules: {} },
+  { id: 'il-sport5', country: 'Israel', flag: 'il', region: 'Middle East & Africa', network: 'Sport 5', app: '', url: '', type: 'Live', f1tvPro: true, timezone: 'IDT (UTC+3)', schedules: {} },
+  { id: 'xk-arena', country: 'Kosovo', flag: 'xk', region: 'Europe', network: 'Arena Sport', app: '', url: '', type: 'Live', f1tvPro: true, timezone: 'CET (UTC+1)', schedules: {} },
+  { id: 'no-viaplay', country: 'Norway', flag: 'no', region: 'Europe', network: 'V sport 1 / Viaplay', app: 'Viaplay App', url: '', type: 'Live', f1tvPro: true, timezone: 'CEST (UTC+2)', schedules: {} },
+  { id: 'pg-tvwan', country: 'Papua New Guinea & Pacific Islands', flag: 'pg', region: 'Asia/Pacific', network: 'TVWAN Sports', app: '', url: '', type: 'Live', f1tvPro: false, timezone: 'Various', schedules: {} },
+  { id: 'ph-bein', country: 'Philippines', flag: 'ph', region: 'Asia/Pacific', network: 'beIN SPORTS', app: 'beIN CONNECT', url: '', type: 'Live', f1tvPro: true, timezone: 'PHT (UTC+8)', schedules: {} },
+  { id: 'pl-eleven', country: 'Poland', flag: 'pl', region: 'Europe', network: 'Eleven Sports', app: '', url: '', type: 'Live', f1tvPro: true, timezone: 'CEST (UTC+2)', schedules: {} },
+  { id: 'pt-dazn', country: 'Portugal', flag: 'pt', region: 'Europe', network: 'DAZN', app: 'DAZN App', url: '', type: 'Live', f1tvPro: true, timezone: 'WEST (UTC+1)', schedules: {} },
+  { id: 'ro-antena', country: 'Romania', flag: 'ro', region: 'Europe', network: 'Antena', app: '', url: '', type: 'Live', f1tvPro: true, timezone: 'EEST (UTC+3)', schedules: {} },
+  { id: 'rs-arena', country: 'Serbia', flag: 'rs', region: 'Europe', network: 'Arena Sport', app: '', url: '', type: 'Live', f1tvPro: true, timezone: 'CET (UTC+1)', schedules: {} },
+  { id: 'sg-bein', country: 'Singapore', flag: 'sg', region: 'Asia/Pacific', network: 'beIN SPORTS', app: 'beIN SPORTS CONNECT', url: '', type: 'Live', f1tvPro: false, timezone: 'SGT (UTC+8)', schedules: {} },
+  { id: 'si-kanal', country: 'Slovenia', flag: 'si', region: 'Europe', network: 'Kanal A / VOYO', app: 'VOYO', url: '', type: 'Live', f1tvPro: true, timezone: 'CEST (UTC+2)', schedules: {} },
+  { id: 'kr-coupang', country: 'South Korea', flag: 'kr', region: 'Asia/Pacific', network: 'Coupang Play', app: 'Coupang Play', url: '', type: 'Live', f1tvPro: false, timezone: 'KST (UTC+9)', schedules: {} },
+  { id: 'se-viaplay', country: 'Sweden', flag: 'se', region: 'Europe', network: 'Viaplay', app: 'Viaplay App', url: '', type: 'Live', f1tvPro: true, timezone: 'CEST (UTC+2)', schedules: {} },
+  { id: 'ch-srf', country: 'Switzerland', flag: 'ch', region: 'Europe', network: 'SRF / RSI / RTS / Sky', app: '', url: '', type: 'Live', f1tvPro: true, timezone: 'CEST (UTC+2)', schedules: {} },
+  { id: 'th-bein', country: 'Thailand', flag: 'th', region: 'Asia/Pacific', network: 'beIN SPORTS', app: 'beIN CONNECT', url: '', type: 'Live', f1tvPro: true, timezone: 'ICT (UTC+7)', schedules: {} },
+  { id: 'tr-bein', country: 'Turkey', flag: 'tr', region: 'Europe', network: 'beIN SPORTS', app: 'TOD App', url: '', type: 'Live', f1tvPro: true, timezone: 'TRT (UTC+3)', schedules: {} },
+  { id: 'ua-setanta', country: 'Ukraine', flag: 'ua', region: 'Europe', network: 'Setanta Ukraine', app: '', url: '', type: 'Live', f1tvPro: true, timezone: 'EEST (UTC+3)', schedules: {} },
+  { id: 'vn-tv360', country: 'Vietnam', flag: 'vn', region: 'Asia/Pacific', network: 'TV360', app: 'TV360', url: '', type: 'Live', f1tvPro: true, timezone: 'ICT (UTC+7)', schedules: {} }
 ].sort((a, b) => a.country.localeCompare(b.country));
 
 // --- AUTO-SELECT NEXT UPCOMING RACE ---
@@ -621,12 +637,29 @@ for (const r of races) {
 const initialRace = races.find(r => r.id === activeRaceId) || races[0];
 const initialBroadcaster = broadcasters.find(b => b.id === 'uk-sky') || broadcasters[0];
 const initialSchedule = initialBroadcaster.schedules[initialRace.id as keyof typeof initialBroadcaster.schedules] || [];
+
+// --- SEO STRUCTURED DATA LOGIC ---
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": broadcasters.map(b => ({
+    "@type": "Question",
+    "name": `How to watch Formula 1 live in ${b.country}?`,
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": `In ${b.country}, you can watch Formula 1 on ${b.network}.${b.app ? ` You can also stream sessions live using the ${b.app} app.` : ''}${b.f1tvPro ? ' F1 TV Pro is also available in this region for live streaming.' : ''}`
+    }
+  }))
+};
 ---
 
 <Layout 
   title="Global TV Guide, Radio & Programme Start Times | My Grand Prix Hub"
   description="Live Formula 1 TV and Radio guide. Select your country and race to see local broadcast networks, radio streams, live session indicators, and Add-to-Calendar exports."
 >
+  <!-- SEO STRUCTURED DATA -->
+  <script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />
+
   <div class="tv-guide-wrapper">
     <main class="page-container">
       
@@ -802,6 +835,15 @@ const initialSchedule = initialBroadcaster.schedules[initialRace.id as keyof typ
             </div>
             <p class="search-desc">Click any country card below to view their specific broadcast schedule.</p>
             
+            <!-- NEW REGION FILTERS -->
+            <div class="region-filters" id="region-filters">
+              <button type="button" class="filter-btn is-active" data-region="all">All Regions</button>
+              <button type="button" class="filter-btn" data-region="Europe">Europe</button>
+              <button type="button" class="filter-btn" data-region="Americas">Americas</button>
+              <button type="button" class="filter-btn" data-region="Asia/Pacific">Asia & Pacific</button>
+              <button type="button" class="filter-btn" data-region="Middle East & Africa">Middle East & Africa</button>
+            </div>
+
             <div class="search-wrapper">
               <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
               <input 
@@ -821,6 +863,7 @@ const initialSchedule = initialBroadcaster.schedules[initialRace.id as keyof typ
                   class={`broadcaster-item ${index === 0 ? 'is-active' : ''}`} 
                   data-id={b.id}
                   data-country={b.country.toLowerCase()}
+                  data-region={b.region}
                 >
                   <div class="b-left">
                     <img src={`https://flagcdn.com/w40/${b.flag}.png`} alt={b.country} class="country-flag" />
@@ -867,7 +910,9 @@ const initialSchedule = initialBroadcaster.schedules[initialRace.id as keyof typ
 </Layout>
 
 <script>
-  document.addEventListener('DOMContentLoaded', () => {
+  let tvInterval: ReturnType<typeof setInterval> | undefined; // Track interval so it doesn't duplicate across navigations
+
+  const initTVGuide = () => {
     const dataElement = document.getElementById('broadcaster-data');
     if (!dataElement) return;
     const { races, broadcasters } = JSON.parse(dataElement.textContent || '{}');
@@ -894,10 +939,55 @@ const initialSchedule = initialBroadcaster.schedules[initialRace.id as keyof typ
     const radioProviderText = document.getElementById('radio-provider-text');
     const radioListenBtn = document.getElementById('radio-listen-btn') as HTMLAnchorElement;
 
-    // State - dynamically pull initial race from selector value
-    let currentRaceId = raceSelector.value;
-    let currentBroadcasterId = broadcasters[0].id;
-    let isLocalTime = false;
+    // Filter UI Elements
+    const filterBtns = document.querySelectorAll('.filter-btn');
+
+    // --- TIMEZONE DETECTION LOGIC ---
+    const getBroadcasterFromTimezone = () => {
+      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+      
+      if (tz.includes('New_York') || tz.includes('Chicago') || tz.includes('Denver') || tz.includes('Los_Angeles') || tz.includes('Phoenix') || tz.includes('Anchorage') || tz.includes('Honolulu')) return 'us-appletv';
+      if (tz.includes('Toronto') || tz.includes('Vancouver') || tz.includes('Montreal') || tz.includes('Edmonton') || tz.includes('Winnipeg') || tz.includes('Halifax')) return 'ca-tsn';
+      if (tz.startsWith('Australia/')) return 'au-fox';
+      if (tz.includes('Amsterdam')) return 'nl-viaplay';
+      if (tz.includes('Berlin')) return 'de-sky';
+      if (tz.includes('Rome')) return 'it-sky';
+      if (tz.includes('Madrid') || tz.includes('Canary')) return 'es-dazn';
+      if (tz.includes('Paris')) return 'fr-canal';
+      if (tz.includes('Sao_Paulo') || tz.includes('Fortaleza') || tz.includes('Manaus') || tz.includes('Cuiaba')) return 'br-globo';
+      if (tz.includes('Tokyo')) return 'jp-fuji';
+      if (tz.includes('Kolkata') || tz.includes('Calcutta')) return 'in-fancode';
+      if (tz.includes('Johannesburg')) return 'za-super';
+      if (tz.includes('Auckland')) return 'nz-sky';
+      if (tz.includes('Dubai') || tz.includes('Riyadh') || tz.includes('Qatar') || tz.includes('Bahrain')) return 'mena-bein';
+      
+      return 'uk-sky';
+    };
+
+    // Initial State
+    let currentRaceId = raceSelector?.value;
+    let currentBroadcasterId = getBroadcasterFromTimezone();
+    let isLocalTime = true; 
+    let currentRegion = 'all';
+
+    // --- AUTO-UPDATE UI TO MATCH DETECTED TIMEZONE ---
+    const localTimeToggle = document.getElementById('time-local') as HTMLInputElement;
+    if (localTimeToggle) localTimeToggle.checked = true;
+
+    broadcasterButtons.forEach((btn) => {
+      btn.classList.remove('is-active');
+      if (btn.getAttribute('data-id') === currentBroadcasterId) {
+        btn.classList.add('is-active');
+        
+        // Auto-scroll the list down to their detected country
+        setTimeout(() => {
+          const listContainer = document.getElementById('broadcaster-list');
+          if (listContainer) {
+            listContainer.scrollTop = (btn as HTMLElement).offsetTop - 20;
+          }
+        }, 100);
+      }
+    });
 
     // --- TIME CONVERSION HELPERS ---
     const parseTimeOffset = (onAirStr: string, startStr: string) => {
@@ -906,7 +996,7 @@ const initialSchedule = initialBroadcaster.schedules[initialRace.id as keyof typ
         return h * 60 + m;
       };
       let diff = parse(startStr) - parse(onAirStr);
-      if (diff < 0) diff += 24 * 60; // handle midnight crossing
+      if (diff < 0) diff += 24 * 60; 
       return diff;
     };
 
@@ -918,7 +1008,6 @@ const initialSchedule = initialBroadcaster.schedules[initialRace.id as keyof typ
       return date.toLocaleDateString([], { weekday: 'long' });
     };
 
-    // Add to Google Calendar URL Generator
     const generateGoogleCalendarUrl = (title: string, sessionName: string, startIso: string, endIso: string, location: string, network: string, f1tv: boolean) => {
       const formatTime = (iso: string) => iso.replace(/[-:]/g, '').split('.')[0] + 'Z';
       const eventTitle = encodeURIComponent(`F1: ${title} - ${sessionName}`);
@@ -929,7 +1018,7 @@ const initialSchedule = initialBroadcaster.schedules[initialRace.id as keyof typ
       return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${eventTitle}&dates=${dates}&details=${details}&location=${loc}`;
     };
 
-    // Calculate Real-Time Session Status (With Highlight Next Session Logic)
+    // Calculate Real-Time Session Status
     const updateSessionStatuses = () => {
       const now = new Date().getTime();
       const rows = document.querySelectorAll('.schedule-row');
@@ -955,7 +1044,7 @@ const initialSchedule = initialBroadcaster.schedules[initialRace.id as keyof typ
         } else if (now < start && !foundNext) {
           statusPill.className = 'live-status-pill pill-next';
           statusPill.textContent = '⏳ UP NEXT';
-          row.classList.add('is-next-session'); // Add the highlight class
+          row.classList.add('is-next-session'); 
           foundNext = true;
         } else {
           statusPill.className = 'live-status-pill pill-upcoming';
@@ -972,7 +1061,6 @@ const initialSchedule = initialBroadcaster.schedules[initialRace.id as keyof typ
       
       if (!selectedRace || !selectedBroadcaster) return;
 
-      // Update Broadcaster Headers
       if (scheduleTimezone) {
         if (isLocalTime) {
           const tzName = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -987,7 +1075,6 @@ const initialSchedule = initialBroadcaster.schedules[initialRace.id as keyof typ
       if (activeBroadcasterName) activeBroadcasterName.textContent = `${selectedBroadcaster.network} (${selectedBroadcaster.country})`;
       if (watchLiveBtn) watchLiveBtn.href = selectedBroadcaster.url;
 
-      // Update Radio Coverage Section
       if (selectedBroadcaster.radio) {
         if (radioProviderText) radioProviderText.innerHTML = `Listen live via <strong>${selectedBroadcaster.radio.name}</strong>`;
         if (radioListenBtn) radioListenBtn.href = selectedBroadcaster.radio.url;
@@ -996,12 +1083,10 @@ const initialSchedule = initialBroadcaster.schedules[initialRace.id as keyof typ
         if (radioListenBtn) radioListenBtn.href = 'https://www.formula1.com/en/f1-live.html';
       }
 
-      // Update F1 TV Pro Ad Visibility
       if (f1tvPromoCard) {
         f1tvPromoCard.style.display = selectedBroadcaster.f1tvPro ? 'flex' : 'none';
       }
 
-      // Update Race Headers
       if (scheduleFlag) scheduleFlag.src = `https://flagcdn.com/w40/${selectedRace.flagCode}.png`;
       if (scheduleRoundDates) scheduleRoundDates.innerHTML = `Round ${selectedRace.round} &bull; ${selectedRace.dates}`;
       if (scheduleRaceTitle) scheduleRaceTitle.textContent = selectedRace.name;
@@ -1010,7 +1095,6 @@ const initialSchedule = initialBroadcaster.schedules[initialRace.id as keyof typ
         sprintIndicatorBadge.classList.toggle('hidden', !selectedRace.isSprint);
       }
 
-      // Render Schedule Blocks
       const activeSchedule = selectedBroadcaster.schedules[currentRaceId] || [];
       
       if (scheduleListContainer) {
@@ -1020,13 +1104,11 @@ const initialSchedule = initialBroadcaster.schedules[initialRace.id as keyof typ
         }
 
         scheduleListContainer.innerHTML = activeSchedule.map((item: any) => {
-          
           let displayDay = item.day;
           let displayStart = item.start;
           let displayNetworkOnAir = item.networkOnAir;
           let displayF1tvOnAir = item.f1tvOnAir;
 
-          // Apply Local Time Conversion Math
           if (isLocalTime && item.utcStart) {
             const utcStartDate = new Date(item.utcStart);
             displayDay = getLocalDay(utcStartDate);
@@ -1095,7 +1177,6 @@ const initialSchedule = initialBroadcaster.schedules[initialRace.id as keyof typ
           `
         }).join('');
 
-        // Re-attach Calendar Click Listeners
         const calButtons = scheduleListContainer.querySelectorAll('.btn-cal');
         calButtons.forEach(btn => {
           btn.addEventListener('click', (e) => {
@@ -1108,8 +1189,33 @@ const initialSchedule = initialBroadcaster.schedules[initialRace.id as keyof typ
           });
         });
 
-        // Run Real-time Status Evaluation
         updateSessionStatuses();
+      }
+    };
+
+    // Client-Side Search and Filter Logic
+    const filterBroadcasters = () => {
+      const term = searchInput ? searchInput.value.toLowerCase().trim() : '';
+      let visibleCount = 0;
+
+      broadcasterButtons.forEach((item) => {
+        const el = item as HTMLElement;
+        const country = el.getAttribute('data-country') || '';
+        const region = el.getAttribute('data-region') || '';
+
+        const matchesSearch = country.includes(term);
+        const matchesRegion = currentRegion === 'all' || region === currentRegion;
+
+        if (matchesSearch && matchesRegion) {
+          el.style.display = 'flex';
+          visibleCount++;
+        } else {
+          el.style.display = 'none';
+        }
+      });
+
+      if (noResults) {
+        noResults.classList.toggle('hidden', visibleCount !== 0);
       }
     };
 
@@ -1138,33 +1244,46 @@ const initialSchedule = initialBroadcaster.schedules[initialRace.id as keyof typ
     });
 
     if (searchInput) {
-      searchInput.addEventListener('input', (e) => {
-        const term = (e.target as HTMLInputElement).value.toLowerCase().trim();
-        let visibleCount = 0;
-
-        broadcasterButtons.forEach((item) => {
-          const el = item as HTMLElement;
-          const country = el.getAttribute('data-country') || '';
-          if (country.includes(term)) {
-            el.style.display = 'flex';
-            visibleCount++;
-          } else {
-            el.style.display = 'none';
-          }
-        });
-
-        if (noResults) {
-          noResults.classList.toggle('hidden', visibleCount !== 0);
-        }
-      });
+      searchInput.addEventListener('input', filterBroadcasters);
     }
 
-    // Initialize Real-time status timer interval
-    setInterval(updateSessionStatuses, 60000);
+    filterBtns.forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        filterBtns.forEach(b => b.classList.remove('is-active'));
+        const target = e.target as HTMLElement;
+        target.classList.add('is-active');
+        currentRegion = target.getAttribute('data-region') || 'all';
+        filterBroadcasters();
+      });
+    });
+
+    // --- CHECK INCOMING CALENDAR LINKS ---
+    function checkUrlForRaceFilter() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const targetRound = urlParams.get('round');
+
+      if (targetRound && raceSelector) {
+        // Find race by round string
+        const targetRace = races.find((r: any) => String(r.round) === targetRound);
+        
+        if (targetRace) {
+          currentRaceId = targetRace.id;
+          raceSelector.value = targetRace.id;
+        }
+      }
+    }
+    checkUrlForRaceFilter(); // Run before render
+
+    if (tvInterval) clearInterval(tvInterval);
+    tvInterval = setInterval(updateSessionStatuses, 60000);
     
-    // Initial Render Call to set statuses and styling immediately
-    updateSessionStatuses();
-  });
+    // Final render
+    renderSchedule();
+  };
+
+  // Bind to BOTH standard load and Astro's View Transitions
+  document.addEventListener('DOMContentLoaded', initTVGuide);
+  document.addEventListener('astro:page-load', initTVGuide);
 </script>
 
 <style is:global>
@@ -1897,6 +2016,37 @@ const initialSchedule = initialBroadcaster.schedules[initialRace.id as keyof typ
     margin: 0 0 1.25rem 0;
   }
 
+  /* NEW REGION FILTERS */
+  .region-filters {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.25rem;
+    flex-wrap: wrap;
+  }
+
+  .filter-btn {
+    background: #0f172a;
+    border: 1px solid #283548;
+    color: #94a3b8;
+    padding: 0.35rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .filter-btn:hover {
+    background: #1e293b;
+    color: #cbd5e1;
+  }
+
+  .filter-btn.is-active {
+    background: rgba(56, 189, 248, 0.15);
+    border-color: #38bdf8;
+    color: #38bdf8;
+  }
+
   .search-wrapper {
     position: relative;
     width: 100%;
@@ -2138,7 +2288,7 @@ const initialSchedule = initialBroadcaster.schedules[initialRace.id as keyof typ
     .broadcaster-section {
       order: 1; 
       position: static;
-      height: 450px; /* Reduced from 600px so users can easily scroll past it to see the timings */
+      height: 450px; 
     }
 
     /* Pushes the Timings Schedule underneath */

@@ -1,8 +1,7 @@
 ---
 // src/pages/creators/index.astro
 import Layout from '../../layouts/Layout.astro';
-
-// --- DATA MODEL ---
+import { creatorsData } from '../../data/creators';
 
 // 1. "Play on Site" Media Hub (Top 3 Most Popular)
 const featuredMedia = [
@@ -23,250 +22,37 @@ const featuredMedia = [
   }
 ];
 
-// 2. Creators Directory
-const creators = [
-  {
-    name: "P1 with Matt & Tommy",
-    type: "Podcast",
-    categories: ["Podcast", "YouTube"],
-    host: "Matt Gallagher & Tommy Bellingham",
-    description: "Matt Gallagher and Tommy Bellingham bring their signature banter, race reactions, and F1 news breakdowns. Essential listening for the modern F1 fan.",
-    tags: ["Race Review", "News", "Humor"],
-    socials: { twitter: "https://twitter.com/p1mattandtommy", instagram: "https://instagram.com/p1mattandtommy" },
-    links: [
-      { name: "YouTube", url: "https://www.youtube.com/@p1withmattandtommy", style: "yt" },
-      { name: "Apple", url: "https://podcasts.apple.com/gb/podcast/p1-with-matt-and-tommy/id1670705840", style: "pod" },
-      { name: "Spotify", url: "https://open.spotify.com/show/1Kk7ZpG17fT63o5d9W7dKx", style: "spot" }
-    ]
-  },
-  {
-    name: "F1: Beyond The Grid",
-    type: "Podcast",
-    categories: ["Podcast"],
-    host: "Tom Clarkson",
-    description: "The official long-form interview podcast. Tom Clarkson sits down with current drivers, legends of the sport, and team bosses for revealing, hour-long conversations.",
-    tags: ["Interviews", "History", "Official"],
-    socials: { twitter: "https://twitter.com/f1", instagram: "https://instagram.com/f1" },
-    links: [
-      { name: "Apple", url: "https://podcasts.apple.com/gb/podcast/f1-beyond-the-grid/id1405972616", style: "pod" },
-      { name: "Spotify", url: "https://open.spotify.com/show/44YvzFFLLAcrBrcemO0DoZ", style: "spot" }
-    ]
-  },
-  {
-    name: "Sky Sports F1 Podcast",
-    type: "Podcast",
-    categories: ["Podcast"],
-    host: "Sky F1 Team",
-    description: "The official podcast from the UK's F1 broadcaster. Features Ted Kravitz, Crofty, Natalie Pinkham and the rest of the team debating the hottest topics in the paddock.",
-    tags: ["Debate", "Expert", "Broadcaster"],
-    socials: { twitter: "https://twitter.com/skysportsf1", instagram: "https://instagram.com/skysportsf1" },
-    links: [
-      { name: "Apple", url: "https://podcasts.apple.com/gb/podcast/sky-sports-f1-podcast/id1675204481", style: "pod" },
-      { name: "Spotify", url: "https://open.spotify.com/show/4FfH0E88M2hFUXi0Z6C8jH", style: "spot" }
-    ]
-  },
-  {
-    name: "Up To Speed",
-    type: "Podcast",
-    categories: ["Podcast", "YouTube"],
-    host: "Will Buxton, Naomi Schiff, David Coulthard & Jolie Sharpe",
-    description: "Step inside sport's greatest soap opera. This powerhouse lineup offers razor-sharp reaction, behind-the-scenes insight, and blockbuster interviews, providing an unfiltered look at paddock gossip.",
-    tags: ["Expert", "News", "Paddock"],
-    socials: { instagram: "https://instagram.com/uptospeedshow" },
-    links: [
-      { name: "YouTube", url: "https://www.youtube.com/@uptospeedshow", style: "yt" },
-      { name: "Apple", url: "https://podcasts.apple.com/gb/podcast/up-to-speed/id1875990109", style: "pod" },
-      { name: "Global", url: "https://global.com/podcast/up-to-speed/", style: "default" }
-    ]
-  },
-  {
-    name: "The Fast and The Curious",
-    type: "Podcast",
-    categories: ["Podcast", "YouTube"],
-    host: "Greg James, Betty Glover & Christian Hewgill",
-    description: "A highly entertaining, fan-first podcast that takes you inside the fascinating world of Formula 1. Less about deep technical analysis and more about the human side of the sport, bringing out driver personalities with brilliant humor.",
-    tags: ["Entertainment", "Interviews", "Humor"],
-    socials: { twitter: "https://twitter.com/fastcuriouspod", instagram: "https://instagram.com/fastcuriouspod" },
-    links: [
-      { name: "YouTube", url: "https://www.youtube.com/@fastcuriouspod", style: "yt" },
-      { name: "Apple", url: "https://podcasts.apple.com/gb/podcast/the-fast-and-the-curious/id1672650209", style: "pod" },
-      { name: "Spotify", url: "https://open.spotify.com/show/2vF69zJOhZz4pU3vjTqL5B", style: "spot" }
-    ]
-  },
-  {
-    name: "The Red Flags Podcast",
-    type: "Podcast",
-    categories: ["Podcast", "YouTube"],
-    host: "Brian Muller & Matt Elisofon",
-    description: "A uniquely American, highly comedic take on F1. Brian and Matt dive into the drama, the memes, and the absurdity of the sport. Perfect for fans who love the Drive to Survive reality-TV aspect of F1.",
-    tags: ["Comedy", "Culture", "Entertainment"],
-    socials: { twitter: "https://twitter.com/TheRedFlagsPod", instagram: "https://instagram.com/theredflagspod" },
-    links: [
-      { name: "YouTube", url: "https://www.youtube.com/@theredflagspod", style: "yt" },
-      { name: "Apple", url: "https://podcasts.apple.com/us/podcast/the-red-flags-podcast/id1588691515", style: "pod" },
-      { name: "Spotify", url: "https://open.spotify.com/show/065Z62Y137J6Yg7NnOq2kF", style: "spot" }
-    ]
-  },
-  {
-    name: "Pitstop",
-    type: "Podcast",
-    categories: ["Podcast", "YouTube"],
-    host: "Jake Boys & Fabio Bocca",
-    description: "Bringing incredible energy and a casual 'chat with your mates' vibe. Jake and Fabio have taken the F1 world by storm, scoring interviews with team principals and drivers while keeping things incredibly fun and accessible.",
-    tags: ["Accessible", "Culture", "Fun"],
-    socials: { twitter: "https://twitter.com/pitstop", instagram: "https://instagram.com/pitstop" },
-    links: [
-      { name: "YouTube", url: "https://www.youtube.com/@PitstopPodcast", style: "yt" },
-      { name: "Apple", url: "https://podcasts.apple.com/gb/podcast/pitstop/id1608933256", style: "pod" },
-      { name: "Spotify", url: "https://open.spotify.com/show/3u48UqjHnS1gV7hAxyyG8N", style: "spot" }
-    ]
-  },
-  {
-    name: "F1 Nation",
-    type: "Podcast",
-    categories: ["Podcast"],
-    host: "Tom Clarkson & Guests",
-    description: "The official race preview and review podcast from the paddock. Features exclusive interviews and insights straight from the drivers and team principals post-race.",
-    tags: ["Race Review", "News", "Official"],
-    socials: { twitter: "https://twitter.com/f1", instagram: "https://instagram.com/f1" },
-    links: [
-      { name: "Apple", url: "https://podcasts.apple.com/gb/podcast/f1-nation/id1510488661", style: "pod" },
-      { name: "Spotify", url: "https://open.spotify.com/show/5J0D7hF4hR3b3ZzB3yX0nO", style: "spot" }
-    ]
-  },
-  {
-    name: "Shift+F1",
-    type: "Podcast",
-    categories: ["Podcast"],
-    host: "Drew, Rob & Danny",
-    description: "A fantastic, accessible weekly podcast about Formula 1. Great for both seasoned veterans and new fans (check out their Preseason Primer).",
-    tags: ["Accessible", "News", "Humor"],
-    socials: { twitter: "https://twitter.com/shiftf1podcast" },
-    links: [
-      { name: "Apple", url: "https://podcasts.apple.com/us/podcast/shift-f1/id1209355152", style: "pod" },
-      { name: "Spotify", url: "https://open.spotify.com/show/4zM4YXXNtc9wA4P2a3j0b1", style: "spot" }
-    ]
-  },
-  {
-    name: "BBC F1: Chequered Flag",
-    type: "Podcast",
-    categories: ["Podcast"],
-    host: "BBC Radio 5 Live",
-    description: "Expert analysis, exclusive interviews, and immediate post-race reactions from the BBC commentary team.",
-    tags: ["Analysis", "Race Review", "Expert"],
-    socials: { twitter: "https://twitter.com/bbc5live" },
-    links: [
-      { name: "BBC Sounds", url: "https://www.bbc.co.uk/programmes/p02nrsjn/episodes/downloads", style: "default" },
-      { name: "Apple", url: "https://podcasts.apple.com/gb/podcast/f1-chequered-flag/id1393699341", style: "pod" }
-    ]
-  },
-  {
-    name: "Missed Apex Podcast",
-    type: "Podcast",
-    categories: ["Podcast", "YouTube"],
-    host: "Spanners & Trumpets",
-    description: "An independent F1 podcast bringing paddock-level analysis with a fun, slightly irreverent shed-based atmosphere. Features ex-F1 personnel regularly.",
-    tags: ["Independent", "Debate", "Fun"],
-    socials: { twitter: "https://twitter.com/MissedApexF1", instagram: "https://instagram.com/missedapexf1" },
-    links: [
-      { name: "YouTube", url: "https://www.youtube.com/@missedapexf1", style: "yt" },
-      { name: "Apple", url: "https://podcasts.apple.com/us/podcast/missed-apex-f1-podcast/id1156681023", style: "pod" },
-      { name: "Spotify", url: "https://open.spotify.com/show/4zM4YXXNtc9wA4P2a3j0b1", style: "spot" }
-    ]
-  },
-  {
-    name: "The Race",
-    type: "YouTube",
-    categories: ["YouTube", "Podcast"],
-    host: "The Race Media",
-    description: "In-depth technical analysis, historical deep-dives, and breaking news explained clearly with excellent 3D animations and paddock sources.",
-    tags: ["Technical", "News", "Analysis"],
-    socials: { twitter: "https://twitter.com/wearetherace", instagram: "https://instagram.com/wearetherace" },
-    links: [
-      { name: "YouTube Channel", url: "https://www.youtube.com/@TheRace", style: "yt" },
-      { name: "Podcasts", url: "https://the-race.com/podcasts/", style: "pod" }
-    ]
-  },
-  {
-    name: "Driver61",
-    type: "YouTube",
-    categories: ["YouTube"],
-    host: "Scott Mansell",
-    description: "A former professional racing driver breaks down driving techniques, engineering secrets, and track-specific challenges in Formula 1.",
-    tags: ["Engineering", "Driving Technique", "Educational"],
-    socials: { twitter: "https://twitter.com/driver61", instagram: "https://instagram.com/officialdriver61" },
-    links: [
-      { name: "YouTube Channel", url: "https://www.youtube.com/@Driver61", style: "yt" }
-    ]
-  },
-  {
-    name: "Tommo",
-    type: "YouTube",
-    categories: ["YouTube"],
-    host: "Tommo",
-    description: "High-quality video essays, race reviews, and liveries rankings. Tommo blends great production value with passionate F1 fandom.",
-    tags: ["Video Essays", "Culture", "Design"],
-    socials: { twitter: "https://twitter.com/TwommoF1", instagram: "https://instagram.com/twommof1" },
-    links: [
-      { name: "YouTube Channel", url: "https://www.youtube.com/@TommoF1", style: "yt" }
-    ]
-  },
-  {
-    name: "WTF1",
-    type: "YouTube",
-    categories: ["YouTube", "Podcast"],
-    host: "WTF1 Team",
-    description: "Internet best reactions, memes, driver tier lists, and news. Heavily focused on the social and entertainment side of Formula 1.",
-    tags: ["Entertainment", "Memes", "Culture"],
-    socials: { twitter: "https://twitter.com/wtf1official", instagram: "https://instagram.com/wtf1official" },
-    links: [
-      { name: "YouTube Channel", url: "https://www.youtube.com/@WTF1", style: "yt" },
-      { name: "Podcasts", url: "https://wtf1.com/podcast/", style: "pod" }
-    ]
-  },
-  {
-    name: "Live to Dash",
-    type: "YouTube",
-    categories: ["YouTube"],
-    host: "Live to Dash",
-    description: "Follow the ultimate F1 travel vloggers as they travel around the world attending Grand Prix weekends. Get an incredible fan-perspective of the atmosphere, trackside experiences, and global F1 culture.",
-    tags: ["Travel", "Vlogs", "Trackside"],
-    socials: { twitter: "https://twitter.com/livetodash", instagram: "https://instagram.com/livetodash" },
-    links: [
-      { name: "YouTube Channel", url: "https://www.youtube.com/@LivetoDash", style: "yt" }
-    ]
-  },
-  {
-    name: "Kym Illman",
-    type: "YouTube",
-    categories: ["YouTube"],
-    host: "Kym Illman",
-    description: "Renowned F1 photographer Kym Illman takes you behind the scenes of the paddock. Get exclusive looks at the drivers, VIPs, and the fascinating world of F1 photography.",
-    tags: ["Photography", "Behind the Scenes", "Paddock"],
-    socials: { instagram: "https://instagram.com/kymillman" },
-    links: [
-      { name: "YouTube Channel", url: "https://www.youtube.com/@KymIllman", style: "yt" }
-    ]
-  },
-  {
-    name: "Josh Revell",
-    type: "YouTube",
-    categories: ["YouTube"],
-    host: "Josh Revell",
-    description: "Known for his witty commentary and highly entertaining video essays. Josh covers F1 history, driver profiles, and motorsport controversies with a unique comedic flair.",
-    tags: ["Comedy", "Video Essays", "History"],
-    socials: { twitter: "https://twitter.com/thejoshrevell" },
-    links: [
-      { name: "YouTube Channel", url: "https://www.youtube.com/@TheJoshRevell", style: "yt" }
-    ]
-  }
-].sort((a, b) => a.name.localeCompare(b.name));
+// Extract unique categories for filter pills dynamically
+const allCategories = new Set<string>();
+creatorsData.forEach(c => c.categories.forEach(cat => allCategories.add(cat)));
+const filterCategories = ['All', ...Array.from(allCategories)];
+
+// SEO ItemList Schema
+const creatorsSchema = {
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  "name": "Top Formula 1 Creators, Podcasts & YouTube Channels",
+  "description": "Directory of the best Formula 1 podcasts, YouTube channels, paddock journalists, and engineering analysts.",
+  "itemListElement": creatorsData.map((creator, index) => ({
+    "@type": "ListItem",
+    "position": index + 1,
+    "item": {
+      "@type": "CreativeWorkSeries",
+      "name": creator.name,
+      "description": creator.description,
+      "genre": creator.type
+    }
+  }))
+};
 ---
 
 <Layout 
   title="F1 Content Creators & Podcasts Directory | My Grand Prix Hub"
   description="Discover the best Formula 1 YouTube channels, technical analysis videos, and podcasts. Listen and watch directly on site."
 >
+  <!-- SEO STRUCTURED DATA -->
+  <script type="application/ld+json" set:html={JSON.stringify(creatorsSchema)} />
+
   <main class="page-container">
     
     <!-- HEADER -->
@@ -331,29 +117,33 @@ const creators = [
 
           <!-- PILL-SHAPED FILTER TOGGLE -->
           <div class="filter-group" id="creator-filters">
-            <button class="filter-btn is-active" data-filter="All">All</button>
-            <button class="filter-btn" data-filter="Podcast">Podcasts</button>
-            <button class="filter-btn" data-filter="YouTube">YouTube</button>
+            {filterCategories.map((cat, i) => (
+              <button class={`filter-btn ${i === 0 ? 'is-active' : ''}`} data-filter={cat}>{cat}</button>
+            ))}
           </div>
         </div>
       </div>
 
       <div class="creators-grid" id="creators-grid">
-        {creators.map((creator) => (
+        {creatorsData.map((creator) => (
           <div 
             class={`creator-card border-accent-${creator.type === 'YouTube' ? 'yt' : 'pod'}`} 
             data-categories={creator.categories.join(',')}
             data-search={creator.name.toLowerCase() + ' ' + creator.tags.join(' ').toLowerCase() + ' ' + creator.description.toLowerCase()}
           >
             
-            <div class="card-top">
-              <span class={`media-icon ${creator.type === 'YouTube' ? 'icon-yt' : 'icon-pod'}`}>
-                {creator.type === 'YouTube' ? (
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33 2.78 2.78 0 0 0 1.94 2c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.33 29 29 0 0 0-.46-5.33z"/><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02" fill="#0f172a"/></svg>
-                ) : (
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
-                )}
-              </span>
+              <div class="card-top">
+              {creator.imageUrl ? (
+                <img src={creator.imageUrl} alt={`${creator.name} Cover`} class="creator-cover-img" />
+              ) : (
+                <span class={`media-icon ${creator.type === 'YouTube' ? 'icon-yt' : 'icon-pod'}`}>
+                  {creator.type === 'YouTube' ? (
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33 2.78 2.78 0 0 0 1.94 2c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.33 29 29 0 0 0-.46-5.33z"/><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02" fill="#0f172a"/></svg>
+                  ) : (
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
+                  )}
+                </span>
+              )}
               <div class="card-top-text">
                 <h3 class="card-title">{creator.name}</h3>
                 <span class="platform-text">{creator.categories.join(' & ')}</span>
@@ -689,6 +479,7 @@ const creators = [
   }
   
   .creator-card { 
+    position: relative;
     background: #1e293b; 
     border: 1px solid #334155; 
     border-radius: 12px; 
@@ -698,7 +489,6 @@ const creators = [
     box-shadow: 0 4px 6px rgba(0,0,0,0.1);
   }
 
-  /* Dynamic Card Top Accent Borders */
   .border-accent-yt { border-top: 4px solid #e10600; }
   .border-accent-pod { border-top: 4px solid #8b5cf6; }
 
@@ -721,8 +511,8 @@ const creators = [
     display: flex; 
     align-items: center; 
     justify-content: center; 
-    width: 36px; 
-    height: 36px; 
+    width: 44px; 
+    height: 44px; 
     border-radius: 8px; 
     flex-shrink: 0; 
     box-shadow: 0 2px 8px rgba(0,0,0,0.3);
@@ -738,7 +528,7 @@ const creators = [
   }
   
   .card-title { 
-    font-size: 1.35rem; 
+    font-size: 1.25rem; 
     font-weight: 800; 
     color: #ffffff; 
     margin: 0; 
@@ -794,6 +584,16 @@ const creators = [
     border-radius: 4px; 
   }
 
+  .creator-cover-img {
+    width: 46px;
+    height: 46px;
+    border-radius: 8px;
+    object-fit: cover;
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    border: 1px solid #334155;
+  }
+
   /* Footer Links & Socials */
   .card-footer { 
     padding: 1.25rem 1.5rem; 
@@ -810,17 +610,23 @@ const creators = [
     gap: 0.75rem; 
     flex-wrap: wrap; 
     width: 100%;
+    align-items: stretch; /* Forces all buttons to span to the same height */
   }
   
   .btn-link { 
-    padding: 0.6rem 1rem; 
+    padding: 0.6rem 0.5rem; 
     border-radius: 6px; 
     font-size: 0.85rem; 
     font-weight: 800; 
     text-decoration: none; 
     flex: 1; 
+    display: flex; 
+    align-items: center;
+    justify-content: center;
     text-align: center; 
     transition: all 0.2s ease; 
+    min-height: 44px;
+    line-height: 1.2;
   }
   
   .btn-default { background: #334155; color: #ffffff; }
@@ -960,6 +766,6 @@ const creators = [
       justify-content: center;
       margin-left: 0;
       margin-top: 0.5rem;
-    }
+    } 
   }
 </style>

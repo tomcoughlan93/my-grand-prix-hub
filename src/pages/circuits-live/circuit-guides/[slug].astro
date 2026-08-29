@@ -55,12 +55,48 @@ if (seasonData && seasonData.drivers) {
     };
   }
 }
+
+// --- SEO STRUCTURED DATA LOGIC ---
+// Calculate a rough end date (Sunday) based on the first session (Friday)
+const endDate = new Date(new Date(firstSessionDate).getTime() + (2 * 24 * 60 * 60 * 1000)).toISOString();
+
+const eventSchema = {
+  "@context": "https://schema.org",
+  "@type": "SportsEvent",
+  "name": raceName,
+  "description": description,
+  "startDate": firstSessionDate,
+  "endDate": endDate,
+  "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
+  "eventStatus": "https://schema.org/EventScheduled",
+  "location": {
+    "@type": "Place",
+    "name": circuitName,
+    "address": {
+      "@type": "PostalAddress",
+      "addressLocality": location.split(',')[0].trim(),
+      "addressCountry": location.split(',')[1] ? location.split(',')[1].trim() : ""
+    },
+    "geo": {
+      "@type": "GeoCoordinates",
+      "latitude": lat,
+      "longitude": lon
+    }
+  },
+  "organizer": {
+    "@type": "Organization",
+    "name": "Formula 1",
+    "url": "https://www.formula1.com"
+  }
+};
 ---
 
 <Layout 
   title={`${raceName} Circuit Guide | My Grand Prix Hub`}
   description={`Explore the ${circuitName} 2026 layout, weather, grandstands, tyres, and schedule.`}
 >
+  <script type="application/ld+json" set:html={JSON.stringify(eventSchema)} />
+
   <main class="page-container circuit-guide">
     
     <header class="guide-header">
@@ -142,7 +178,6 @@ if (seasonData && seasonData.drivers) {
 
     <div class="guide-grid">
       
-      <!-- LEFT COLUMN -->
       <section class="map-section">
         <div class="info-card map-card">
           <div class="map-header">
@@ -194,7 +229,6 @@ if (seasonData && seasonData.drivers) {
           </div>
         </div>
 
-        <!-- MOVED: Cross-Linking Hub to the bottom of the left column -->
         <div class="cross-link-card">
           <span class="widget-badge">Plan Your Trip</span>
           <h3>Heading to {location.split(',')[0]}?</h3>
@@ -207,7 +241,6 @@ if (seasonData && seasonData.drivers) {
 
       </section>
 
-      <!-- RIGHT COLUMN -->
       <section class="info-section">
         
         <div class="info-card overview-card">

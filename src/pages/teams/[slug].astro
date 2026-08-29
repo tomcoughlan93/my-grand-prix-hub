@@ -144,14 +144,14 @@ let d2Ahead = 0;
 let d1Best = 99;
 let d2Best = 99;
 
-const d1Season: (string | number)[] = Array(22).fill('-');
-const d2Season: (string | number)[] = Array(22).fill('-');
+const d1Season: (string | number)[] = Array(23).fill('-');
+const d2Season: (string | number)[] = Array(23).fill('-');
 
 if (seasonData && seasonData.drivers) {
   const d1Row: any = seasonData.drivers.find((d: any) => d.code === team.d1);
   const d2Row: any = seasonData.drivers.find((d: any) => d.code === team.d2);
 
-  for (let i = 1; i <= 22; i++) {
+  for (let i = 1; i <= 23; i++) {
     const rKey = `r${i}`;
     let val1 = (d1Row && d1Row[rKey] !== undefined) ? String(d1Row[rKey]).trim().toUpperCase() : '-';
     let val2 = (d2Row && d2Row[rKey] !== undefined) ? String(d2Row[rKey]).trim().toUpperCase() : '-';
@@ -193,14 +193,14 @@ function getFormBadgeClass(result: number | string): string {
 }
 
 const ROUND_DATA = [
-  { round: 1, name: 'BHR', flag: 'bh' }, { round: 2, name: 'SAU', flag: 'sa' }, { round: 3, name: 'AUS', flag: 'au' },
-  { round: 4, name: 'JPN', flag: 'jp' }, { round: 5, name: 'CHN', flag: 'cn' }, { round: 6, name: 'MIA', flag: 'us' },
-  { round: 7, name: 'EMI', flag: 'it' }, { round: 8, name: 'MON', flag: 'mc' }, { round: 9, name: 'CAN', flag: 'ca' },
-  { round: 10, name: 'ESP', flag: 'es' }, { round: 11, name: 'AUT', flag: 'at' }, { round: 12, name: 'GBR', flag: 'gb' },
-  { round: 13, name: 'HUN', flag: 'hu' }, { round: 14, name: 'BEL', flag: 'be' }, { round: 15, name: 'NED', flag: 'nl' },
-  { round: 16, name: 'ITA', flag: 'it' }, { round: 17, name: 'AZE', flag: 'az' }, { round: 18, name: 'SIN', flag: 'sg' },
-  { round: 19, name: 'USA', flag: 'us' }, { round: 20, name: 'MEX', flag: 'mx' }, { round: 21, name: 'SAP', flag: 'br' },
-  { round: 22, name: 'LVG', flag: 'us' }
+  { round: 1, name: 'AUS', flag: 'au' }, { round: 2, name: 'CHN', flag: 'cn' }, { round: 3, name: 'JPN', flag: 'jp' },
+  { round: 4, name: 'MIA', flag: 'us' }, { round: 5, name: 'CAN', flag: 'ca' }, { round: 6, name: 'MON', flag: 'mc' },
+  { round: 7, name: 'ESP', flag: 'es' }, { round: 8, name: 'AUT', flag: 'at' }, { round: 9, name: 'GBR', flag: 'gb' },
+  { round: 10, name: 'BEL', flag: 'be' }, { round: 11, name: 'HUN', flag: 'hu' }, { round: 12, name: 'NED', flag: 'nl' },
+  { round: 13, name: 'ITA', flag: 'it' }, { round: 14, name: 'MAD', flag: 'es' }, { round: 15, name: 'AZE', flag: 'az' },
+  { round: 16, name: 'BHR', flag: 'bh' }, { round: 17, name: 'SIN', flag: 'sg' }, { round: 18, name: 'USA', flag: 'us' },
+  { round: 19, name: 'MEX', flag: 'mx' }, { round: 20, name: 'SAP', flag: 'br' }, { round: 21, name: 'LVG', flag: 'us' },
+  { round: 22, name: 'QAT', flag: 'qa' }, { round: 23, name: 'ABU', flag: 'ae' }
 ];
 
 // --- 4. FETCH & FILTER RSS NEWS ---

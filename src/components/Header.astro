@@ -1,15 +1,129 @@
 ---
 // src/components/Header.astro
+import seasonData from '@/content/results/season-2026.json';
+
+interface Podium {
+  first: string;
+  second: string;
+  third: string;
+}
+
+interface SessionInfo {
+  fp1: string;
+  fp2: string;
+  fp3: string;
+  quali: string;
+  race: string;
+}
+
+interface Race {
+  season: string;
+  round: string;
+  raceName: string;
+  sessions: SessionInfo;
+  isSprint?: boolean;
+  podium?: Podium;
+}
+
+const CALENDAR: Race[] = [
+  { season: "2026", round: "1", raceName: "Australian Grand Prix", sessions: { fp1: "2026-03-06T01:30:00Z", fp2: "2026-03-06T05:00:00Z", fp3: "2026-03-07T01:30:00Z", quali: "2026-03-07T05:00:00Z", race: "2026-03-08T04:00:00Z" } },
+  { season: "2026", round: "2", raceName: "Chinese Grand Prix", isSprint: true, sessions: { fp1: "2026-03-13T03:30:00Z", fp2: "2026-03-13T07:00:00Z", fp3: "2026-03-14T03:30:00Z", quali: "2026-03-14T07:00:00Z", race: "2026-03-15T07:00:00Z" } },
+  { season: "2026", round: "3", raceName: "Japanese Grand Prix", sessions: { fp1: "2026-03-27T02:30:00Z", fp2: "2026-03-27T06:00:00Z", fp3: "2026-03-28T02:30:00Z", quali: "2026-03-28T06:00:00Z", race: "2026-03-29T05:00:00Z" } },
+  { season: "2026", round: "4", raceName: "Miami Grand Prix", isSprint: true, sessions: { fp1: "2026-05-01T16:30:00Z", fp2: "2026-05-01T20:00:00Z", fp3: "2026-05-02T16:30:00Z", quali: "2026-05-02T20:00:00Z", race: "2026-05-03T20:00:00Z" } },
+  { season: "2026", round: "5", raceName: "Canadian Grand Prix", sessions: { fp1: "2026-05-22T17:30:00Z", fp2: "2026-05-22T21:00:00Z", fp3: "2026-05-23T16:30:00Z", quali: "2026-05-23T20:00:00Z", race: "2026-05-24T18:00:00Z" } },
+  { season: "2026", round: "6", raceName: "Monaco Grand Prix", sessions: { fp1: "2026-06-05T11:30:00Z", fp2: "2026-06-05T15:00:00Z", fp3: "2026-06-06T10:30:00Z", quali: "2026-06-06T14:00:00Z", race: "2026-06-07T13:00:00Z" } },
+  { season: "2026", round: "7", raceName: "Spanish Grand Prix", sessions: { fp1: "2026-06-12T11:30:00Z", fp2: "2026-06-12T15:00:00Z", fp3: "2026-06-13T10:30:00Z", quali: "2026-06-13T14:00:00Z", race: "2026-06-14T13:00:00Z" } },
+  { season: "2026", round: "8", raceName: "Austrian Grand Prix", isSprint: true, sessions: { fp1: "2026-06-26T11:30:00Z", fp2: "2026-06-26T15:00:00Z", fp3: "2026-06-27T10:30:00Z", quali: "2026-06-27T14:00:00Z", race: "2026-06-28T13:00:00Z" } },
+  { season: "2026", round: "9", raceName: "British Grand Prix", sessions: { fp1: "2026-07-03T11:30:00Z", fp2: "2026-07-03T15:00:00Z", fp3: "2026-07-04T10:30:00Z", quali: "2026-07-04T14:00:00Z", race: "2026-07-05T14:00:00Z" } },
+  { season: "2026", round: "10", raceName: "Belgian Grand Prix", sessions: { fp1: "2026-07-17T11:30:00Z", fp2: "2026-07-17T15:00:00Z", fp3: "2026-07-18T10:30:00Z", quali: "2026-07-18T14:00:00Z", race: "2026-07-19T13:00:00Z" } },
+  { season: "2026", round: "11", raceName: "Hungarian Grand Prix", sessions: { fp1: "2026-07-24T11:30:00Z", fp2: "2026-07-24T15:00:00Z", fp3: "2026-07-25T10:30:00Z", quali: "2026-07-25T14:00:00Z", race: "2026-07-26T13:00:00Z" } },
+  { season: "2026", round: "12", raceName: "Dutch Grand Prix", isSprint: true, sessions: { fp1: "2026-08-21T12:30:00+02:00", fp2: "2026-08-21T16:00:00+02:00", fp3: "2026-08-22T11:30:00+02:00", quali: "2026-08-22T16:00:00+02:00", race: "2026-08-23T15:00:00+02:00" } },
+  { season: "2026", round: "13", raceName: "Italian Grand Prix", sessions: { fp1: "2026-09-04T13:30:00+02:00", fp2: "2026-09-04T17:00:00+02:00", fp3: "2026-09-05T12:30:00+02:00", quali: "2026-09-05T16:00:00+02:00", race: "2026-09-06T15:00:00+02:00" } },
+  { season: "2026", round: "14", raceName: "Madrid Grand Prix", sessions: { fp1: "2026-09-11T13:30:00+02:00", fp2: "2026-09-11T17:00:00+02:00", fp3: "2026-09-12T12:30:00+02:00", quali: "2026-09-12T16:00:00+02:00", race: "2026-09-13T15:00:00+02:00" } },
+  { season: "2026", round: "15", raceName: "Azerbaijan Grand Prix", sessions: { fp1: "2026-09-24T13:30:00+04:00", fp2: "2026-09-24T17:00:00+04:00", fp3: "2026-09-25T12:30:00+04:00", quali: "2026-09-25T16:00:00+04:00", race: "2026-09-26T15:00:00+04:00" } },
+  { season: "2026", round: "16", raceName: "Bahrain Grand Prix", sessions: { fp1: "2026-10-02T11:30:00Z", fp2: "2026-10-02T15:00:00Z", fp3: "2026-10-03T12:30:00Z", quali: "2026-10-03T16:00:00Z", race: "2026-10-04T15:00:00Z" } },
+  { season: "2026", round: "17", raceName: "Singapore Grand Prix", isSprint: true, sessions: { fp1: "2026-10-09T17:30:00+08:00", fp2: "2026-10-09T21:30:00+08:00", fp3: "2026-10-10T17:30:00+08:00", quali: "2026-10-10T21:00:00+08:00", race: "2026-10-11T20:00:00+08:00" } },
+  { season: "2026", round: "18", raceName: "United States Grand Prix", isSprint: true, sessions: { fp1: "2026-10-23T17:30:00Z", fp2: "2026-10-23T21:00:00Z", fp3: "2026-10-24T18:00:00Z", quali: "2026-10-24T22:00:00Z", race: "2026-10-25T19:00:00Z" } },
+  { season: "2026", round: "19", raceName: "Mexico City Grand Prix", sessions: { fp1: "2026-10-30T18:30:00Z", fp2: "2026-10-30T22:00:00Z", fp3: "2026-10-31T17:30:00Z", quali: "2026-10-31T21:00:00Z", race: "2026-11-01T20:00:00Z" } },
+  { season: "2026", round: "20", raceName: "São Paulo Grand Prix", isSprint: true, sessions: { fp1: "2026-11-06T14:30:00Z", fp2: "2026-11-06T18:00:00Z", fp3: "2026-11-07T14:30:00Z", quali: "2026-11-07T18:00:00Z", race: "2026-11-08T17:00:00Z" } },
+  { season: "2026", round: "21", raceName: "Las Vegas Grand Prix", sessions: { fp1: "2026-11-19T02:30:00Z", fp2: "2026-11-19T06:00:00Z", fp3: "2026-11-20T02:30:00Z", quali: "2026-11-20T06:00:00Z", race: "2026-11-21T06:00:00Z" } },
+  { season: "2026", round: "22", raceName: "Qatar Grand Prix", isSprint: true, sessions: { fp1: "2026-11-27T13:30:00Z", fp2: "2026-11-27T17:00:00Z", fp3: "2026-11-28T13:30:00Z", quali: "2026-11-28T17:00:00Z", race: "2026-11-29T17:00:00Z" } },
+  { season: "2026", round: "23", raceName: "Abu Dhabi Grand Prix", sessions: { fp1: "2026-12-04T09:30:00Z", fp2: "2026-12-04T13:00:00Z", fp3: "2026-12-05T10:30:00Z", quali: "2026-12-05T14:00:00Z", race: "2026-12-06T13:00:00Z" } }
+];
+
+// --- 2. Calculate Next Race and Latest Race ---
+const now = new Date();
+let nextRace: Race | null = null;
+let latestRace: Race | null = null;
+let pastRaces: Race[] = [];
+let targetCountdown = "";
+let targetSessionName = "";
+let isSessionLive = false;
+
+for (const race of CALENDAR) {
+  const raceStartTime = new Date(race.sessions.race);
+  const heroExpirationTime = new Date(raceStartTime.getTime() + (24 * 60 * 60 * 1000));
+
+  if (now < heroExpirationTime) {
+    if (!nextRace) nextRace = race;
+  } else {
+    pastRaces.push(race);
+  }
+}
+
+if (pastRaces.length > 0) {
+  latestRace = pastRaces[pastRaces.length - 1];
+  
+  if (seasonData && seasonData.drivers) {
+    const roundKey = `r${latestRace.round}`;
+    const p1 = seasonData.drivers.find((d: any) => String(d[roundKey]) === "1");
+    const p2 = seasonData.drivers.find((d: any) => String(d[roundKey]) === "2");
+    const p3 = seasonData.drivers.find((d: any) => String(d[roundKey]) === "3");
+
+    if (p1 && p2 && p3) {
+      latestRace.podium = { 
+        first: p1.code || "TBD", 
+        second: p2.code || "TBD", 
+        third: p3.code || "TBD" 
+      };
+    }
+  }
+}
+
+if (nextRace) {
+  const sessionsList = [
+    { id: 'fp1', name: 'Practice 1', time: new Date(nextRace.sessions.fp1) },
+    { id: 'fp2', name: nextRace.isSprint ? 'Sprint Quali' : 'Practice 2', time: new Date(nextRace.sessions.fp2) },
+    { id: 'fp3', name: nextRace.isSprint ? 'Sprint Race' : 'Practice 3', time: new Date(nextRace.sessions.fp3) },
+    { id: 'quali', name: 'Qualifying', time: new Date(nextRace.sessions.quali) },
+    { id: 'race', name: 'Race', time: new Date(nextRace.sessions.race) }
+  ];
+
+  for (const session of sessionsList) {
+    const sessionStart = session.time.getTime();
+    const durationHours = session.id === 'race' ? 2 : 1; 
+    const sessionEnd = sessionStart + (durationHours * 60 * 60 * 1000); 
+    
+    if (now.getTime() < sessionStart) {
+      targetCountdown = session.time.toISOString();
+      targetSessionName = session.name;
+      break;
+    } else if (now.getTime() >= sessionStart && now.getTime() <= sessionEnd) {
+      targetCountdown = session.time.toISOString(); 
+      targetSessionName = session.name;
+      isSessionLive = true;
+      break;
+    }
+  }
+}
 ---
 
-<header class="site-header">
+<header class="site-header sticky-header">
   <div class="header-container">
     <!-- Brand Logo -->
     <a href="/" class="logo-container">
       <svg width="32" height="24" viewBox="0 0 32 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        <!-- Red Forward Slash -->
         <path d="M10 2L2 22H10L18 2H10Z" fill="#e10600"/>
-        <!-- Gray/White Slashes -->
         <path d="M20 2L14 14H20L26 2H20Z" fill="#e5e7eb"/>
         <path d="M28 2L24 10H30L34 2H28Z" fill="#94a3b8"/>
       </svg>
@@ -53,50 +167,180 @@
       </div>
 
       <!-- Other Pillars -->
-      <a href="/travel-and-tickets" class="nav-link">Travel & Tickets</a>
+       <a href="/travel-and-tickets" class="nav-link">Travel & Tickets</a>
       <a href="/tv-guides" class="nav-link">Where to Watch</a>
       <a href="/creators" class="nav-link">Creators</a>
     </nav>
   </div>
+  
+  <!-- PREMIUM STATUS BAR (STICKY ROW) -->
+  <div class="premium-status-bar">
+    <!-- TOP ROW: NEXT SESSION TICKER -->
+    {nextRace && targetCountdown && (
+      <div class="status-row-top" data-target={targetCountdown}>
+        <div class="status-inner">
+          <div class="sr-left">
+            <span class="badge-yellow">NEXT SESSION</span>
+            <span class="sr-race-title">{nextRace.raceName} <span class="sr-divider">|</span> <span class="sr-session">{targetSessionName.toUpperCase()}</span></span>
+          </div>
+
+          <div class="sr-right">
+            {isSessionLive ? (
+              <div class="ticker-live">
+                <span class="pulse-dot"></span> LIVE NOW
+              </div>
+            ) : (
+              <div class="ticker-boxes" id="header-ticker">
+                <div class="t-box"><span id="ht-d">00</span><small>D</small></div><span class="t-colon">:</span>
+                <div class="t-box"><span id="ht-h">00</span><small>H</small></div><span class="t-colon">:</span>
+                <div class="t-box"><span id="ht-m">00</span><small>M</small></div><span class="t-colon">:</span>
+                <div class="t-box"><span id="ht-s">00</span><small>S</small></div>
+              </div>
+            )}
+            
+            <div class="local-time-box">
+              <span class="lt-label">LOCAL TIME:</span>
+              <span class="lt-val js-local-time-val">--</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    )}
+  </div>
 </header>
 
+<!-- BOTTOM ROW: LATEST GP RESULTS (NON-STICKY) -->
+{latestRace && latestRace.podium && (
+  <div class="status-row-bottom non-sticky-results">
+    <div class="status-inner">
+      <div class="sr-left">
+        <span class="badge-dark">LATEST GP</span>
+        <span class="sr-race-title">{latestRace.raceName} <span class="sr-muted">Podium</span></span>
+      </div>
+
+      <div class="sr-right js-podium-container">
+        <button type="button" class="btn-reveal js-reveal-btn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+          REVEAL RESULTS
+        </button>
+        <div class="header-podium is-hidden js-podium-data">
+          <span class="hp-step" title="1st Place">🥇 {latestRace.podium.first}</span>
+          <span class="hp-step" title="2nd Place">🥈 {latestRace.podium.second}</span>
+          <span class="hp-step" title="3rd Place">🥉 {latestRace.podium.third}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
+
 <script is:inline>
-  function setupMobileMenu() {
+  function setupHeaderScripts() {
+    // 1. Setup Mobile Menu
     const toggle = document.getElementById('mobile-menu-toggle');
     const menu = document.getElementById('nav-menu');
     
     if (toggle && menu) {
-      // Clone and replace to prevent duplicate event listeners across Astro view transitions
       const newToggle = toggle.cloneNode(true);
       toggle.parentNode.replaceChild(newToggle, toggle);
       
       newToggle.addEventListener('click', () => {
         menu.classList.toggle('is-open');
-        
-        // Optional: Animate the hamburger to an 'X' (by toggling a class)
         newToggle.classList.toggle('menu-active');
       });
     }
+
+    // 2. Setup Reveal Results Logic
+    const revealBtns = document.querySelectorAll('.js-reveal-btn');
+    revealBtns.forEach(btn => {
+      const newBtn = btn.cloneNode(true);
+      btn.parentNode.replaceChild(newBtn, btn);
+      
+      newBtn.addEventListener('click', (e) => {
+        const container = e.target.closest('.js-podium-container');
+        const podium = container.querySelector('.js-podium-data');
+        newBtn.classList.add('is-hidden');
+        podium.classList.remove('is-hidden');
+      });
+    });
+
+    // 3. Setup Top Row Ticker & Local Time Formatting
+    const topRow = document.querySelector('.status-row-top');
+    if (!topRow) return;
+    
+    const targetDateStr = topRow.getAttribute('data-target');
+    if (!targetDateStr) return;
+    
+    const targetDate = new Date(targetDateStr).getTime();
+    
+    // Format the Local Time Box
+    const localTimeVal = document.querySelector('.js-local-time-val');
+    if (localTimeVal) {
+      const dateObj = new Date(targetDateStr);
+      const formatter = new Intl.DateTimeFormat('en-US', {
+        weekday: 'short', month: 'short', day: 'numeric', 
+        hour: 'numeric', minute: '2-digit', hour12: true
+      });
+      localTimeVal.textContent = formatter.format(dateObj);
+    }
+
+    // Run Ticker Math
+    const elD = document.getElementById('ht-d');
+    const elH = document.getElementById('ht-h');
+    const elM = document.getElementById('ht-m');
+    const elS = document.getElementById('ht-s');
+
+    if (window.headerTickerInterval) clearInterval(window.headerTickerInterval);
+
+    const updateTimer = () => {
+      if (!elD) return;
+      const now = new Date().getTime();
+      const distance = targetDate - now;
+
+      if (distance < 0) {
+        elD.innerText = "00"; elH.innerText = "00"; elM.innerText = "00"; elS.innerText = "00";
+        return;
+      }
+
+      elD.innerText = Math.floor(distance / (1000 * 60 * 60 * 24)).toString().padStart(2, '0');
+      elH.innerText = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)).toString().padStart(2, '0');
+      elM.innerText = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)).toString().padStart(2, '0');
+      elS.innerText = Math.floor((distance % (1000 * 60)) / 1000).toString().padStart(2, '0');
+    };
+
+    updateTimer(); 
+    window.headerTickerInterval = setInterval(updateTimer, 1000);
   }
 
-  // Run on initial load and when navigating between pages
-  document.addEventListener('DOMContentLoaded', setupMobileMenu);
-  document.addEventListener('astro:page-load', setupMobileMenu);
+  document.addEventListener('DOMContentLoaded', setupHeaderScripts);
+  document.addEventListener('astro:page-load', setupHeaderScripts);
 </script>
 
 <style>
+  /* --- STICKY HEADER --- */
+  .sticky-header {
+    position: -webkit-sticky;
+    position: sticky;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 9999;
+    box-shadow: 0 4px 25px rgba(0, 0, 0, 0.4);
+  }
+
   .site-header {
     background-color: #111827;
     color: #ffffff;
-    padding: 1rem 1.5rem;
-    border-bottom: 3px solid #e10600; /* F1 Red border */
-    position: relative;
-    z-index: 50;
+    padding: 1rem 0 0 0; 
+    border-bottom: none; 
   }
 
   .header-container {
     max-width: 1200px;
     margin: 0 auto;
+    padding: 0 1.5rem 1rem 1.5rem; 
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -105,7 +349,7 @@
   .logo-container {
     display: flex;
     align-items: center;
-    gap: 0.75rem; /* Space between the SVG icon and the text */
+    gap: 0.75rem; 
     text-decoration: none;
   }
 
@@ -122,13 +366,11 @@
     color: #e10600;
   }
 
-  /* Only needed if you chose Option 2 */
   .italic-shift {
     font-style: italic;
     transform: skewX(-5deg);
   }
 
-  /* Hamburger Button - Hidden on Desktop */
   .mobile-toggle {
     display: none;
     background: transparent;
@@ -136,7 +378,7 @@
     color: #ffffff;
     cursor: pointer;
     padding: 0.25rem;
-    z-index: 60; /* Keeps it above the menu */
+    z-index: 60; 
   }
 
   .nav-menu {
@@ -166,7 +408,6 @@
     color: #9ca3af;
   }
 
-  /* Dropdown styling (Desktop) */
   .dropdown {
     position: relative;
     display: inline-block;
@@ -201,22 +442,247 @@
     color: #ffffff;
   }
 
-  /* Hover state to show dropdown menu */
   .dropdown:hover .dropdown-menu {
     display: block;
   }
 
-  /* ========================================================
-     MOBILE RESPONSIVE STYLES
-     Triggers at 1024px (Tablets & Phones) to prevent crowding
-     ======================================================== */
-  @media (max-width: 1024px) {
-    .mobile-toggle {
-      display: block; /* Show hamburger icon */
-    }
+  /* --- PREMIUM STATUS BAR --- */
+  .premium-status-bar {
+    background: #0f172a;
+    border-top: 2px solid #e10600;
+    border-bottom: 1px solid #000000;
+    display: flex;
+    flex-direction: column;
+  }
 
+  .status-row-top {
+    background: linear-gradient(90deg, #161f30 0%, #1e293b 50%, #161f30 100%);
+    padding: 0.6rem 1.5rem;
+    border-bottom: 1px solid #0f172a;
+  }
+
+  .status-row-bottom {
+    background: #0b0f19;
+    padding: 0.5rem 1.5rem;
+  }
+
+  /* Anchors the non-sticky bar to the page */
+  .non-sticky-results {
+    border-bottom: 1px solid #1e293b;
+  }
+
+  .status-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .sr-left {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  /* Badges */
+  .badge-yellow {
+    background: #fbbf24;
+    color: #0f172a;
+    font-size: 0.7rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 0.25rem 0.6rem;
+    border-radius: 4px;
+  }
+
+  .badge-dark {
+    background: #1e293b;
+    color: #94a3b8;
+    font-size: 0.65rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    border: 1px solid #334155;
+  }
+
+  /* Typography */
+  .sr-race-title {
+    color: #ffffff;
+    font-size: 0.9rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .sr-divider {
+    color: #475569;
+    font-weight: 400;
+  }
+
+  .sr-session {
+    color: #f8fafc;
+    font-weight: 600;
+  }
+
+  .sr-muted {
+    color: #64748b;
+    font-weight: 600;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+
+  .sr-right {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  /* Ticker Logic */
+  .ticker-boxes {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+
+  .t-box {
+    background: #0b0f19;
+    border: 1px solid #1e293b;
+    border-radius: 4px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0.2rem 0.4rem;
+    min-width: 32px;
+  }
+
+  .t-box span {
+    color: #ffffff;
+    font-size: 1rem;
+    font-weight: 900;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+  }
+
+  .t-box small {
+    color: #e10600;
+    font-size: 0.5rem;
+    font-weight: 800;
+    margin-top: 0.1rem;
+  }
+
+  .t-colon {
+    color: #475569;
+    font-weight: 900;
+    margin-top: -8px;
+  }
+
+  .ticker-live {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: #e10600;
+    font-weight: 900;
+    font-size: 0.85rem;
+    letter-spacing: 0.05em;
+  }
+
+  .pulse-dot {
+    width: 6px;
+    height: 6px;
+    background: #e10600;
+    border-radius: 50%;
+    box-shadow: 0 0 6px #e10600;
+    animation: headerPulse 1.5s infinite;
+  }
+
+  @keyframes headerPulse {
+    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(225, 6, 0, 0.7); }
+    70% { transform: scale(1); box-shadow: 0 0 0 5px rgba(225, 6, 0, 0); }
+    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(225, 6, 0, 0); }
+  }
+
+  /* Local Time Box */
+  .local-time-box {
+    border: 1px solid #334155;
+    background: rgba(15, 23, 42, 0.5);
+    border-radius: 4px;
+    padding: 0.35rem 0.6rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .lt-label {
+    color: #64748b;
+    font-size: 0.65rem;
+    font-weight: 800;
+  }
+
+  .lt-val {
+    color: #34d399;
+    font-size: 0.75rem;
+    font-weight: 700;
+  }
+
+  /* Podium Reveal Button */
+  .btn-reveal {
+    background: transparent;
+    border: 1px solid #38bdf8;
+    color: #38bdf8;
+    font-size: 0.65rem;
+    font-weight: 800;
+    padding: 0.25rem 0.6rem;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    transition: all 0.2s ease;
+  }
+
+  .btn-reveal:hover {
+    background: #38bdf8;
+    color: #0f172a;
+  }
+
+  .btn-reveal.is-hidden {
+    display: none;
+  }
+
+  .header-podium {
+    display: flex;
+    gap: 0.75rem;
+    animation: fadeIn 0.3s ease-in;
+  }
+
+  .header-podium.is-hidden {
+    display: none;
+  }
+
+  .hp-step {
+    color: #ffffff;
+    font-size: 0.75rem;
+    font-weight: 800;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateX(10px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  /* Mobile Adjustments */
+  @media (max-width: 1024px) {
+    .mobile-toggle { display: block; }
     .nav-menu {
-      /* Hide by default, setup for absolute positioning */
       display: none; 
       position: absolute;
       top: 100%;
@@ -230,42 +696,78 @@
       border-bottom: 3px solid #e10600;
       box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
     }
-
-    /* Class applied by JavaScript when toggle is clicked */
-    .nav-menu.is-open {
-      display: flex;
-    }
-
-    .nav-link {
-      font-size: 1.1rem;
-      padding: 0;
-    }
-
-    .dropdown {
-      width: 100%;
-    }
-
-    /* On mobile, instead of hovering, display dropdown items indented beneath the main link */
+    .nav-menu.is-open { display: flex; }
+    .nav-link { font-size: 1.1rem; padding: 0; }
+    .dropdown { width: 100%; }
     .dropdown-menu {
       position: static;
-      display: block; /* Always visible beneath parent on mobile */
+      display: block; 
       background: transparent;
       box-shadow: none;
       border: none;
-      border-left: 2px solid #374151; /* Nice indented line effect */
+      border-left: 2px solid #374151; 
       margin-top: 0.75rem;
       margin-left: 0.5rem;
       padding: 0;
       border-radius: 0;
     }
+    .dropdown-menu a { padding: 0.5rem 1rem; font-size: 0.95rem; }
+    .arrow { display: none; }
     
-    .dropdown-menu a {
-      padding: 0.5rem 1rem;
-      font-size: 0.95rem;
+    /* --- MOBILE TICKER COMPRESSION --- */
+    /* 1. Hide the Latest GP row entirely to save space */
+    .status-row-bottom { display: none; }
+
+    /* 2. Slim down the Top Row padding */
+    .status-row-top { padding: 0.4rem 1rem; }
+
+    /* 3. Force a single tight line */
+    .status-inner {
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+      text-align: left;
+      gap: 0.5rem;
     }
 
-    .arrow {
-      display: none; /* Hide the arrow since it's always open on mobile */
+    /* 4. Hide non-essential desktop elements */
+    .badge-yellow,
+    .sr-divider,
+    .local-time-box {
+      display: none;
     }
+
+    /* 5. Shrink typography and spacing */
+    .sr-left, .sr-right {
+      flex-direction: row;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    /* Stack race name and session tightly on the left */
+    .sr-race-title {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0;
+      font-size: 0.75rem;
+      line-height: 1.2;
+    }
+
+    .sr-session {
+      font-size: 0.65rem;
+      color: #94a3b8;
+    }
+
+    /* Miniaturize the countdown boxes */
+    .t-box {
+      min-width: 26px;
+      padding: 0.15rem 0.25rem;
+    }
+
+    .t-box span { font-size: 0.85rem; }
+    .t-box small { font-size: 0.45rem; margin-top: 0; }
+    .t-colon { font-size: 0.8rem; margin-top: -6px; }
+
+    .ticker-live { font-size: 0.75rem; }
   }
 </style>

@@ -2,17 +2,7 @@
 import { defineCollection, z } from 'astro:content';
 import { glob } from 'astro/loaders';
 
-// 1. Circuits Collection
-const circuits = defineCollection({
-  loader: glob({ pattern: '**/[^_]*.{md,mdx}', base: './src/content/circuits' }),
-  schema: z.object({
-    title: z.string(),
-    country: z.string().optional(),
-    heroImage: z.string().optional(),
-  }),
-});
-
-// 2. Grandstand Reviews Collection
+// 1. Grandstand Reviews Collection
 const grandstands = defineCollection({
   loader: glob({ pattern: '**/[^_]*.{md,mdx}', base: './src/content/grandstands' }),
   schema: z.object({
@@ -23,26 +13,7 @@ const grandstands = defineCollection({
   }),
 });
 
-// 3. City & Fan Guides Collection
-const cityGuides = defineCollection({
-  loader: glob({ pattern: '**/[^_]*.{md,mdx}', base: './src/content/cityGuides' }),
-  schema: z.object({
-    title: z.string(),
-    city: z.string().optional(),
-  }),
-});
-
-// 4. Travel & Tickets Advice Collection
-const travelTickets = defineCollection({
-  loader: glob({ pattern: '**/[^_]*.{md,mdx}', base: './src/content/travelTickets' }),
-  schema: z.object({
-    title: z.string(),
-    category: z.string().optional(),
-    heroImage: z.string().optional(),
-  }),
-});
-
-// 5. Where to Watch (TV & Streaming) Collection
+// 2. Where to Watch (TV & Streaming) Collection
 const tvGuides = defineCollection({
   loader: glob({ pattern: '**/[^_]*.{md,mdx}', base: './src/content/tvGuides' }),
   schema: z.object({
@@ -52,7 +23,7 @@ const tvGuides = defineCollection({
   }),
 });
 
-// 6. F1 Creators & Podcasts Collection
+// 3. F1 Creators & Podcasts Collection
 const creators = defineCollection({
   loader: glob({ pattern: '**/[^_]*.{md,mdx}', base: './src/content/creators' }),
   schema: z.object({
@@ -63,7 +34,7 @@ const creators = defineCollection({
   }),
 });
 
-// 7. Drivers Collection
+// 4. Drivers Collection
 const drivers = defineCollection({
   loader: glob({ pattern: '**/[^_]*.{md,mdx}', base: './src/content/drivers' }),
   schema: z.object({
@@ -85,22 +56,7 @@ const drivers = defineCollection({
   }),
 });
 
-// 8. Teams Collection
-const teams = defineCollection({
-  loader: glob({ pattern: '**/[^_]*.{md,mdx}', base: './src/content/teams' }),
-  schema: z.object({
-    name: z.string(),
-    fullTeamName: z.string().optional(),
-    carModel: z.string().optional(),
-    powerUnit: z.string().optional(),
-    base: z.string().optional(),
-    heroImage: z.string().optional(),
-    points: z.number().optional(),
-    position: z.number().optional(),
-  }),
-});
-
-// 9. AI News & Previews Collection
+// 5. AI News & Previews Collection
 const news = defineCollection({
   loader: glob({ pattern: '**/[^_]*.{md,mdx}', base: './src/content/news' }),
   schema: z.object({
@@ -111,15 +67,11 @@ const news = defineCollection({
   }),
 });
 
-// EXPORT ALL COLLECTIONS TOGETHER
+// EXPORT ALL ACTIVE COLLECTIONS
 export const collections = {
-  circuits,
   grandstands,
-  cityGuides,
-  travelTickets,
   tvGuides,
   creators,
   drivers,
-  teams,
   news, 
 };

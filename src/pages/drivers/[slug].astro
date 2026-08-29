@@ -170,10 +170,11 @@ const ROUND_DATA = [
   { round: 9, name: 'GBR', flag: 'gb', gp: 'British GP' }, { round: 10, name: 'BEL', flag: 'be', gp: 'Belgian GP' },
   { round: 11, name: 'HUN', flag: 'hu', gp: 'Hungarian GP' }, { round: 12, name: 'NED', flag: 'nl', gp: 'Dutch GP' },
   { round: 13, name: 'ITA', flag: 'it', gp: 'Italian GP' }, { round: 14, name: 'MAD', flag: 'es', gp: 'Madrid GP' },
-  { round: 15, name: 'AZE', flag: 'az', gp: 'Azerbaijan GP' }, { round: 16, name: 'SIN', flag: 'sg', gp: 'Singapore GP' },
-  { round: 17, name: 'USA', flag: 'us', gp: 'United States GP' }, { round: 18, name: 'MEX', flag: 'mx', gp: 'Mexico City GP' },
-  { round: 19, name: 'BRA', flag: 'br', gp: 'São Paulo GP' }, { round: 20, name: 'LVG', flag: 'us', gp: 'Las Vegas GP' },
-  { round: 21, name: 'QAT', flag: 'qa', gp: 'Qatar GP' }, { round: 22, name: 'ABU', flag: 'ae', gp: 'Abu Dhabi GP' },
+  { round: 15, name: 'AZE', flag: 'az', gp: 'Azerbaijan GP' }, { round: 16, name: 'BHR', flag: 'bh', gp: 'Bahrain GP' },
+  { round: 17, name: 'SIN', flag: 'sg', gp: 'Singapore GP' }, { round: 18, name: 'USA', flag: 'us', gp: 'United States GP' },
+  { round: 19, name: 'MEX', flag: 'mx', gp: 'Mexico City GP' }, { round: 20, name: 'SAP', flag: 'br', gp: 'São Paulo GP' },
+  { round: 21, name: 'LVG', flag: 'us', gp: 'Las Vegas GP' }, { round: 22, name: 'QAT', flag: 'qa', gp: 'Qatar GP' },
+  { round: 23, name: 'ABU', flag: 'ae', gp: 'Abu Dhabi GP' }
 ];
 
 const gridDriver = seasonData?.drivers?.find((d: any) => String(d.code).toUpperCase().trim() === code) as any;
@@ -182,7 +183,7 @@ let seasonPodiums = 0;
 let seasonWins = 0;
 let seasonPointsFinishes = 0;
 
-for (let i = 1; i <= 22; i++) {
+for (let i = 1; i <= 23; i++) {
   const val = gridDriver?.[`r${i}`] ? String(gridDriver[`r${i}`]).trim().toUpperCase() : '-';
   if (val === 'RET' || val === 'DNF' || val === 'DSQ') {
     seasonResults.push('RET');

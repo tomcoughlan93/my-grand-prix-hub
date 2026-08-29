@@ -27,9 +27,10 @@ interface SessionResults {
 }
 
 interface Weather {
-  temp: number;
+  temp: number | string;
   condition: string;
   icon: string;
+  isLive?: boolean;
 }
 
 interface Race {
@@ -56,7 +57,7 @@ interface Race {
   weather?: Weather;
 }
 
-// Keep your clean 2026 Calendar Array (without any hardcoded podiums!)
+// 2026 Calendar Array
 const CALENDAR: Race[] = [
   { season: "2026", round: "1", raceName: "Australian Grand Prix", tyresAnnounced: true, tyres: ["C3", "C4", "C5"], Circuit: { circuitName: "Albert Park Grand Prix Circuit", Location: { locality: "Melbourne", country: "Australia", timezone: "Australia/Melbourne", coordinates: { lat: -37.8497, lon: 144.968 } } }, date: "2026-03-08", time: "04:00:00Z", sessions: { fp1: "2026-03-06T01:30:00Z", fp2: "2026-03-06T05:00:00Z", fp3: "2026-03-07T01:30:00Z", quali: "2026-03-07T05:00:00Z", race: "2026-03-08T04:00:00Z" } },
   { season: "2026", round: "2", raceName: "Chinese Grand Prix", isSprint: true, tyresAnnounced: true, tyres: ["C2", "C3", "C4"], Circuit: { circuitName: "Shanghai International Circuit", Location: { locality: "Shanghai", country: "China", timezone: "Asia/Shanghai", coordinates: { lat: 31.3389, lon: 121.22 } } }, date: "2026-03-15", time: "07:00:00Z", sessions: { fp1: "2026-03-13T03:30:00Z", fp2: "2026-03-13T07:00:00Z", fp3: "2026-03-14T03:30:00Z", quali: "2026-03-14T07:00:00Z", race: "2026-03-15T07:00:00Z" } },
@@ -73,16 +74,47 @@ const CALENDAR: Race[] = [
   { season: "2026", round: "13", raceName: "Italian Grand Prix", tyresAnnounced: true, tyres: ["C3", "C4", "C5"], Circuit: { circuitName: "Autodromo Nazionale Monza", Location: { locality: "Monza", country: "Italy", timezone: "Europe/Rome", coordinates: { lat: 45.6156, lon: 9.28111 } } }, date: "2026-09-06", time: "15:00:00+02:00", sessions: { fp1: "2026-09-04T13:30:00+02:00", fp2: "2026-09-04T17:00:00+02:00", fp3: "2026-09-05T12:30:00+02:00", quali: "2026-09-05T16:00:00+02:00", race: "2026-09-06T15:00:00+02:00" } },
   { season: "2026", round: "14", raceName: "Madrid Grand Prix", tyresAnnounced: true, tyres: ["C2", "C3", "C4"], Circuit: { circuitName: "IFEMA Madrid", Location: { locality: "Madrid", country: "Spain", timezone: "Europe/Madrid", coordinates: { lat: 40.4667, lon: -3.6167 } } }, date: "2026-09-13", time: "15:00:00+02:00", sessions: { fp1: "2026-09-11T13:30:00+02:00", fp2: "2026-09-11T17:00:00+02:00", fp3: "2026-09-12T12:30:00+02:00", quali: "2026-09-12T16:00:00+02:00", race: "2026-09-13T15:00:00+02:00" } },
   { season: "2026", round: "15", raceName: "Azerbaijan Grand Prix", tyresAnnounced: false, tyres: ["C3", "C4", "C5"], Circuit: { circuitName: "Baku City Circuit", Location: { locality: "Baku", country: "Azerbaijan", timezone: "Asia/Baku", coordinates: { lat: 40.3725, lon: 49.8533 } } }, date: "2026-09-26", time: "15:00:00+04:00", sessions: { fp1: "2026-09-24T13:30:00+04:00", fp2: "2026-09-24T17:00:00+04:00", fp3: "2026-09-25T12:30:00+04:00", quali: "2026-09-25T16:00:00+04:00", race: "2026-09-26T15:00:00+04:00" } },
-  { season: "2026", round: "16", raceName: "Singapore Grand Prix", isSprint: true, tyresAnnounced: false, tyres: ["C3", "C4", "C5"], Circuit: { circuitName: "Marina Bay Street Circuit", Location: { locality: "Marina Bay", country: "Singapore", timezone: "Asia/Singapore", coordinates: { lat: 1.2914, lon: 103.864 } } }, date: "2026-10-11", time: "20:00:00+08:00", sessions: { fp1: "2026-10-09T17:30:00+08:00", fp2: "2026-10-09T21:30:00+08:00", fp3: "2026-10-10T17:30:00+08:00", quali: "2026-10-10T21:00:00+08:00", race: "2026-10-11T20:00:00+08:00" } },
-  { season: "2026", round: "17", raceName: "United States Grand Prix", isSprint: true, tyresAnnounced: false, tyres: ["C2", "C3", "C4"], Circuit: { circuitName: "Circuit of the Americas", Location: { locality: "Austin", country: "USA", timezone: "America/Chicago", coordinates: { lat: 30.1328, lon: -97.6411 } } }, date: "2026-10-25", time: "19:00:00Z", sessions: { fp1: "2026-10-23T17:30:00Z", fp2: "2026-10-23T21:00:00Z", fp3: "2026-10-24T18:00:00Z", quali: "2026-10-24T22:00:00Z", race: "2026-10-25T19:00:00Z" } },
-  { season: "2026", round: "18", raceName: "Mexico City Grand Prix", tyresAnnounced: false, tyres: ["C3", "C4", "C5"], Circuit: { circuitName: "Autódromo Hermanos Rodríguez", Location: { locality: "Mexico City", country: "Mexico", timezone: "America/Mexico_City", coordinates: { lat: 19.4042, lon: -99.0907 } } }, date: "2026-11-01", time: "20:00:00Z", sessions: { fp1: "2026-10-30T18:30:00Z", fp2: "2026-10-30T22:00:00Z", fp3: "2026-10-31T17:30:00Z", quali: "2026-10-31T21:00:00Z", race: "2026-11-01T20:00:00Z" } },
-  { season: "2026", round: "19", raceName: "São Paulo Grand Prix", isSprint: true, tyresAnnounced: false, tyres: ["C2", "C3", "C4"], Circuit: { circuitName: "Autódromo José Carlos Pace", Location: { locality: "São Paulo", country: "Brazil", timezone: "America/Sao_Paulo", coordinates: { lat: -23.7036, lon: -46.6997 } } }, date: "2026-11-08", time: "17:00:00Z", sessions: { fp1: "2026-11-06T14:30:00Z", fp2: "2026-11-06T18:00:00Z", fp3: "2026-11-07T14:30:00Z", quali: "2026-11-07T18:00:00Z", race: "2026-11-08T17:00:00Z" } },
-  { season: "2026", round: "20", raceName: "Las Vegas Grand Prix", tyresAnnounced: false, tyres: ["C3", "C4", "C5"], Circuit: { circuitName: "Las Vegas Strip Circuit", Location: { locality: "Las Vegas", country: "USA", timezone: "America/Los_Angeles", coordinates: { lat: 36.1147, lon: -115.173 } } }, date: "2026-11-21", time: "06:00:00Z", sessions: { fp1: "2026-11-19T02:30:00Z", fp2: "2026-11-19T06:00:00Z", fp3: "2026-11-20T02:30:00Z", quali: "2026-11-20T06:00:00Z", race: "2026-11-21T06:00:00Z" } },
-  { season: "2026", round: "21", raceName: "Qatar Grand Prix", isSprint: true, tyresAnnounced: false, tyres: ["C1", "C2", "C3"], Circuit: { circuitName: "Lusail International Circuit", Location: { locality: "Al Daayen", country: "Qatar", timezone: "Asia/Qatar", coordinates: { lat: 25.49, lon: 51.4542 } } }, date: "2026-11-29", time: "17:00:00Z", sessions: { fp1: "2026-11-27T13:30:00Z", fp2: "2026-11-27T17:00:00Z", fp3: "2026-11-28T13:30:00Z", quali: "2026-11-28T17:00:00Z", race: "2026-11-29T17:00:00Z" } },
-  { season: "2026", round: "22", raceName: "Abu Dhabi Grand Prix", tyresAnnounced: false, tyres: ["C3", "C4", "C5"], Circuit: { circuitName: "Yas Marina Circuit", Location: { locality: "Abu Dhabi", country: "UAE", timezone: "Asia/Dubai", coordinates: { lat: 24.4672, lon: 54.6031 } } }, date: "2026-12-06", time: "13:00:00Z", sessions: { fp1: "2026-12-04T09:30:00Z", fp2: "2026-12-04T13:00:00Z", fp3: "2026-12-05T10:30:00Z", quali: "2026-12-05T14:00:00Z", race: "2026-12-06T13:00:00Z" } }
+  { season: "2026", round: "16", raceName: "Bahrain Grand Prix", tyresAnnounced: false, tyres: ["C1", "C2", "C3"], Circuit: { circuitName: "Bahrain International Circuit", Location: { locality: "Sakhir", country: "Bahrain", timezone: "Asia/Bahrain", coordinates: { lat: 26.0325, lon: 50.5106 } } }, date: "2026-10-04", time: "15:00:00Z", sessions: { fp1: "2026-10-02T11:30:00Z", fp2: "2026-10-02T15:00:00Z", fp3: "2026-10-03T12:30:00Z", quali: "2026-10-03T16:00:00Z", race: "2026-10-04T15:00:00Z" } },
+  { season: "2026", round: "17", raceName: "Singapore Grand Prix", isSprint: true, tyresAnnounced: false, tyres: ["C3", "C4", "C5"], Circuit: { circuitName: "Marina Bay Street Circuit", Location: { locality: "Marina Bay", country: "Singapore", timezone: "Asia/Singapore", coordinates: { lat: 1.2914, lon: 103.864 } } }, date: "2026-10-11", time: "20:00:00+08:00", sessions: { fp1: "2026-10-09T17:30:00+08:00", fp2: "2026-10-09T21:30:00+08:00", fp3: "2026-10-10T17:30:00+08:00", quali: "2026-10-10T21:00:00+08:00", race: "2026-10-11T20:00:00+08:00" } },
+  { season: "2026", round: "18", raceName: "United States Grand Prix", isSprint: true, tyresAnnounced: false, tyres: ["C2", "C3", "C4"], Circuit: { circuitName: "Circuit of the Americas", Location: { locality: "Austin", country: "USA", timezone: "America/Chicago", coordinates: { lat: 30.1328, lon: -97.6411 } } }, date: "2026-10-25", time: "19:00:00Z", sessions: { fp1: "2026-10-23T17:30:00Z", fp2: "2026-10-23T21:00:00Z", fp3: "2026-10-24T18:00:00Z", quali: "2026-10-24T22:00:00Z", race: "2026-10-25T19:00:00Z" } },
+  { season: "2026", round: "19", raceName: "Mexico City Grand Prix", tyresAnnounced: false, tyres: ["C3", "C4", "C5"], Circuit: { circuitName: "Autódromo Hermanos Rodríguez", Location: { locality: "Mexico City", country: "Mexico", timezone: "America/Mexico_City", coordinates: { lat: 19.4042, lon: -99.0907 } } }, date: "2026-11-01", time: "20:00:00Z", sessions: { fp1: "2026-10-30T18:30:00Z", fp2: "2026-10-30T22:00:00Z", fp3: "2026-10-31T17:30:00Z", quali: "2026-10-31T21:00:00Z", race: "2026-11-01T20:00:00Z" } },
+  { season: "2026", round: "20", raceName: "São Paulo Grand Prix", isSprint: true, tyresAnnounced: false, tyres: ["C2", "C3", "C4"], Circuit: { circuitName: "Autódromo José Carlos Pace", Location: { locality: "São Paulo", country: "Brazil", timezone: "America/Sao_Paulo", coordinates: { lat: -23.7036, lon: -46.6997 } } }, date: "2026-11-08", time: "17:00:00Z", sessions: { fp1: "2026-11-06T14:30:00Z", fp2: "2026-11-06T18:00:00Z", fp3: "2026-11-07T14:30:00Z", quali: "2026-11-07T18:00:00Z", race: "2026-11-08T17:00:00Z" } },
+  { season: "2026", round: "21", raceName: "Las Vegas Grand Prix", tyresAnnounced: false, tyres: ["C3", "C4", "C5"], Circuit: { circuitName: "Las Vegas Strip Circuit", Location: { locality: "Las Vegas", country: "USA", timezone: "America/Los_Angeles", coordinates: { lat: 36.1147, lon: -115.173 } } }, date: "2026-11-21", time: "06:00:00Z", sessions: { fp1: "2026-11-19T02:30:00Z", fp2: "2026-11-19T06:00:00Z", fp3: "2026-11-20T02:30:00Z", quali: "2026-11-20T06:00:00Z", race: "2026-11-21T06:00:00Z" } },
+  { season: "2026", round: "22", raceName: "Qatar Grand Prix", isSprint: true, tyresAnnounced: false, tyres: ["C1", "C2", "C3"], Circuit: { circuitName: "Lusail International Circuit", Location: { locality: "Al Daayen", country: "Qatar", timezone: "Asia/Qatar", coordinates: { lat: 25.49, lon: 51.4542 } } }, date: "2026-11-29", time: "17:00:00Z", sessions: { fp1: "2026-11-27T13:30:00Z", fp2: "2026-11-27T17:00:00Z", fp3: "2026-11-28T13:30:00Z", quali: "2026-11-28T17:00:00Z", race: "2026-11-29T17:00:00Z" } },
+  { season: "2026", round: "23", raceName: "Abu Dhabi Grand Prix", tyresAnnounced: false, tyres: ["C3", "C4", "C5"], Circuit: { circuitName: "Yas Marina Circuit", Location: { locality: "Abu Dhabi", country: "UAE", timezone: "Asia/Dubai", coordinates: { lat: 24.4672, lon: 54.6031 } } }, date: "2026-12-06", time: "13:00:00Z", sessions: { fp1: "2026-12-04T09:30:00Z", fp2: "2026-12-04T13:00:00Z", fp3: "2026-12-05T10:30:00Z", quali: "2026-12-05T14:00:00Z", race: "2026-12-06T13:00:00Z" } }
 ];
 
-// --- 2. MAP DYNAMIC PODIUMS FROM TINA CMS ---
+// --- Expected Weather Lookup Helper ---
+const getExpectedWeather = (locality: string) => {
+  const weatherMap: Record<string, {temp: string, cond: string, icon: string}> = {
+    'Melbourne': { temp: '22', cond: 'Sunny & Breezy', icon: '🌤️' },
+    'Shanghai': { temp: '19', cond: 'Mild & Overcast', icon: '☁️' },
+    'Suzuka': { temp: '18', cond: 'Variable, Rain risk', icon: '🌦️' },
+    'Miami': { temp: '29', cond: 'Hot & Humid', icon: '🌴' },
+    'Montreal': { temp: '23', cond: 'Warm & Variable', icon: '⛅' },
+    'Monte-Carlo': { temp: '24', cond: 'Sunny & Mild', icon: '☀️' },
+    'Montmeló': { temp: '26', cond: 'Warm & Sunny', icon: '☀️' },
+    'Spielberg': { temp: '24', cond: 'Mountain Showers', icon: '🌧️' },
+    'Silverstone': { temp: '21', cond: 'Classic British Rain', icon: '🌦️' },
+    'Spa': { temp: '20', cond: 'Microclimate Showers', icon: '🌧️' },
+    'Budapest': { temp: '30', cond: 'Hot & Dry', icon: '☀️' },
+    'Zandvoort': { temp: '20', cond: 'Coastal Winds', icon: '💨' },
+    'Monza': { temp: '26', cond: 'Warm & Sunny', icon: '☀️' },
+    'Madrid': { temp: '28', cond: 'Hot & Dry', icon: '☀️' },
+    'Baku': { temp: '26', cond: 'Windy City', icon: '💨' },
+    'Sakhir': { temp: '31', cond: 'Warm & Clear', icon: '🌙' },
+    'Marina Bay': { temp: '31', cond: 'Tropical Humidity', icon: '🌙' },
+    'Austin': { temp: '28', cond: 'Warm & Variable', icon: '🌤️' },
+    'Mexico City': { temp: '23', cond: 'High Altitude', icon: '⛅' },
+    'São Paulo': { temp: '24', cond: 'Sudden Rain', icon: '⛈️' },
+    'Las Vegas': { temp: '14', cond: 'Desert Night Chill', icon: '🌙' },
+    'Al Daayen': { temp: '29', cond: 'Desert Night', icon: '🌙' },
+    'Abu Dhabi': { temp: '27', cond: 'Warm Night', icon: '🌙' }
+  };
+  return weatherMap[locality] || { temp: '25', cond: 'Variable', icon: '⛅' };
+};
+
+// --- MAP DYNAMIC PODIUMS FROM TINA CMS ---
 if (seasonData && seasonData.drivers) {
   for (const race of CALENDAR) {
     const roundKey = `r${race.round}`;
@@ -96,15 +128,12 @@ if (seasonData && seasonData.drivers) {
         second: p2.code || "TBD",
         third: p3.code || "TBD"
       };
-      // Make sure it displays in the hero session boxes too
-      race.sessionResults = {
-        race: race.podium
-      };
+      race.sessionResults = { race: race.podium };
     }
   }
 }
 
-// --- 3. DYNAMIC RACE SORTING LOGIC (THE "MONDAY RULE") ---
+// --- DYNAMIC RACE SORTING LOGIC ---
 const now = new Date();
 let nextRace: Race | null = null;
 let upcomingRaces: Race[] = [];
@@ -112,28 +141,22 @@ let pastRaces: Race[] = [];
 
 for (const race of CALENDAR) {
   const raceStartTime = new Date(race.sessions.race);
-  
-  // A race stays in the "Next Race" hero slot until 24 hours AFTER it starts.
-  // This guarantees a Sunday 2pm race stays as the Hero until Monday 2pm.
   const heroExpirationTime = new Date(raceStartTime.getTime() + (24 * 60 * 60 * 1000));
 
   if (!nextRace) {
-    // If we are currently *before* the Monday expiration time, this is our Hero!
     if (now < heroExpirationTime) {
       nextRace = race;
     } else {
-      // The Monday expiration has passed, move it down to the completed pile
       pastRaces.push(race);
     }
   } else {
-    // We already found our Hero. Add everything else to upcoming.
     upcomingRaces.push(race);
   }
 }
 
-pastRaces.reverse(); // Put the most recently completed races at the top of the past list
+pastRaces.reverse();
 
-// --- 4. DYNAMIC NEXT SESSION COUNTDOWN & LIVE BADGE ---
+// --- DYNAMIC NEXT SESSION COUNTDOWN & LIVE BADGE ---
 let targetCountdown = "";
 let targetSessionName = "Next Session";
 let isSessionLive = false;
@@ -151,7 +174,6 @@ if (nextRace) {
 
   for (const session of sessionsList) {
     const sessionStart = session.time.getTime();
-    // Rough session duration (1 hr for practice/quali, 2 hrs for race)
     const durationHours = session.id === 'race' ? 2 : 1; 
     const sessionEnd = sessionStart + (durationHours * 60 * 60 * 1000); 
     
@@ -167,15 +189,15 @@ if (nextRace) {
     }
   }
 
-  // If no sessions caught it, the race has finished but it's still before the Monday expiration.
   if (!targetCountdown && !isSessionLive) {
     isWeekendFinished = true;
   }
 }
 
-// --- 5. FETCH LIVE WEATHER FOR NEXT RACE ---
+// --- FETCH LIVE WEATHER FOR NEXT RACE ---
 if (nextRace) {
-  nextRace.weather = { temp: 21, condition: "Partly Cloudy", icon: "⛅" };
+  const expected = getExpectedWeather(nextRace.Circuit.Location.locality);
+  nextRace.weather = { temp: expected.temp, condition: expected.cond, icon: expected.icon, isLive: false };
 
   try {
     const apiKey = import.meta.env.OPENWEATHER_API_KEY;
@@ -205,7 +227,7 @@ if (nextRace) {
             return map[icon] || '🌡️';
           };
 
-          nextRace.weather = { temp: temp, condition: condition, icon: getWeatherEmoji(iconCode) };
+          nextRace.weather = { temp: temp, condition: condition, icon: getWeatherEmoji(iconCode), isLive: true };
         }
       }
     }
@@ -217,6 +239,11 @@ if (nextRace) {
 // Helpers
 function formatMonth(dateStr: string) { return new Date(dateStr).toLocaleString('en-US', { month: 'short' }).toUpperCase(); }
 function formatDay(dateStr: string) { return new Date(dateStr).toLocaleString('en-US', { day: '2-digit' }); }
+function formatWeekendDays(fp1Str: string, raceStr: string) { 
+  const startDay = new Date(fp1Str).toLocaleString('en-US', { day: '2-digit' });
+  const endDay = new Date(raceStr).toLocaleString('en-US', { day: '2-digit' });
+  return `${startDay}-${endDay}`; 
+}
 function getFlagCode(country: string) {
   const map: Record<string, string> = {
     'Bahrain': 'bh', 'Saudi Arabia': 'sa', 'Australia': 'au', 'Japan': 'jp', 'China': 'cn',
@@ -226,8 +253,20 @@ function getFlagCode(country: string) {
   };
   return map[country] || 'un';
 }
-function getGuideSlug(raceName: string) { return `/circuits-live/circuit-guides/${raceName.toLowerCase().replace(/\s+/g, '-')}`; }
-function getSlug(raceName: string) { return raceName.toLowerCase().replace(/\s+/g, '-'); }
+function getCircuitGuideSlug(raceName: string) { return `/circuits-live/circuit-guides/${raceName.toLowerCase().replace(/\s+/g, '-')}`; }
+function getCityGuideSlug(locality: string) { 
+  const cityOverrides: Record<string, string> = {
+    'Monza': 'milan',
+    'Montmeló': 'barcelona',
+    'Zandvoort': 'amsterdam',
+    'Al Daayen': 'doha',
+  };
+  if (cityOverrides[locality]) {
+    return `/circuits-live/city-guides/${cityOverrides[locality]}`;
+  }
+  const cleanCity = locality.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  return `/circuits-live/city-guides/${cleanCity.toLowerCase().replace(/\s+/g, '-')}`; 
+}
 
 const getSessionArray = (race: Race) => [
   { id: 'fp1', name: 'Practice 1', utc: race.sessions.fp1, results: race.sessionResults?.fp1 },
@@ -242,10 +281,23 @@ const getSessionArray = (race: Race) => [
   title="F1 Race Calendar | Schedule & Countdown | My Grand Prix Hub"
   description="Live Formula 1 World Championship race calendar, schedule, and live countdown to the next Grand Prix session."
 >
+  <!-- Embed Calendar Data for Client-Side JS -->
+  <script id="calendar-data" type="application/json" set:html={JSON.stringify(CALENDAR)}></script>
+
   <main class="page-container">
     <header class="section-header">
-      <span class="badge">Race Calendar</span>
-      <h1>World Championship Schedule</h1>
+      <div class="header-flex">
+        <div>
+          <span class="badge">Race Calendar</span>
+          <h1>World Championship Schedule</h1>
+        </div>
+        
+        <!-- MASTER SYNC BUTTON -->
+        <button type="button" class="btn-sync js-sync-all-btn" title="Sync all 24 races to your Calendar">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M12 14v4M10 16h4"/></svg>
+          Sync Full Season
+        </button>
+      </div>
       <p>The complete 2026 calendar. Track dates, locations, and watch the live countdown to the next session.</p>
     </header>
 
@@ -259,10 +311,11 @@ const getSessionArray = (race: Race) => [
             <div class="badge-row">
               <span class="round-pill">Round {nextRace.round} &bull; Up Next</span>
               {nextRace.isSprint && (
-                <span class="sprint-badge">
+                
+                <button type="button" class="sprint-badge js-sprint-modal-trigger">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
                   Sprint Weekend
-                </span>
+                </button>
               )}
             </div>
             
@@ -277,7 +330,7 @@ const getSessionArray = (race: Race) => [
             
             <!-- Tyres, Links & Weather Row -->
             <div class="hero-actions-row">
-              <div class="tyres-container" title="Pirelli Tyre Allocation">
+              <button type="button" class="tyres-container js-tyre-modal-trigger" title="View Pirelli Tyre Compounds Guide">
                 <span class="tyres-label">Tyres:</span>
                 {nextRace.tyresAnnounced !== false ? (
                   <>
@@ -288,25 +341,28 @@ const getSessionArray = (race: Race) => [
                 ) : (
                   <span class="tbc-badge">TBC</span>
                 )}
-              </div>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="tyre-info-icon"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+              </button>
 
-              <a href={getGuideSlug(nextRace.raceName)} class="btn-primary">
+              <a href={getCircuitGuideSlug(nextRace.raceName)} class="btn-primary">
                 Circuit Guide 
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
               </a>
-              <a href={`/travel-and-tickets/${getSlug(nextRace.raceName)}`} class="btn-secondary">Travel & Tickets</a>
-              <a href="/tv-guides" class="btn-secondary btn-outline">TV Guide</a>
+              <a href={getCityGuideSlug(nextRace.Circuit.Location.locality)} class="btn-secondary">City Guide</a>
+              <a href={`/tv-guides?round=${nextRace.round}`} class="btn-secondary btn-outline">TV Guide</a>
               
               {nextRace.weather && (
-                <div class="weather-pill" title="Live Local Forecast">
+                <div class={`weather-pill ${nextRace.weather.isLive ? 'is-live-weather' : 'is-est-weather'}`} title={nextRace.weather.isLive ? "Live trackside forecast" : "Estimated historical seasonal climate"}>
+                  <span class="weather-badge">{nextRace.weather.isLive ? 'Live' : 'Avg'}</span>
                   <span class="weather-icon">{nextRace.weather.icon}</span>
                   <span class="weather-text">{nextRace.weather.temp}°C &bull; {nextRace.weather.condition}</span>
+                  {nextRace.weather.isLive && <span class="weather-live-dot"></span>}
                 </div>
               )}
             </div>
           </div>
 
-          <div class="countdown-card">
+          <div class="countdown-card js-hero-countdown">
             <div class="countdown-header">
               {isSessionLive ? <span class="live-pulse"></span> : hasOfficialResults ? <span class="pulse-dot" style="background:#22c55e; box-shadow: 0 0 8px #22c55e;"></span> : <span class="pulse-dot"></span>}
               <span>
@@ -329,7 +385,7 @@ const getSessionArray = (race: Race) => [
                 </span>
               </div>
             ) : (
-              <div class="timer-grid" id="f1-countdown" data-target={targetCountdown}>
+              <div class="timer-grid" id="f1-countdown" data-target={targetCountdown} data-session={targetSessionName}>
                 <div class="time-box">
                   <span class="time-val" id="cd-days">00</span>
                   <span class="time-label">Days</span>
@@ -354,7 +410,6 @@ const getSessionArray = (race: Race) => [
           </div>
         </div>
 
-        <!-- Hero Bottom: Full Weekend Schedule & Live Results -->
         <div class="hero-schedule-footer">
           <h3 class="hero-sched-title">Weekend Schedule & Live Results</h3>
           <div class="hero-sched-grid">
@@ -374,13 +429,10 @@ const getSessionArray = (race: Race) => [
                   </div>
                 </div>
                 
-                {/* --- NEW ANTI-SPOILER RACE RESULTS BLOCK --- */}
                 {session.id === 'race' && (
                   <div class="h-sess-results js-sess-results">
                     {session.results ? (
                       <div class="spoiler-container js-spoiler-container">
-                        
-                        <!-- The Reveal Button -->
                         <button class="reveal-btn js-reveal-btn">
                           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
@@ -388,22 +440,17 @@ const getSessionArray = (race: Race) => [
                           </svg>
                           Reveal Results
                         </button>
-                        
-                        <!-- The Hidden Results Grid -->
                         <div class="mini-podium race-podium is-hidden js-race-podium">
                           <span class="m-step m-1" title="1st Place">🥇 {session.results.first}</span>
                           <span class="m-step m-2" title="2nd Place">🥈 {session.results.second}</span>
                           <span class="m-step m-3" title="3rd Place">🥉 {session.results.third}</span>
                         </div>
-                        
                       </div>
                     ) : (
                       <span class="pending-results">Awaiting Results...</span>
                     )}
                   </div>
                 )}
-                {/* ------------------------------------------- */}
-
               </div>
             ))}
           </div>
@@ -412,26 +459,27 @@ const getSessionArray = (race: Race) => [
     )}
 
     <div class="calendar-split">
-      <!-- Upcoming Races -->
       <section class="calendar-list-section">
         <h3 class="list-heading">Upcoming Races</h3>
         <div class="races-stack">
-          {upcomingRaces.map((race) => (
+          {upcomingRaces.map((race) => {
+            const expWeather = getExpectedWeather(race.Circuit.Location.locality);
+            return (
             <div class="race-card-wrapper upcoming-wrapper">
               <div class="race-card-header">
                 <div class="date-block">
                   <span class="date-month">{formatMonth(race.date)}</span>
-                  <span class="date-day">{formatDay(race.date)}</span>
+                  <span class="date-day">{formatWeekendDays(race.sessions.fp1, race.date)}</span>
                 </div>
                 
                 <div class="race-info">
                   <div class="card-meta">
                     <span class="round-text">Round {race.round}</span>
                     {race.isSprint && (
-                      <span class="sprint-badge list-sprint-badge">
+                      <button type="button" class="sprint-badge list-sprint-badge js-sprint-modal-trigger">
                         <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
                         Sprint
-                      </span>
+                      </button>
                     )}
                     <img src={`https://flagcdn.com/w20/${getFlagCode(race.Circuit.Location.country)}.png`} width="16" height="12" alt={race.Circuit.Location.country} class="card-flag" />
                   </div>
@@ -439,7 +487,8 @@ const getSessionArray = (race: Race) => [
                   
                   <div class="circuit-meta-row">
                     <span class="circuit-text">{race.Circuit.circuitName}</span>
-                    <div class="tyres-container">
+                    
+                    <button type="button" class="tyres-container js-tyre-modal-trigger" title="View Tyre Info">
                       {race.tyresAnnounced !== false ? (
                         <>
                           <div class="tyre-dot tyre-hard">{race.tyres[0]}</div>
@@ -449,18 +498,24 @@ const getSessionArray = (race: Race) => [
                       ) : (
                         <span class="tbc-badge">TBC</span>
                       )}
+                    </button>
+                    
+                    <div class="expected-weather" title="Estimated historical seasonal climate for race month">
+                      <span class="weather-badge">Avg</span>
+                      <span class="weather-icon">{expWeather.icon}</span>
+                      <span class="weather-text">{expWeather.temp}°C &bull; {expWeather.cond}</span>
                     </div>
                   </div>
                 </div>
                 
                 <div class="action-stack">
                   <div class="card-buttons">
-                    <a href={getGuideSlug(race.raceName)} class="btn-primary btn-sm" title="Circuit Guide">Guide</a>
-                    <a href={`/travel-and-tickets/${getSlug(race.raceName)}`} class="btn-secondary btn-sm" title="Travel & Tickets">Tickets</a>
-                    <a href="/tv-guides" class="btn-secondary btn-outline btn-sm" title="TV Guide">TV</a>
+                    <a href={getCircuitGuideSlug(race.raceName)} class="btn-primary btn-sm" title="Circuit Guide">Guide</a>
+                    <a href={getCityGuideSlug(race.Circuit.Location.locality)} class="btn-secondary btn-sm" title="City Guide">City Guide</a>
+                    <a href={`/tv-guides?round=${race.round}`} class="btn-secondary btn-outline btn-sm" title="TV Guide">TV</a>
                   </div>
                   <button class="expand-btn" aria-expanded="false" data-target={`schedule-${race.round}`}>
-                    <span>Schedule</span>
+                    <span>Schedule & Timings</span>
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="chevron"><path d="M6 9l6 6 6-6"/></svg>
                   </button>
                 </div>
@@ -472,23 +527,37 @@ const getSessionArray = (race: Race) => [
                     <div class="th-session">Session</div>
                     <div class="th-track">Track Time</div>
                     <div class="th-local">Your Time</div>
+                    <div class="th-cal"></div>
                   </div>
                   {getSessionArray(race).map(session => (
                     <div class="schedule-row js-schedule-row" data-utc={session.utc} data-tz={race.Circuit.Location.timezone}>
                       <div class="td-session">{session.name}</div>
                       <div class="td-track js-track-td">--:--</div>
                       <div class="td-local js-local-td">--:--</div>
+                      <div class="td-cal">
+                        <button 
+                          type="button" 
+                          class="btn-cal-sm js-cal-btn" 
+                          data-race={race.raceName} 
+                          data-session={session.name} 
+                          data-start={session.utc} 
+                          data-loc={race.Circuit.circuitName}
+                          title="Add to Google Calendar"
+                        >
+                          +Cal
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>
               </div>
             </div>
-          ))}
+            )
+          })}
           {upcomingRaces.length === 0 && <div class="empty-state">No upcoming races scheduled.</div>}
         </div>
       </section>
 
-      <!-- Past Races -->
       <section class="calendar-list-section mt-8">
         <h3 class="list-heading past-heading">Completed Races</h3>
         <div class="races-stack past-stack">
@@ -497,17 +566,17 @@ const getSessionArray = (race: Race) => [
               <div class="race-card-header">
                 <div class="date-block">
                   <span class="date-month">{formatMonth(race.date)}</span>
-                  <span class="date-day">{formatDay(race.date)}</span>
+                  <span class="date-day">{formatWeekendDays(race.sessions.fp1, race.date)}</span>
                 </div>
                 
                 <div class="race-info">
                   <div class="card-meta">
                     <span class="round-text">Round {race.round}</span>
                     {race.isSprint && (
-                      <span class="sprint-badge past-sprint">
+                      <button type="button" class="sprint-badge past-sprint js-sprint-modal-trigger">
                         <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
                         Sprint
-                      </span>
+                      </button>
                     )}
                     <img src={`https://flagcdn.com/w20/${getFlagCode(race.Circuit.Location.country)}.png`} width="16" height="12" alt={race.Circuit.Location.country} class="card-flag" />
                   </div>
@@ -515,7 +584,7 @@ const getSessionArray = (race: Race) => [
                   
                   <div class="circuit-meta-row">
                     <span class="circuit-text">{race.Circuit.circuitName}</span>
-                    <div class="tyres-container">
+                    <button type="button" class="tyres-container js-tyre-modal-trigger">
                       {race.tyresAnnounced !== false ? (
                         <>
                           <div class="tyre-dot tyre-hard">{race.tyres[0]}</div>
@@ -525,14 +594,14 @@ const getSessionArray = (race: Race) => [
                       ) : (
                         <span class="tbc-badge">TBC</span>
                       )}
-                    </div>
+                    </button>
                   </div>
                 </div>
                 
                 <div class="action-stack">
                   <div class="card-buttons" style="margin-bottom: 0.5rem;">
-                    <a href={getGuideSlug(race.raceName)} class="btn-primary btn-sm">Guide</a>
-                    <a href={`/travel-and-tickets/${getSlug(race.raceName)}`} class="btn-secondary btn-outline btn-sm">Reviews</a>
+                    <a href={getCircuitGuideSlug(race.raceName)} class="btn-primary btn-sm">Guide</a>
+                    <a href={getCityGuideSlug(race.Circuit.Location.locality)} class="btn-secondary btn-outline btn-sm">City</a>
                   </div>
                   <span class="completed-badge">Completed</span>
                   <button class="expand-btn" aria-expanded="false" data-target={`podium-${race.round}`} style="margin-top: 0.5rem;">
@@ -570,6 +639,75 @@ const getSessionArray = (race: Race) => [
       </section>
     </div>
   </main>
+
+  <!-- INTERACTIVE TYRE GUIDE MODAL -->
+  <div id="tyre-modal" class="modal-overlay">
+    <div class="modal-content">
+      <button class="modal-close js-modal-close">&times;</button>
+      <div class="modal-header">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#e10600" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+        <h3>Pirelli Tyre Compounds</h3>
+      </div>
+      <p class="modal-desc">Formula 1 uses five slick dry-weather tyre compounds (C1 to C5). Pirelli selects three specifically suited for each track's abrasiveness and layout.</p>
+      
+      <div class="tyre-guide-list">
+        <div class="tyre-guide-row">
+          <div class="tg-visual"><span class="tyre-dot tyre-hard lg-dot">C1</span> <span class="tyre-dot tyre-hard lg-dot">C2</span></div>
+          <div class="tg-text">
+            <strong>The Hard Tyre (White)</strong>
+            <span>Longest lasting but slowest to warm up. Best for heavy braking zones and abrasive tracks.</span>
+          </div>
+        </div>
+        <div class="tyre-guide-row">
+          <div class="tg-visual"><span class="tyre-dot tyre-medium lg-dot">C3</span> <span class="tyre-dot tyre-medium lg-dot">C4</span></div>
+          <div class="tg-text">
+            <strong>The Medium Tyre (Yellow)</strong>
+            <span>The optimal balance of durability and speed. Often the preferred race tyre.</span>
+          </div>
+        </div>
+        <div class="tyre-guide-row">
+          <div class="tg-visual"><span class="tyre-dot tyre-soft lg-dot">C4</span> <span class="tyre-dot tyre-soft lg-dot">C5</span></div>
+          <div class="tg-text">
+            <strong>The Soft Tyre (Red)</strong>
+            <span>Provides maximum mechanical grip for qualifying, but degrades rapidly during a race.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- INTERACTIVE SPRINT GUIDE MODAL -->
+  <div id="sprint-modal" class="modal-overlay">
+    <div class="modal-content">
+      <button class="modal-close js-sprint-close">&times;</button>
+      <div class="modal-header">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#9333ea" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+        <h3>F1 Sprint Format</h3>
+      </div>
+      <p class="modal-desc">Sprint weekends replace the standard free practice sessions with a secondary, shortened competitive race that awards championship points.</p>
+      
+      <div class="tyre-guide-list">
+        <div class="tyre-guide-row" style="border-left: 3px solid #94a3b8;">
+          <div class="tg-text">
+            <strong>Friday: Sprint Qualifying</strong>
+            <span>Replaces FP2. A shortened, three-part qualifying session (SQ1, SQ2, SQ3) that sets the grid specifically for the Sprint Race.</span>
+          </div>
+        </div>
+        <div class="tyre-guide-row" style="border-left: 3px solid #9333ea;">
+          <div class="tg-text">
+            <strong>Saturday: The Sprint Race</strong>
+            <span>A flat-out, 100km dash to the finish line with no mandatory pit stops. Points are awarded to the top 8 finishers (8 for 1st, down to 1 for 8th).</span>
+          </div>
+        </div>
+        <div class="tyre-guide-row" style="border-left: 3px solid #e10600;">
+          <div class="tg-text">
+            <strong>Saturday/Sunday: Standard Grand Prix</strong>
+            <span>After the Sprint, standard Grand Prix Qualifying takes place to set the grid for the main Sunday race, exactly like a normal weekend.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </Layout>
 
 <script is:inline>
@@ -647,10 +785,8 @@ const getSessionArray = (race: Race) => [
     });
   }
 
-  // --- NEW SCRIPT: ANTI-SPOILER LOGIC ---
   function setupSpoilers() {
     const revealButtons = document.querySelectorAll('.js-reveal-btn');
-    
     revealButtons.forEach(btn => {
       const newBtn = btn.cloneNode(true);
       btn.parentNode.replaceChild(newBtn, btn);
@@ -664,23 +800,141 @@ const getSessionArray = (race: Race) => [
       });
     });
   }
-  // --------------------------------------
+
+  function setupCalendarButtons() {
+    const calBtns = document.querySelectorAll('.js-cal-btn');
+    
+    const generateGoogleCalendarUrl = (title, sessionName, startIso, endIso, location) => {
+      const formatTime = (iso) => iso.replace(/[-:]/g, '').split('.')[0] + 'Z';
+      const eventTitle = encodeURIComponent(`F1: ${title} - ${sessionName}`);
+      const details = encodeURIComponent(`🏎️ Formula 1: ${title} - ${sessionName}\n📍 Track: ${location}\n\nView full timings and F1 guides at My Grand Prix Hub.`);
+      const loc = encodeURIComponent(location);
+      const dates = `${formatTime(startIso)}/${formatTime(endIso)}`;
+      return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${eventTitle}&dates=${dates}&details=${details}&location=${loc}`;
+    };
+
+    calBtns.forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const race = btn.getAttribute('data-race');
+        const session = btn.getAttribute('data-session');
+        const start = btn.getAttribute('data-start');
+        const loc = btn.getAttribute('data-loc');
+        
+        const durationHours = session.toLowerCase().includes('race') ? 2 : 1;
+        const startDateObj = new Date(start);
+        const endDateObj = new Date(startDateObj.getTime() + (durationHours * 60 * 60 * 1000));
+        const end = endDateObj.toISOString();
+
+        const url = generateGoogleCalendarUrl(race, session, start, end, loc);
+        window.open(url, '_blank');
+      });
+    });
+  }
+
+  // --- MASTER FULL SEASON SYNC (.ICS Generator) ---
+  function setupMasterSync() {
+    const syncBtn = document.querySelector('.js-sync-all-btn');
+    if (!syncBtn) return;
+
+    syncBtn.addEventListener('click', () => {
+      const dataEl = document.getElementById('calendar-data');
+      if (!dataEl) return;
+
+      const races = JSON.parse(dataEl.textContent);
+      const formatTime = (iso) => iso.replace(/[-:]/g, '').split('.')[0] + 'Z';
+      
+      let icsContent = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//My Grand Prix Hub//F1 2026 Calendar//EN\nCALSCALE:GREGORIAN\nMETHOD:PUBLISH\n";
+
+      races.forEach(race => {
+        const buildEvent = (sessionName, startIso, isRace) => {
+          if (!startIso) return;
+          const durationHours = isRace ? 2 : 1;
+          const startObj = new Date(startIso);
+          const endObj = new Date(startObj.getTime() + (durationHours * 60 * 60 * 1000));
+          
+          icsContent += "BEGIN:VEVENT\n";
+          icsContent += `DTSTART:${formatTime(startIso)}\n`;
+          icsContent += `DTEND:${formatTime(endObj.toISOString())}\n`;
+          icsContent += `SUMMARY:F1: ${race.raceName} - ${sessionName}\n`;
+          icsContent += `LOCATION:${race.Circuit.circuitName}, ${race.Circuit.Location.locality}, ${race.Circuit.Location.country}\n`;
+          icsContent += `DESCRIPTION:🏎️ Formula 1: ${race.raceName} - ${sessionName}\\n\\nView full timings and guides at My Grand Prix Hub.\n`;
+          icsContent += "END:VEVENT\n";
+        };
+
+        buildEvent("Practice 1", race.sessions.fp1, false);
+        buildEvent(race.isSprint ? "Sprint Qualifying" : "Practice 2", race.sessions.fp2, false);
+        buildEvent(race.isSprint ? "Sprint Race" : "Practice 3", race.sessions.fp3, race.isSprint);
+        buildEvent("Qualifying", race.sessions.quali, false);
+        buildEvent("Grand Prix", race.sessions.race, true);
+      });
+
+      icsContent += "END:VCALENDAR";
+
+      const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = 'f1-season-2026.ics';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    });
+  }
+
+  function setupModals() {
+    // Tyre Modal
+    const tyreTriggers = document.querySelectorAll('.js-tyre-modal-trigger');
+    const tyreModal = document.getElementById('tyre-modal');
+    const tyreCloseBtn = document.querySelector('.js-modal-close');
+    
+    // Sprint Modal
+    const sprintTriggers = document.querySelectorAll('.js-sprint-modal-trigger');
+    const sprintModal = document.getElementById('sprint-modal');
+    const sprintCloseBtn = document.querySelector('.js-sprint-close');
+
+    if (tyreModal) tyreModal.style.display = 'none';
+    if (sprintModal) sprintModal.style.display = 'none';
+
+    const bindModal = (triggers, modal, closeBtn) => {
+      if (!modal) return;
+      triggers.forEach(trigger => {
+        trigger.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          modal.style.display = 'flex';
+          document.body.style.overflow = 'hidden';
+        });
+      });
+
+      const close = () => {
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+      };
+
+      if (closeBtn) closeBtn.addEventListener('click', close);
+      modal.addEventListener('click', (e) => { if (e.target === modal) close(); });
+    };
+
+    bindModal(tyreTriggers, tyreModal, tyreCloseBtn);
+    bindModal(sprintTriggers, sprintModal, sprintCloseBtn);
+  }
 
   function initCountdown() {
     const timerElement = document.getElementById('f1-countdown');
     if (!timerElement) return;
 
-    const targetDateStr = timerElement.getAttribute('data-target');
+    let targetDateStr = timerElement.getAttribute('data-target');
     if (!targetDateStr) return;
-
-    const targetDate = new Date(targetDateStr).getTime();
     
+    let targetDate = new Date(targetDateStr).getTime();
+
     const daysEl = document.getElementById('cd-days');
     const hoursEl = document.getElementById('cd-hours');
     const minsEl = document.getElementById('cd-mins');
     const secsEl = document.getElementById('cd-secs');
 
     const updateTimer = () => {
+      if (!targetDate) return;
       const now = new Date().getTime();
       const distance = targetDate - now;
 
@@ -692,15 +946,15 @@ const getSessionArray = (race: Race) => [
         return;
       }
 
-      const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-      const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-      const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-      const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+      const d = Math.floor(distance / (1000 * 60 * 60 * 24)).toString().padStart(2, '0');
+      const h = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)).toString().padStart(2, '0');
+      const m = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)).toString().padStart(2, '0');
+      const s = Math.floor((distance % (1000 * 60)) / 1000).toString().padStart(2, '0');
 
-      if(daysEl) daysEl.innerText = days.toString().padStart(2, '0');
-      if(hoursEl) hoursEl.innerText = hours.toString().padStart(2, '0');
-      if(minsEl) minsEl.innerText = minutes.toString().padStart(2, '0');
-      if(secsEl) secsEl.innerText = seconds.toString().padStart(2, '0');
+      if(daysEl) daysEl.innerText = d;
+      if(hoursEl) hoursEl.innerText = h;
+      if(minsEl) minsEl.innerText = m;
+      if(secsEl) secsEl.innerText = s;
     };
 
     updateTimer(); 
@@ -711,7 +965,10 @@ const getSessionArray = (race: Race) => [
     formatSessionTimes();
     formatHeroSchedule();
     setupAccordions();
-    setupSpoilers(); // <-- Added to our main runner
+    setupSpoilers(); 
+    setupCalendarButtons(); 
+    setupMasterSync();
+    setupModals();
     initCountdown();
   }
 
@@ -731,6 +988,15 @@ const getSessionArray = (race: Race) => [
   .section-header {
     margin-bottom: 3rem;
   }
+  
+  .header-flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.5rem;
+  }
 
   .badge {
     display: inline-block;
@@ -746,7 +1012,7 @@ const getSessionArray = (race: Race) => [
 
   h1 {
     font-size: 2.5rem;
-    margin: 0.75rem 0 0.5rem 0;
+    margin: 0.75rem 0 0 0;
     font-weight: 800;
     color: #f8fafc;
   }
@@ -755,6 +1021,27 @@ const getSessionArray = (race: Race) => [
     color: var(--color-muted, #94a3b8);
     font-size: 1.15rem;
     margin: 0;
+  }
+
+  /* Sync Button */
+  .btn-sync {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(56, 189, 248, 0.1);
+    color: #38bdf8;
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    font-size: 0.85rem;
+    font-weight: 800;
+    padding: 0.55rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .btn-sync:hover {
+    background: #38bdf8;
+    color: #0f172a;
   }
 
   /* Hero Section (Next Race) */
@@ -808,7 +1095,7 @@ const getSessionArray = (race: Race) => [
     border: 1px solid #334155;
   }
 
-  /* Sprint Badges */
+  /* Sprint Badges - Now Buttons! */
   .sprint-badge {
     display: inline-flex;
     align-items: center;
@@ -822,7 +1109,15 @@ const getSessionArray = (race: Race) => [
     margin-left: 0.5rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
+    border: none;
+    cursor: pointer;
     box-shadow: 0 2px 10px rgba(147, 51, 234, 0.4);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  
+  .sprint-badge:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(147, 51, 234, 0.6);
   }
 
   .list-sprint-badge {
@@ -866,6 +1161,7 @@ const getSessionArray = (race: Race) => [
   .circuit-meta-row {
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
     gap: 1rem;
     margin-bottom: 0.25rem;
   }
@@ -878,6 +1174,12 @@ const getSessionArray = (race: Race) => [
     border: 1px solid #334155;
     padding: 0.3rem 0.6rem;
     border-radius: 9999px;
+    cursor: pointer;
+    transition: border-color 0.2s;
+  }
+  
+  .tyres-container:hover {
+    border-color: #e10600;
   }
 
   .tyres-label {
@@ -886,6 +1188,11 @@ const getSessionArray = (race: Race) => [
     color: #64748b;
     text-transform: uppercase;
     margin-right: 0.2rem;
+  }
+  
+  .tyre-info-icon {
+    color: #64748b;
+    margin-left: 0.2rem;
   }
 
   .tyre-dot {
@@ -913,6 +1220,39 @@ const getSessionArray = (race: Race) => [
     border-radius: 4px;
     font-size: 0.75rem;
     font-weight: 700;
+  }
+
+  .expected-weather {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    background: #0f172a;
+    color: #94a3b8;
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 0.35rem 0.65rem;
+    border-radius: 9999px;
+    border: 1px solid #334155;
+  }
+
+  /* Weather Badges */
+  .weather-badge {
+    font-size: 0.65rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 0.15rem 0.4rem;
+    border-radius: 4px;
+    background: #1e293b;
+    color: #64748b;
+    border: 1px solid #334155;
+    line-height: 1;
+  }
+
+  .is-live-weather .weather-badge {
+    background: rgba(56, 189, 248, 0.15);
+    color: #38bdf8;
+    border-color: rgba(56, 189, 248, 0.4);
   }
 
   /* Hero Actions Row */
@@ -981,6 +1321,11 @@ const getSessionArray = (race: Race) => [
     padding: 0.5rem 1rem;
     border-radius: 9999px;
   }
+  
+  .is-live-weather {
+    border-color: rgba(56, 189, 248, 0.4);
+    background: linear-gradient(90deg, rgba(15,23,42,1) 0%, rgba(15,23,42,1) 80%, rgba(56,189,248,0.1) 100%);
+  }
 
   .weather-icon {
     font-size: 1.1rem;
@@ -990,6 +1335,15 @@ const getSessionArray = (race: Race) => [
     font-size: 0.85rem;
     font-weight: 600;
     color: #94a3b8;
+  }
+
+  .weather-live-dot {
+    width: 6px;
+    height: 6px;
+    background: #38bdf8;
+    border-radius: 50%;
+    box-shadow: 0 0 6px #38bdf8;
+    margin-left: 0.2rem;
   }
 
   /* Countdown & Live Timer */
@@ -1196,7 +1550,7 @@ const getSessionArray = (race: Race) => [
     letter-spacing: 0.05em;
   }
 
-  /* --- NEW ANTI-SPOILER STYLES --- */
+  /* --- ANTI-SPOILER STYLES --- */
   .spoiler-container {
     display: flex;
     justify-content: center;
@@ -1242,7 +1596,6 @@ const getSessionArray = (race: Race) => [
     from { opacity: 0; transform: translateY(4px); }
     to { opacity: 1; transform: translateY(0); }
   }
-  /* ------------------------------- */
 
   .mini-podium {
     display: flex;
@@ -1329,9 +1682,11 @@ const getSessionArray = (race: Race) => [
   }
 
   .date-day {
-    font-size: 1.65rem;
+    font-size: 1.45rem; 
     font-weight: 900;
     color: #ffffff;
+    white-space: nowrap; 
+    letter-spacing: -0.02em;
   }
 
   .race-info {
@@ -1496,6 +1851,7 @@ const getSessionArray = (race: Race) => [
 
   .schedule-row {
     display: flex;
+    align-items: center;
     padding: 0.75rem 0;
     border-bottom: 1px dashed #1e293b;
     color: #e2e8f0;
@@ -1511,14 +1867,151 @@ const getSessionArray = (race: Race) => [
   .th-session, .td-session { flex: 2; font-weight: 700; color: #ffffff; }
   .th-track, .td-track { flex: 1.5; color: #94a3b8; font-variant-numeric: tabular-nums;}
   .th-local, .td-local { flex: 1.5; font-variant-numeric: tabular-nums;}
+  .th-cal, .td-cal { flex: 0.5; display: flex; justify-content: flex-end; }
 
   .td-local {
     color: #38bdf8;
   }
 
+  .btn-cal-sm {
+    background: #0f172a;
+    border: 1px solid #334155;
+    color: #cbd5e1;
+    font-size: 0.65rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .btn-cal-sm:hover {
+    background: #38bdf8;
+    color: #0f172a;
+    border-color: #38bdf8;
+  }
+
+  /* MODAL STYLES */
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(4px);
+    display: none; 
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+  }
+
+  .modal-content {
+    position: relative;
+    background: #0f172a;
+    border: 1px solid #334155;
+    padding: 2rem;
+    border-radius: 12px;
+    max-width: 500px;
+    width: 90%;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+    animation: slideUp 0.3s ease-out;
+  }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .modal-close {
+    position: absolute;
+    top: 1rem;
+    right: 1.25rem;
+    background: transparent;
+    border: none;
+    color: #94a3b8;
+    font-size: 2rem;
+    cursor: pointer;
+    line-height: 1;
+  }
+
+  .modal-close:hover {
+    color: #ffffff;
+  }
+
+  .modal-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .modal-header h3 {
+    margin: 0;
+    color: #ffffff;
+    font-size: 1.5rem;
+    font-weight: 800;
+  }
+
+  .modal-desc {
+    color: #cbd5e1;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    margin-bottom: 1.5rem;
+  }
+
+  .tyre-guide-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .tyre-guide-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    background: #1e293b;
+    padding: 1rem;
+    border-radius: 8px;
+    border: 1px solid #334155;
+  }
+
+  .tg-visual {
+    display: flex;
+    gap: 0.25rem;
+  }
+
+  .lg-dot {
+    width: 26px;
+    height: 26px;
+    font-size: 0.7rem;
+  }
+
+  .tg-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .tg-text strong {
+    color: #f8fafc;
+    font-size: 0.95rem;
+  }
+
+  .tg-text span {
+    color: #94a3b8;
+    font-size: 0.85rem;
+    line-height: 1.4;
+  }
+
   /* Responsive Mobile Overrides */
   @media (max-width: 768px) {
     .page-container { padding: 2rem 1rem 4rem; }
+    
+    .header-flex { flex-direction: column; align-items: flex-start; }
+    .btn-sync { width: 100%; justify-content: center; margin-top: 0.5rem;}
+    
     h1 { font-size: 2rem; }
     
     .next-race-content { padding: 1.5rem; }

@@ -1,7 +1,8 @@
 ---
 // src/pages/circuits-live/city-guides/[slug].astro
 import Layout from '../../../layouts/Layout.astro';
-import { cityGuidesData, type CityGuide } from '../../../data/cityGuides';
+import { cityGuidesData } from '@/data/cityGuides/index';
+import type { CityGuide } from '@/data/types';
 
 export const prerender = true;
 
@@ -13,6 +14,7 @@ export function getStaticPaths() {
 }
 
 const { 
+  slug, // Make sure to destructure the slug!
   city, 
   raceSlug, 
   race, 
@@ -32,13 +34,49 @@ const {
   foodAndDrink,
   watchParties,
   sightseeing 
-} = Astro.props as CityGuide;
+} = Astro.props as CityGuide & { slug: string }; 
+
+// --- SEO STRUCTURED DATA LOGIC ---
+const articleSchema = {
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": `${city} F1 Fan Guide: Travel & Survival for the ${race}`,
+  "description": intro,
+  "image": heroImage,
+  "author": {
+    "@type": "Organization",
+    "name": "My Grand Prix Hub"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "My Grand Prix Hub",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://mygrandprixhub.com/logo.png" // Fallback - replace if you have a real URL
+    }
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": `https://mygrandprixhub.com/circuits-live/city-guides/${slug}` // Fallback domain
+  },
+  "about": {
+    "@type": "Place",
+    "name": city,
+    "address": {
+      "@type": "PostalAddress",
+      "addressCountry": country
+    }
+  }
+};
 ---
 
 <Layout 
   title={`${city} Fan City Guide | ${race} | My Grand Prix Hub`}
   description={`F1 fan guide to ${city}. Where to stay, post-session dining, non-clashing weekend itinerary, and fast transit routes to ${circuitName}.`}
 >
+  <!-- SEO STRUCTURED DATA -->
+  <script type="application/ld+json" set:html={JSON.stringify(articleSchema)} />
+
   <main class="page-container">
     
     <!-- BACK LINK -->
