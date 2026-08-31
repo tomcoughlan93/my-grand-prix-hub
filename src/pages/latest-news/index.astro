@@ -1,228 +1,93 @@
 ---
+// src/pages/latest-news/index.astro
 import Layout from '@/layouts/Layout.astro';
-import Parser from 'rss-parser';
 import { getCollection } from 'astro:content';
 
-// --- 1. FETCH INTERNAL EXCLUSIVES (With Safe Fallback) ---
-let sortedHubNews: any[] = [];
+// Fetch the 3 most recent SEO blog posts to feature on the portal
+let latestFeatures: any[] = [];
 try {
-  const allHubNews = await getCollection('news');
-  if (allHubNews) {
-    sortedHubNews = allHubNews.sort((a, b) => new Date(b.data.date).valueOf() - new Date(a.data.date).valueOf());
+  const allFeatures = await getCollection('news');
+  if (allFeatures) {
+    latestFeatures = allFeatures
+      .sort((a, b) => new Date(b.data.date).valueOf() - new Date(a.data.date).valueOf())
+      .slice(0, 3);
   }
 } catch (e) {
-  console.warn('Notice: Could not load internal news collection.');
-}
-
-// --- 2. RSS PARSER SETUP (Upgraded Version) ---
-interface CustomFeedItem {
-  mediaContent?: any;
-  mediaThumbnail?: any;
-  enclosure?: { url?: string };
-  contentEncoded?: string;
-  description?: string;
-  content?: string;
-  summary?: string;
-  contentSnippet?: string;
-  title?: string;
-  link?: string;
-  pubDate?: string;
-  image?: any;
-}
-
-const parser: Parser<{}, CustomFeedItem> = new Parser({
-  customFields: {
-    item: [
-      ['media:content', 'mediaContent', { keepArray: true }],
-      ['media:thumbnail', 'mediaThumbnail', { keepArray: true }],
-      ['media:group', 'mediaGroup', { keepArray: true }],
-      ['content:encoded', 'contentEncoded'],
-      ['description', 'description'],
-      ['image', 'image']
-    ],
-  },
-});
-
-const VERIFIED_FEEDS = [
-  { name: 'BBC Sport F1', url: 'https://feeds.bbci.co.uk/sport/formula1/rss.xml' },
-  { name: 'Autosport', url: 'https://www.autosport.com/rss/f1/news/' },
-  { name: 'Motorsport.com', url: 'https://www.motorsport.com/rss/f1/news/' },
-  { name: 'RacingNews365', url: 'https://racingnews365.com/feed/news.xml' },
-  { name: 'Crash.net F1', url: 'https://www.crash.net/rss/f1' },
-];
-
-interface NewsItem {
-  title: string;
-  link: string;
-  pubDate: string;
-  source: string;
-  snippet: string;
-  imageUrl?: string;
-  dateObj: Date;
-}
-
-function cleanSnippet(str?: string): string {
-  if (!str) return '';
-  const text = str.replace(/<[^>]*>?/gm, '').replace(/&quot;/g, '"').replace(/&amp;/g, '&').replace(/&#039;/g, "'").replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/\s+/g, ' ').trim();
-  return text.length > 130 ? text.substring(0, 127) + '...' : text;
-}
-
-function extractImage(item: CustomFeedItem, sourceName: string): string | undefined {
-  let url: string | undefined = undefined;
-
-  if (item.enclosure && item.enclosure.url) url = item.enclosure.url;
-
-  if (!url && item.mediaContent && Array.isArray(item.mediaContent)) {
-    const found = item.mediaContent.find((m: any) => m.$?.url || m.url);
-    if (found) url = found.$?.url || found.url;
-  }
-  if (!url && item.mediaThumbnail && Array.isArray(item.mediaThumbnail)) {
-    const found = item.mediaThumbnail.find((t: any) => t.$?.url || t.url);
-    if (found) url = found.$?.url || found.url;
-  }
-  if (!url && (item as any).mediaGroup && Array.isArray((item as any).mediaGroup)) {
-    const group = (item as any).mediaGroup[0];
-    if (group && group['media:content'] && Array.isArray(group['media:content'])) {
-      const found = group['media:content'].find((m: any) => m.$?.url || m.url);
-      if (found) url = found.$?.url || found.url;
-    }
-  }
-  if (!url && item.image) {
-    if (typeof item.image === 'string') url = item.image;
-    else if (item.image.url) url = item.image.url;
-    else if (item.image.$ && item.image.$.url) url = item.image.$.url;
-  }
-  if (!url) {
-    const htmlString = [item.contentEncoded, item.content, item.summary, item.description, item.contentSnippet].filter(Boolean).join(' ');
-    const dataSrcMatch = htmlString.match(/<img[^>]+data-src\s*=\s*["']([^"']+)["']/i);
-    if (dataSrcMatch && dataSrcMatch[1]) url = dataSrcMatch[1];
-    else {
-      const srcMatch = htmlString.match(/<img[^>]+src\s*=\s*["']([^"']+)["']/i);
-      if (srcMatch && srcMatch[1]) url = srcMatch[1];
-    }
-  }
-  if (!url) {
-    const itemStr = JSON.stringify(item);
-    const regex = /(https?:\/\/[^"'\s>]+?\.(?:jpg|jpeg|png|webp)(?:\?[^"'\s>]*)?)/i;
-    const match = itemStr.match(regex);
-    if (match && match[1]) url = match[1];
-  }
-  if (!url) return undefined;
-  if (sourceName === 'BBC Sport F1') {
-    url = url.replace(/\/\d+x\d+\//g, '/976x549/').replace(/\/p\d+\//g, '/p0976/').replace(/\/(144|240|320|480)\//g, '/976/');
-  }
-  return url;
-}
-
-// --- 3. FETCH AND SORT EXTERNAL RSS FEEDS ---
-let articles: NewsItem[] = [];
-
-try {
-  const feedPromises = VERIFIED_FEEDS.map(async (src) => {
-    try {
-      const feed = await parser.parseURL(src.url);
-      const validItems: NewsItem[] = [];
-      
-      for (const item of feed.items || []) {
-        const hasValidDate = item.pubDate && !isNaN(new Date(item.pubDate).getTime());
-        if (!hasValidDate) continue;
-
-        const imageUrl = extractImage(item, src.name);
-        
-        // Skip RN365 articles if the image parser failed to find one
-        if (src.name === 'RacingNews365' && !imageUrl) continue;
-        if (!imageUrl) continue; // Require images for all layout cards
-        
-        const dateObj = new Date(item.pubDate!);
-        
-        validItems.push({
-          title: item.title || 'F1 News Headline',
-          link: item.link || '#',
-          pubDate: dateObj.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }).toUpperCase(),
-          source: src.name,
-          snippet: cleanSnippet(item.contentEncoded || item.content || item.summary || item.description || item.contentSnippet),
-          imageUrl,
-          dateObj,
-        });
-        
-        if (validItems.length >= 8) break; // Grab slightly more from each feed
-      }
-      return validItems;
-    } catch (err) {
-      console.warn(`[RSS Notice] Could not fetch ${src.name}:`, err);
-      return [];
-    }
-  });
-  const results = await Promise.all(feedPromises);
-  articles = results.flat().sort((a, b) => b.dateObj.getTime() - a.dateObj.getTime());
-} catch (e) {
-  console.error('Error loading news feeds:', e);
+  console.warn('Notice: Could not load features collection.');
 }
 ---
 
-<Layout title="Latest F1 News & Headlines | My Grand Prix Hub">
+<Layout 
+  title="F1 News & Features | My Grand Prix Hub"
+  description="Your ultimate source for live Formula 1 paddock updates and in-depth evergreen F1 features, guides, and analysis."
+>
   <main class="page-container">
     
-    <header class="section-header">
-      <span class="badge">Latest News</span>
-      <h1>Latest F1 News</h1>
-      <p>The latest headlines, paddock updates, and technical analysis.</p>
-    </header>
+    <!-- ALIGNED HEADER (Matches City/Circuit Directories) -->
+    <div class="header-container">
+      <header class="section-header">
+        <span class="badge">Media Hub</span>
+        <h1 class="gradient-title">News & Features</h1>
+        <p>Choose your feed. Get up-to-the-minute updates from the paddock, or dive into our deep-dive guides and historical F1 features.</p>
+      </header>
+    </div>
 
-    <!-- SECTION 1: EXCLUSIVES (INTERNAL CONTENT) -->
-    {sortedHubNews.length > 0 && (
-      <section class="exclusive-section">
-        <div class="section-title-row">
-          <h2>From The Hub Desk</h2>
-          <span class="section-badge">Exclusives</span>
+    <div class="gateway-grid">
+      
+      <!-- GATEWAY 1: LIVE PADDOCK NEWS (RSS) -->
+      <a href="/latest-news/paddock" class="gateway-card paddock-card">
+        <div class="card-bg-image paddock-bg"></div>
+        <div class="card-overlay"></div>
+        <div class="card-content">
+          <div class="card-meta">
+            <span class="live-pulse"></span>
+            <span class="meta-text">Updated 24/7</span>
+          </div>
+          <h2>Paddock News</h2>
+          <p>Live, aggregated updates from the world's top motorsport publishers. Breaking news, driver quotes, and weekend paddock rumors.</p>
+          <span class="btn-gateway">Enter The Paddock &rarr;</span>
         </div>
-        <div class="exclusive-grid">
-          {sortedHubNews.map((article) => (
-            <a href={`/news/${article.id}`} class="exclusive-card">
-              <div class="card-content">
-                <span class="exclusive-badge">★ Hub Feature</span>
-                <h3>{article.data.title}</h3>
-                <p>{article.data.description || 'In-depth preview and analysis from the My Grand Prix Hub team.'}</p>
-                <span class="read-more">Read Full Article →</span>
+      </a>
+
+      <!-- GATEWAY 2: SEO BLOG / FEATURES -->
+      <a href="/latest-news/features" class="gateway-card features-card">
+        <div class="card-bg-image features-bg"></div>
+        <div class="card-overlay"></div>
+        <div class="card-content">
+          <div class="card-meta">
+            <span class="static-dot"></span>
+            <span class="meta-text">Hub Exclusives</span>
+          </div>
+          <h2>The Racing Line</h2>
+          <p>In-depth Formula 1 guides, technical explainers, historical deep-dives, and evergreen motorsport features created by our team.</p>
+          <span class="btn-gateway">Read Features &rarr;</span>
+        </div>
+      </a>
+
+    </div>
+
+    <!-- PREVIEW OF LATEST SEO ARTICLES -->
+    {latestFeatures.length > 0 && (
+      <section class="latest-features-section">
+        <div class="section-title-row">
+          <h3>Latest From The Racing Line</h3>
+          <a href="/latest-news/features" class="view-all-link">View All Articles &rarr;</a>
+        </div>
+        
+        <div class="features-preview-grid">
+          {latestFeatures.map((article) => (
+            <a href={`/news/${article.id}`} class="feature-preview-card">
+              <div class="feature-preview-content">
+                <span class="feature-date">{new Date(article.data.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                <h4>{article.data.title}</h4>
+                <p>{article.data.description}</p>
+                <span class="read-more-text">Read Article &rarr;</span>
               </div>
             </a>
           ))}
         </div>
       </section>
     )}
-
-    <!-- SECTION 2: EXTERNAL RSS FEED -->
-    <section class="rss-section">
-      <div class="section-title-row">
-        <h2>Around The Paddock</h2>
-        <span class="section-badge">Global Feed</span>
-      </div>
-      
-      {articles.length === 0 ? (
-        <div class="news-empty-state">
-          <p>Currently scouting the paddock for the latest updates. Check back soon!</p>
-        </div>
-      ) : (
-        <div class="news-grid">
-          {articles.map((item) => (
-            <a href={item.link} target="_blank" rel="noopener noreferrer" class="news-card">
-              <div class="card-image-wrap">
-                <img src={item.imageUrl} alt={item.title} loading="lazy" class="card-image" />
-              </div>
-              <div class="news-content">
-                <div class="news-meta">
-                  <span class="feed-source">{item.source}</span>
-                  <span class="news-date">{item.pubDate}</span>
-                </div>
-                <h3 class="news-title">{item.title}</h3>
-                {item.snippet && <p class="news-excerpt">{item.snippet}</p>}
-                <span class="read-more">Read on {item.source} ↗</span>
-              </div>
-            </a>
-          ))}
-        </div>
-      )}
-    </section>
 
   </main>
 </Layout>
@@ -231,244 +96,303 @@ try {
   .page-container {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 3rem 1.5rem 6rem;
-    color: #f1f5f9;
-    box-sizing: border-box;
+    padding: 4rem 1.5rem 6rem 1.5rem;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   }
 
-  /* Header Styles */
-  .section-header {
+  /* Standardized Header */
+  .header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
     margin-bottom: 3.5rem;
+    flex-wrap: wrap;
+    gap: 2rem;
   }
-  
+
+  .section-header {
+    max-width: 650px;
+  }
+
   .badge {
-    background: #e10600;
-    color: white;
-    padding: 0.35rem 0.75rem;
-    border-radius: 9999px;
+    display: inline-block;
+    background-color: #38bdf8;
+    color: #0f172a;
+    font-size: 0.85rem;
     font-weight: 800;
-    font-size: 0.75rem;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    padding: 0.4rem 1rem;
+    border-radius: 6px;
+    letter-spacing: 0.08em;
+    margin-bottom: 1.25rem;
   }
-  
-  h1 {
-    font-size: 3.25rem;
-    color: #ffffff;
-    margin: 1rem 0 0.5rem 0;
-    font-weight: 900;
-    letter-spacing: -0.03em;
+
+  .gradient-title { 
+    font-size: 3.5rem; 
+    margin: 0 0 1rem 0; 
+    font-weight: 900; 
+    letter-spacing: -0.03em; 
+    line-height: 1.1; 
+    background: linear-gradient(to right, #ffffff, #94a3b8);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
   }
-  
+
   .section-header p {
     color: #94a3b8;
     font-size: 1.15rem;
-    max-width: 600px;
-    line-height: 1.5;
-  }
-  
-  /* Shared Section Titles */
-  .section-title-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 1.5rem;
-    border-bottom: 1px solid #334155;
-    padding-bottom: 0.75rem;
-  }
-
-  .section-title-row h2 {
-    font-size: 1.5rem;
-    font-weight: 800;
-    color: #ffffff;
+    line-height: 1.6;
     margin: 0;
   }
 
-  .section-badge {
-    background: #0f172a;
-    color: #38bdf8;
-    border: 1px solid #334155;
-    font-size: 0.75rem;
-    font-weight: 700;
-    padding: 0.25rem 0.5rem;
-    border-radius: 4px;
-    text-transform: uppercase;
+  /* Gateway Split Grid */
+  .gateway-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-bottom: 5rem;
   }
 
-  /* Exclusive Internal Section */
-  .exclusive-section {
-    margin-bottom: 4rem;
+  .gateway-card {
+    position: relative;
+    border-radius: 14px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    min-height: 450px;
+    text-decoration: none;
+    border: 1px solid #1e293b;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
   }
-  
-  .exclusive-grid {
+
+  .gateway-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 24px rgba(0,0,0,0.3);
+  }
+
+  .paddock-card:hover { border-color: #e10600; }
+  .features-card:hover { border-color: #38bdf8; }
+
+  .card-bg-image {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    transition: transform 0.5s ease;
+    z-index: 1;
+  }
+
+  .paddock-bg {
+    /* Fast, diagonal diamond-mesh pattern with a deep red underglow */
+    background-color: #0f172a;
+    background-image: 
+      repeating-linear-gradient(-45deg, rgba(225, 6, 0, 0.06) 0, rgba(225, 6, 0, 0.06) 1px, transparent 1px, transparent 12px),
+      repeating-linear-gradient(45deg, rgba(225, 6, 0, 0.06) 0, rgba(225, 6, 0, 0.06) 1px, transparent 1px, transparent 12px),
+      linear-gradient(135deg, #0f172a 0%, #2a0808 100%);
+  }
+
+  .features-bg {
+    /* Replaces the photo with a sleek, technical grid/telemetry pattern */
+    background-color: #0f172a;
+    background-image: 
+      linear-gradient(rgba(56, 189, 248, 0.07) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(56, 189, 248, 0.07) 1px, transparent 1px),
+      linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    background-size: 30px 30px, 30px 30px, 100% 100%;
+  }
+  .gateway-card:hover .card-bg-image {
+    transform: scale(1.05);
+  }
+
+  .card-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(15, 23, 42, 0.95) 0%, rgba(15, 23, 42, 0.6) 50%, rgba(15, 23, 42, 0.2) 100%);
+    z-index: 2;
+  }
+
+  .card-content {
+    position: relative;
+    z-index: 3;
+    padding: 3rem 2.5rem;
+  }
+
+  .card-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .live-pulse {
+    width: 8px;
+    height: 8px;
+    background: #e10600;
+    border-radius: 50%;
+    box-shadow: 0 0 8px #e10600;
+    animation: pulse 1.5s infinite;
+  }
+
+  .static-dot {
+    width: 8px;
+    height: 8px;
+    background: #38bdf8;
+    border-radius: 50%;
+  }
+
+  @keyframes pulse {
+    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(225, 6, 0, 0.7); }
+    70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(225, 6, 0, 0); }
+    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(225, 6, 0, 0); }
+  }
+
+  .meta-text {
+    color: #e2e8f0;
+    font-size: 0.8rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .card-content h2 {
+    color: #ffffff;
+    font-size: 2.5rem;
+    font-weight: 900;
+    margin: 0 0 1rem 0;
+    letter-spacing: -0.02em;
+  }
+
+  .card-content p {
+    color: #cbd5e1;
+    font-size: 1.05rem;
+    line-height: 1.6;
+    margin: 0 0 2rem 0;
+    max-width: 90%;
+  }
+
+  .btn-gateway {
+    display: inline-flex;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    padding: 0.85rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 800;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+  }
+
+  .paddock-card:hover .btn-gateway { background: #e10600; border-color: #e10600; }
+  .features-card:hover .btn-gateway { background: #38bdf8; border-color: #38bdf8; color: #0b0f19; }
+
+  /* Latest Features Preview */
+  .section-title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #334155;
+    padding-bottom: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .section-title-row h3 {
+    color: #ffffff;
+    font-size: 1.5rem;
+    font-weight: 800;
+    margin: 0;
+  }
+
+  .view-all-link {
+    color: #38bdf8;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 700;
+    transition: color 0.2s;
+  }
+
+  .view-all-link:hover { color: #7dd3fc; }
+
+  .features-preview-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 1.5rem;
   }
-  
-  .exclusive-card {
-    background: linear-gradient(145deg, #1e293b, #0f172a);
-    border: 1px solid #475569;
-    border-radius: 12px;
-    text-decoration: none;
-    display: flex;
-    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
-    min-height: 200px;
-  }
-  
-  .exclusive-card:hover {
-    transform: translateY(-4px);
-    border-color: #e10600;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-  }
-  
-  .card-content {
-    padding: 2rem;
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-  }
-  
-  .exclusive-badge {
-    color: #e10600;
-    font-weight: 800;
-    font-size: 0.8rem;
-    text-transform: uppercase;
-    margin-bottom: 1rem;
-    letter-spacing: 0.05em;
-  }
-  
-  .exclusive-card h3 {
-    color: #ffffff;
-    font-size: 1.5rem;
-    margin: 0 0 1rem 0;
-    line-height: 1.3;
-    font-weight: 900;
-  }
-  
-  .exclusive-card p {
-    color: #cbd5e1;
-    font-size: 1rem;
-    margin-bottom: 1.5rem;
-    flex-grow: 1;
-    line-height: 1.6;
-  }
-  
-  /* Unified RSS News Grid */
-  .rss-section {
-    margin-bottom: 4rem;
-  }
 
-  .news-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: 1.75rem;
-  }
-
-  .news-card {
+  .feature-preview-card {
     background: #0f172a;
     border: 1px solid #1e293b;
     border-radius: 12px;
+    padding: 1.75rem;
     text-decoration: none;
-    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
     display: flex;
     flex-direction: column;
-    overflow: hidden;
   }
 
-  .news-card:hover {
+  .feature-preview-card:hover {
     transform: translateY(-4px);
-    border-color: #475569;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+    border-color: #38bdf8;
+    box-shadow: 0 12px 24px rgba(0,0,0,0.3);
   }
 
-  .card-image-wrap {
-    height: 180px;
-    overflow: hidden;
-    background: #0b0f19;
-    border-bottom: 1px solid #1e293b;
-  }
-
-  .card-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
-  .news-content {
-    padding: 1.5rem;
+  .feature-preview-content {
     display: flex;
     flex-direction: column;
     flex-grow: 1;
   }
 
-  .news-meta {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 0.75rem;
+  .feature-date {
+    color: #38bdf8;
     font-size: 0.75rem;
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.05em;
+    display: block;
+    margin-bottom: 0.75rem;
   }
 
-  .feed-source {
-    color: #38bdf8;
-  }
-
-  .news-date {
-    color: #64748b;
-  }
-
-  .news-title {
-    font-size: 1.2rem;
-    font-weight: 800;
+  .feature-preview-content h4 {
     color: #f8fafc;
+    font-size: 1.25rem;
+    font-weight: 800;
     margin: 0 0 0.75rem 0;
     line-height: 1.4;
   }
 
-  .news-excerpt {
-    font-size: 0.9rem;
+  .feature-preview-content p {
     color: #94a3b8;
+    font-size: 0.95rem;
     line-height: 1.5;
     margin: 0 0 1.5rem 0;
     flex-grow: 1;
   }
-
-  .read-more {
-    font-size: 0.8rem;
-    font-weight: 700;
+  
+  .read-more-text {
     color: #e10600;
+    font-size: 0.85rem;
+    font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    transition: color 0.2s ease;
     margin-top: auto;
+    transition: color 0.2s ease;
+  }
+  
+  .feature-preview-card:hover .read-more-text {
+    color: #ff1a1a;
   }
 
-  .news-card:hover .read-more {
-    color: #f87171;
+  @media (max-width: 900px) {
+    .gateway-grid { grid-template-columns: 1fr; }
+    .gateway-card { min-height: 350px; }
   }
 
-  .news-empty-state {
-    background: #0f172a;
-    border: 1px dashed #334155;
-    padding: 3rem 1.5rem;
-    border-radius: 12px;
-    text-align: center;
-  }
-
-  .news-empty-state p {
-    color: #64748b;
-    font-size: 0.95rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin: 0;
-  }
-
-  @media (max-width: 768px) {
-    h1 { font-size: 2.5rem; }
+  @media (max-width: 600px) {
+    .gradient-title { font-size: 2.5rem; }
+    .card-content h2 { font-size: 2rem; }
+    .card-content { padding: 2rem 1.5rem; }
   }
 </style>

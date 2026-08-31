@@ -1,0 +1,271 @@
+---
+// src/pages/latest-news/features.astro
+import Layout from '@/layouts/Layout.astro';
+import { getCollection } from 'astro:content';
+
+// Fetch internal SEO articles from the 'news' collection
+let articles: any[] = [];
+try {
+  const allFeatures = await getCollection('news');
+  if (allFeatures) {
+    articles = allFeatures.sort((a, b) => new Date(b.data.date).valueOf() - new Date(a.data.date).valueOf());
+  }
+} catch (e) {
+  console.warn('Notice: Could not load features collection.');
+}
+
+// Helper to format dates cleanly
+const formatDate = (dateStr: string) => {
+  return new Date(dateStr).toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+  });
+};
+---
+
+<Layout 
+  title="The Racing Line | F1 Guides & Features | My Grand Prix Hub"
+  description="In-depth Formula 1 guides, technical explainers, and evergreen motorsport features."
+>
+  <main class="page-container">
+    
+    <!-- BACK NAVIGATION -->
+    <a href="/latest-news" class="back-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      Back to Media Hub
+    </a>
+
+    <header class="blog-header">
+      <span class="badge">Hub Exclusives</span>
+      <h1 class="gradient-title">The Racing Line</h1>
+      <p class="subtitle">In-depth Formula 1 guides, technical explainers, historical deep-dives, and evergreen motorsport features created by our team.</p>
+    </header>
+
+    {articles.length === 0 ? (
+      <div class="empty-state">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        <p>We are currently drafting our first feature articles. Check back soon!</p>
+      </div>
+    ) : (
+      <div class="features-grid">
+        {articles.map((article) => (
+          <a href={`/news/${article.id}`} class="feature-card">
+            {/* If you add an image field to your TinaCMS schema later, you can swap this placeholder div out for an <img> */}
+            <div class="feature-image-placeholder">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#334155" stroke-width="1.5"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>
+            </div>
+            
+            <div class="feature-content">
+              <span class="feature-date">{formatDate(article.data.date)}</span>
+              <h2>{article.data.title}</h2>
+              <p>{article.data.description || 'Read our comprehensive guide and analysis on this topic.'}</p>
+              
+              <div class="card-footer">
+                <span class="read-btn">Read Article &rarr;</span>
+                <span class="author-tag">By My Grand Prix Hub</span>
+              </div>
+            </div>
+          </a>
+        ))}
+      </div>
+    )}
+
+  </main>
+</Layout>
+
+<style>
+  .page-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 3rem 1.5rem 6rem 1.5rem;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #94a3b8;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 700;
+    margin-bottom: 2rem;
+    transition: color 0.2s ease;
+  }
+  
+  .back-link:hover { color: #38bdf8; }
+
+  .blog-header {
+    margin-bottom: 4rem;
+  }
+
+  .badge {
+    display: inline-block;
+    background-color: #38bdf8;
+    color: #0f172a;
+    font-size: 0.85rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    padding: 0.4rem 1rem;
+    border-radius: 6px;
+    letter-spacing: 0.08em;
+    margin-bottom: 1.25rem;
+  }
+
+  .gradient-title { 
+    font-size: 3.5rem; 
+    margin: 0 0 1rem 0; 
+    font-weight: 900; 
+    letter-spacing: -0.03em; 
+    line-height: 1.1; 
+    background: linear-gradient(to right, #ffffff, #94a3b8);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .subtitle {
+    color: #94a3b8;
+    font-size: 1.15rem;
+    line-height: 1.6;
+    margin: 0;
+    max-width: 700px;
+  }
+
+  /* Grid Layout */
+  .features-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  .feature-card {
+    display: flex;
+    background: #0f172a;
+    border: 1px solid #1e293b;
+    border-radius: 12px;
+    overflow: hidden;
+    text-decoration: none;
+    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .feature-card:hover {
+    transform: translateY(-4px);
+    border-color: #38bdf8;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+  }
+
+  /* Image Placeholder (Left Side) */
+  .feature-image-placeholder {
+    width: 250px;
+    background: linear-gradient(135deg, #1e293b 0%, #0b0f19 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    border-right: 1px solid #1e293b;
+  }
+
+  /* Content (Right Side) */
+  .feature-content {
+    padding: 2rem 2.5rem;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+  }
+
+  .feature-date {
+    color: #38bdf8;
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.75rem;
+  }
+
+  .feature-content h2 {
+    color: #ffffff;
+    font-size: 1.75rem;
+    font-weight: 800;
+    margin: 0 0 0.75rem 0;
+    line-height: 1.3;
+    letter-spacing: -0.01em;
+  }
+
+  .feature-content p {
+    color: #94a3b8;
+    font-size: 1.05rem;
+    line-height: 1.6;
+    margin: 0 0 2rem 0;
+    flex-grow: 1;
+  }
+
+  .card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: auto;
+    padding-top: 1.5rem;
+    border-top: 1px dashed #1e293b;
+  }
+
+  .read-btn {
+    color: #38bdf8;
+    font-size: 0.95rem;
+    font-weight: 800;
+    transition: color 0.2s ease;
+  }
+
+  .feature-card:hover .read-btn {
+    color: #7dd3fc;
+  }
+
+  .author-tag {
+    color: #475569;
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+
+  /* Empty State */
+  .empty-state {
+    background: #1e293b;
+    border: 1px dashed #475569;
+    padding: 4rem 2rem;
+    text-align: center;
+    border-radius: 12px;
+    color: #94a3b8;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .empty-state p {
+    margin: 0;
+    font-size: 1.05rem;
+  }
+
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .gradient-title { font-size: 2.75rem; }
+    
+    .feature-card {
+      flex-direction: column;
+    }
+
+    .feature-image-placeholder {
+      width: 100%;
+      height: 150px;
+      border-right: none;
+      border-bottom: 1px solid #1e293b;
+    }
+
+    .feature-content {
+      padding: 1.5rem;
+    }
+
+    .feature-content h2 {
+      font-size: 1.4rem;
+    }
+  }
+</style>
