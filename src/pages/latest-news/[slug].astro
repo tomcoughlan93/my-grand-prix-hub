@@ -8,7 +8,8 @@ export const prerender = true;
 export async function getStaticPaths() {
   const articles = await getCollection('news');
   return articles.map((entry: any) => ({
-    params: { slug: entry.slug },
+    // NEW: Fall back to entry.id if entry.slug is undefined
+    params: { slug: entry.slug || entry.id },
     props: { entry },
   }));
 }
@@ -29,7 +30,8 @@ const formattedDate = new Date(entry.data.date).toLocaleDateString('en-GB', {
 // Fetch up to 3 related articles for the bottom of the page
 const allArticles = await getCollection('news');
 const relatedArticles = allArticles
-  .filter((a: any) => a.slug !== entry.slug)
+  // NEW: Safely check against ID or Slug
+  .filter((a: any) => (a.slug || a.id) !== (entry.slug || entry.id))
   .sort((a: any, b: any) => new Date(b.data.date).valueOf() - new Date(a.data.date).valueOf())
   .slice(0, 3);
 
@@ -64,7 +66,7 @@ const articleSchema = {
   <main class="page-container article-page">
     
     <!-- BACK NAVIGATION -->
-    <a href="/latest-news/features" class="back-link">
+    <a href="/latest-news/the-racing-line" class="back-link">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
       Back to The Racing Line
     </a>
@@ -132,7 +134,7 @@ const articleSchema = {
         <h3>Keep Reading</h3>
         <div class="related-grid">
           {relatedArticles.map((rel: any) => (
-            <a href={`/news/${rel.slug}`} class="related-card">
+            <a href={`/news/${rel.slug || rel.id}`} class="related-card">
               <span class="rel-date">{new Date(rel.data.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
               <h4>{rel.data.title}</h4>
               <span class="read-btn">Read Article &rarr;</span>
