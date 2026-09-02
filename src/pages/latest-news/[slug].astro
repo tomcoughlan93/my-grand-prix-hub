@@ -1,7 +1,7 @@
 ---
 // src/pages/news/[slug].astro
 import Layout from '@/layouts/Layout.astro';
-import { getCollection } from 'astro:content';
+import { getCollection, render } from 'astro:content';
 
 export const prerender = true;
 
@@ -15,7 +15,7 @@ export async function getStaticPaths() {
 }
 
 const { entry } = Astro.props;
-const { Content } = await entry.render();
+const { Content } = await render(entry);
 
 // Automatically calculate estimated reading time based on word count
 const wordCount = entry.body.split(/\s+/g).length;
