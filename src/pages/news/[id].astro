@@ -22,8 +22,6 @@ const { Content } = await render(entry);
         <span class="badge">Exclusive</span>
         <h1>{entry.data.title}</h1>
         <div class="meta">
-          <span>By {entry.data.author}</span>
-          <span>•</span>
           <span>{new Date(entry.data.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
         </div>
       </header>
@@ -42,9 +40,20 @@ const { Content } = await render(entry);
   h1 { font-size: 2.5rem; color: #f8fafc; margin: 1rem 0; line-height: 1.2; }
   .meta { color: #94a3b8; font-size: 0.95rem; display: flex; gap: 0.75rem; }
   
-  /* Markdown Styles */
+  /* Expanded Markdown Styles */
   .markdown-content { color: #cbd5e1; line-height: 1.7; font-size: 1.1rem; }
-  .markdown-content :global(h2) { color: #f8fafc; margin-top: 2.5rem; font-size: 1.8rem; }
+  
+  /* Headings */
+  .markdown-content :global(h2) { color: #f8fafc; margin-top: 2.5rem; margin-bottom: 1rem; font-size: 1.8rem; }
+  .markdown-content :global(h3) { color: #f8fafc; margin-top: 2rem; margin-bottom: 1rem; font-size: 1.4rem; font-weight: 700; }
+  .markdown-content :global(h4) { color: #f8fafc; margin-top: 1.5rem; margin-bottom: 0.75rem; font-size: 1.2rem; font-weight: 700; }
+  
+  /* Paragraphs & Text */
   .markdown-content :global(p) { margin-bottom: 1.5rem; }
-  .markdown-content :global(strong) { color: #ffffff; }
+  .markdown-content :global(strong) { color: #ffffff; font-weight: 700; }
+  
+  /* Lists */
+  .markdown-content :global(ul), .markdown-content :global(ol) { margin-bottom: 1.5rem; padding-left: 1.5rem; }
+  .markdown-content :global(li) { margin-bottom: 0.5rem; }
+  .markdown-content :global(li > p) { margin-bottom: 0.25rem; /* Prevents double spacing inside lists */ }
 </style>

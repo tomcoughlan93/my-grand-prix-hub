@@ -614,6 +614,7 @@ const getSessionArray = (race: Race) => [
               <div class="race-schedule-details" id={`podium-${race.round}`}>
                 {race.podium ? (
                   <div class="podium-banner">
+                    
                     <div class="podium-grid">
                       <div class="podium-step step-2">
                         <span class="medal">🥈</span>
@@ -628,6 +629,14 @@ const getSessionArray = (race: Race) => [
                         <span class="driver-code">{race.podium.third}</span>
                       </div>
                     </div>
+
+                    <!-- NEW: Button wrapped in a dedicated footer block -->
+                    <div class="podium-footer">
+                      <a href={`/results/${race.round}`} class="btn-secondary btn-sm btn-outline">
+                        View Full Race Classification &rarr;
+                      </a>
+                    </div>
+
                   </div>
                 ) : (
                   <div class="empty-state" style="padding: 1.5rem; text-align: center;">Official classification pending.</div>
@@ -1830,6 +1839,13 @@ const getSessionArray = (race: Race) => [
     font-weight: 900;
     color: #ffffff;
     font-size: 1.1rem;
+  }
+
+  .podium-footer {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 1.5rem;
+    width: 100%;
   }
 
   /* Timetable */

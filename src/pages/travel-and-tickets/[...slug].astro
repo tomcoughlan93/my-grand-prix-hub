@@ -23,15 +23,6 @@ interface Props {
 
 const { race } = Astro.props as Props;
 
-const getStatusColor = (status: string) => {
-  switch(status) {
-    case 'On Sale': return 'status-onsale';
-    case 'Selling Fast': return 'status-fast';
-    case 'Sold Out': return 'status-soldout';
-    default: return 'status-default';
-  }
-};
-
 const startingPriceGBP = race.ticketTiers.length > 0 ? race.ticketTiers[0].priceFromGBP : '--';
 const startingPriceEUR = race.ticketTiers.length > 0 ? race.ticketTiers[0].priceFromEUR : '--';
 const startingPriceUSD = race.ticketTiers.length > 0 ? race.ticketTiers[0].priceFromUSD : '--';
@@ -47,9 +38,6 @@ const startingPriceUSD = race.ticketTiers.length > 0 ? race.ticketTiers[0].price
     <header class="hub-hero">
       <div class="hero-top-meta">
         <span class="round-badge">Round {race.round} &bull; {race.dates}</span>
-        <span class={`status-pill ${getStatusColor(race.ticketStatus)}`}>
-          ● {race.ticketStatus}
-        </span>
       </div>
 
       <h1>{race.raceName}</h1>
@@ -568,19 +556,6 @@ const startingPriceUSD = race.ticketTiers.length > 0 ? race.ticketTiers[0].price
     letter-spacing: 0.05em;
     font-size: 0.85rem;
   }
-
-  .status-pill {
-    font-size: 0.75rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    padding: 0.25rem 0.6rem;
-    border-radius: 9999px;
-  }
-
-  .status-onsale { background: rgba(52, 211, 153, 0.15); color: #34d399; border: 1px solid rgba(52, 211, 153, 0.3); }
-  .status-fast { background: rgba(251, 191, 36, 0.15); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.3); }
-  .status-soldout { background: rgba(244, 63, 94, 0.15); color: #f43f5e; border: 1px solid rgba(244, 63, 94, 0.3); }
-  .status-default { background: #334155; color: #cbd5e1; }
 
   .hub-hero h1 {
     font-size: 3.25rem;

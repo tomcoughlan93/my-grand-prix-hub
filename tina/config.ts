@@ -72,7 +72,7 @@ export default defineConfig({
           { type: "rich-text", name: "body", label: "Guide Content", isBody: true },
         ],
       },
-      // 5. Driver Profiles (UPDATED)
+      // 5. Driver Profiles
       {
         name: "drivers",
         label: "Drivers",
@@ -268,6 +268,97 @@ export default defineConfig({
               { type: "string", name: "r21", label: "R21: Qatar" },
               { type: "string", name: "r22", label: "R22: Abu Dhabi" },
             ]
+          }
+        ]
+      },
+      // 9. The Racing Line (SEO Articles)
+      {
+        name: "news",
+        label: "The Racing Line (Articles)",
+        path: "src/content/news",
+        format: "md",
+        ui: {
+          filename: {
+            readonly: false,
+            slugify: (values) => {
+              return values?.title
+                ? values.title
+                    .toLowerCase()
+                    .trim()
+                    .replace(/[^\w\s-]/g, '')
+                    .replace(/[\s_-]+/g, '-')
+                    .replace(/^-+|-+$/g, '')
+                : 'article';
+            },
+          },
+          router: ({ document }) => {
+            return `/news/${document._sys.filename}`;
+          },
+        },
+        fields: [
+          {
+            type: "string",
+            name: "title",
+            label: "Article Title (H1)",
+            isTitle: true,
+            required: true,
+          },
+          {
+             type: "image",
+             name: "heroImage",
+             label: "Hero Image",
+  },
+          {
+            type: "string",
+            name: "description",
+            label: "SEO Description & Lead Paragraph",
+            description: "Keep under 160 characters for best Google Search results.",
+            required: true,
+            ui: {
+              component: "textarea",
+            },
+          },
+          {
+            type: "datetime",
+            name: "date",
+            label: "Publish Date",
+            required: true,
+          },
+          {
+            type: "rich-text",
+            name: "body",
+            label: "Article Body",
+            isBody: true,
+          },
+        ],
+      },
+      // 10. Weekly Team Stats (Live Updating)
+      {
+        name: "teamStats",
+        label: "Team Weekly Stats",
+        path: "src/content/teamStats",
+        format: "json",
+        ui: {
+          allowedActions: { create: false, delete: false },
+        },
+        fields: [
+          { type: "string", name: "teamName", label: "Team Name", isTitle: true, required: true },
+          { type: "string", name: "slug", label: "Team Slug (DO NOT CHANGE)", required: true },
+          { 
+            type: "number", 
+            name: "poles", 
+            label: "Total Pole Positions" 
+          },
+          { 
+            type: "number", 
+            name: "fastestLaps", 
+            label: "Total Fastest Laps" 
+          },
+          { 
+            type: "string", 
+            name: "championships", 
+            label: "Championships String",
+            description: "e.g. '8 Constructors / 12 Drivers'"
           }
         ]
       }

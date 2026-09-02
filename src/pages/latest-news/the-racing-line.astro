@@ -1,5 +1,5 @@
 ---
-// src/pages/latest-news/features.astro
+// src/pages/latest-news/the-racing-line.astro
 import Layout from '@/layouts/Layout.astro';
 import { getCollection } from 'astro:content';
 
@@ -51,9 +51,17 @@ const formatDate = (dateStr: string) => {
       <div class="features-grid">
         {articles.map((article) => (
           <a href={`/news/${article.id}`} class="feature-card">
-            {/* If you add an image field to your TinaCMS schema later, you can swap this placeholder div out for an <img> */}
             <div class="feature-image-placeholder">
-              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#334155" stroke-width="1.5"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>
+              {article.data.heroImage ? (
+                <img 
+                  src={article.data.heroImage} 
+                  alt={article.data.title} 
+                  class="feature-image" 
+                  loading="lazy" 
+                />
+              ) : (
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#334155" stroke-width="1.5"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>
+              )}
             </div>
             
             <div class="feature-content">
@@ -164,6 +172,12 @@ const formatDate = (dateStr: string) => {
     justify-content: center;
     flex-shrink: 0;
     border-right: 1px solid #1e293b;
+  }
+
+  .feature-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
   }
 
   /* Content (Right Side) */

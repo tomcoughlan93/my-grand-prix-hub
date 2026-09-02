@@ -1,8 +1,9 @@
 ---
 // src/pages/championship/teams-drivers.astro
 import Layout from '@/layouts/Layout.astro';
+import { teamLineage, timelineStart, timelineEnd, totalYears } from '@/data/teamLineage';
 
-// --- NEW: DRIVER SLUG MAPPING HELPER ---
+// --- DRIVER SLUG MAPPING HELPER ---
 const DRIVER_SLUGS: Record<string, string> = {
   VER: 'max-verstappen',
   NOR: 'lando-norris',
@@ -42,9 +43,8 @@ function getDriverSlug(code?: string, name?: string): string {
   }
   return '#';
 }
-// ---------------------------------------
 
-// --- NEW: TEAM SLUG MAPPING HELPER ---
+// --- TEAM SLUG MAPPING HELPER ---
 const TEAM_SLUGS: Record<string, string> = {
   mclaren: 'mclaren',
   ferrari: 'ferrari',
@@ -62,7 +62,6 @@ const TEAM_SLUGS: Record<string, string> = {
 function getTeamSlug(teamKey: string): string {
   return TEAM_SLUGS[teamKey.toLowerCase()] || teamKey.toLowerCase();
 }
-// -------------------------------------
 
 interface Driver {
   number: string;
@@ -103,7 +102,7 @@ const TEAMS_DATA: Team[] = [
     x: "https://x.com/McLarenF1",
     isChampion: true,
     drivers: [
-      { number: "4", name: "Lando Norris", code: "NOR", countryCode: "gb", nationality: "GBR", instagram: "https://www.instagram.com/landonorris/", x: "https://x.com/LandoNorris", isChampion: true, wdc: 1 },
+      { number: "1", name: "Lando Norris", code: "NOR", countryCode: "gb", nationality: "GBR", instagram: "https://www.instagram.com/landonorris/", x: "https://x.com/LandoNorris", isChampion: true, wdc: 1 },
       { number: "81", name: "Oscar Piastri", code: "PIA", countryCode: "au", nationality: "AUS", instagram: "https://www.instagram.com/oscarpiastri/", x: "https://x.com/OscarPiastri" }
     ]
   },
@@ -126,14 +125,14 @@ const TEAMS_DATA: Team[] = [
     name: "Red Bull Racing",
     teamKey: "redbull",
     base: "Milton Keynes, United Kingdom",
-    principal: "Christian Horner",
+    principal: "Laurent Mekies",
     powerUnit: "Red Bull Ford Powertrains",
     championships: 6,
     website: "https://www.redbullracing.com/",
     instagram: "https://www.instagram.com/redbullracing/",
     x: "https://x.com/redbullracing",
     drivers: [
-      { number: "1", name: "Max Verstappen", code: "VER", countryCode: "nl", nationality: "NED", instagram: "https://www.instagram.com/maxverstappen1/", x: "https://x.com/Max33Verstappen", wdc: 4 },
+      { number: "3", name: "Max Verstappen", code: "VER", countryCode: "nl", nationality: "NED", instagram: "https://www.instagram.com/maxverstappen1/", x: "https://x.com/Max33Verstappen", wdc: 4 },
       { number: "6", name: "Isack Hadjar", code: "HAD", countryCode: "fr", nationality: "FRA", instagram: "https://www.instagram.com/isackhadjar/", x: "https://x.com/isack_hadjar" }
     ]
   },
@@ -156,7 +155,7 @@ const TEAMS_DATA: Team[] = [
     name: "Aston Martin Aramco F1 Team",
     teamKey: "astonmartin",
     base: "Silverstone, United Kingdom",
-    principal: "Mike Krack",
+    principal: "Adrian Newey",
     powerUnit: "Honda",
     championships: 0,
     website: "https://www.astonmartinf1.com/",
@@ -171,7 +170,7 @@ const TEAMS_DATA: Team[] = [
     name: "Visa Cash App RB F1 Team",
     teamKey: "rb",
     base: "Faenza, Italy",
-    principal: "Laurent Mekies",
+    principal: "Alan Permane",
     powerUnit: "Red Bull Ford Powertrains",
     championships: 0,
     website: "https://www.visacashapprb.com/",
@@ -179,7 +178,7 @@ const TEAMS_DATA: Team[] = [
     x: "https://x.com/visacashapprb",
     drivers: [
       { number: "30", name: "Liam Lawson", code: "LAW", countryCode: "nz", nationality: "NZL", instagram: "https://www.instagram.com/liamlawson30/", x: "https://x.com/LiamLawson30" },
-      { number: "3", name: "Arvid Lindblad", code: "LIN", countryCode: "gb", nationality: "GBR", instagram: "https://www.instagram.com/arvidlindblad/", x: "https://x.com/arvidlindblad" }
+      { number: "41", name: "Arvid Lindblad", code: "LIN", countryCode: "gb", nationality: "GBR", instagram: "https://www.instagram.com/arvidlindblad/", x: "https://x.com/arvidlindblad" }
     ]
   },
   {
@@ -258,6 +257,15 @@ const TEAMS_DATA: Team[] = [
     ]
   }
 ];
+
+// Flatten the drivers array for the standalone Driver Grid view
+const ALL_DRIVERS = TEAMS_DATA.flatMap(team => 
+  team.drivers.map(driver => ({
+    ...driver,
+    teamName: team.name,
+    teamKey: team.teamKey
+  }))
+);
 ---
 
 <Layout 
@@ -265,130 +273,288 @@ const TEAMS_DATA: Team[] = [
   description="Explore the complete Formula 1 grid: team profiles, bases, power units, driver pairings, and official social media channels."
 >
   <main class="page-container directory-page">
-    <!-- Header Section -->
+    
     <header class="section-header">
-      <span class="badge">Championship Directory</span>
-      <h1>Teams & Drivers</h1>
+      <div class="header-top-row">
+        <span class="badge">Championship Directory</span>
+        
+        <div class="view-toggle">
+          <button class="toggle-btn is-active" data-view="teams">Constructors</button>
+          <button class="toggle-btn" data-view="drivers">Drivers</button>
+        </div>
+      </div>
+      
+      <h1 class="gradient-title">Teams & Drivers</h1>
       <p>Technical profiles, team headquarters, engine suppliers, driver pairings, and official links for the 2026 Formula 1 grid.</p>
     </header>
 
-    <!-- Teams List -->
-    <div class="teams-stack">
-      {TEAMS_DATA.map((team) => (
-        <article class={`team-card team-border-${team.teamKey}`}>
-          
-          <!-- Team Header -->
-          <div class="team-header">
-            <!-- NEW LINK WRAPPER -->
-            <a href={`/teams/${getTeamSlug(team.teamKey)}`} class="team-profile-link">
-              <div class="team-identity">
-                <div class={`team-color-indicator team-bg-${team.teamKey}`}></div>
-                <h2>{team.name}</h2>
-                {team.isChampion ? (
-                  <div class="champion-icon" title="Defending Constructors' Champion">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M4.222 19.778c.026.173.082.342.164.502.19.373.498.665.875.83A2.08 2.08 0 0 0 6.222 21h11.556a2.08 2.08 0 0 0 .961-.102c.377-.165.685-.457.875-.83.082-.16.138-.329.164-.502L22 6.556a1 1 0 0 0-1.572-.818l-4.606 3.29-2.934-5.867a1 1 0 0 0-1.776 0l-2.934 5.867-4.606-3.29A1 1 0 0 0 2 6.556l2.222 13.222zM6 19l-1.63-9.778 3.52 2.514a1 1 0 0 0 1.258-.176L12 6.16l2.852 5.4a1 1 0 0 0 1.258.176l3.52-2.514L18 19H6z"/>
-                      <path d="M12 21v-2H6v2h12v-2h-6z"/>
-                    </svg>
-                  </div>
-                ) : null}
-              </div>
-            </a>
+    <div id="teams-view" class="view-section is-active">
+      <div class="teams-stack">
+        {TEAMS_DATA.map((team) => (
+          <article class={`team-card team-border-${team.teamKey}`}>
             
-            <div class="social-links-group">
-              <a href={team.website} target="_blank" rel="noopener noreferrer" class="social-btn website-btn" title={`${team.name} Official Website`}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-                <span>Website ↗</span>
+            <div class="team-header">
+              <a href={`/teams/${getTeamSlug(team.teamKey)}`} class="team-profile-link">
+                <div class="team-identity">
+                  <div class={`team-color-indicator team-bg-${team.teamKey}`}></div>
+                  <h2>{team.name}</h2>
+                  {team.isChampion ? (
+                    <div class="champion-icon" title="Defending Constructors' Champion">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M4.222 19.778c.026.173.082.342.164.502.19.373.498.665.875.83A2.08 2.08 0 0 0 6.222 21h11.556a2.08 2.08 0 0 0 .961-.102c.377-.165.685-.457.875-.83.082-.16.138-.329.164-.502L22 6.556a1 1 0 0 0-1.572-.818l-4.606 3.29-2.934-5.867a1 1 0 0 0-1.776 0l-2.934 5.867-4.606-3.29A1 1 0 0 0 2 6.556l2.222 13.222zM6 19l-1.63-9.778 3.52 2.514a1 1 0 0 0 1.258-.176L12 6.16l2.852 5.4a1 1 0 0 0 1.258.176l3.52-2.514L18 19H6z"/>
+                        <path d="M12 21v-2H6v2h12v-2h-6z"/>
+                      </svg>
+                    </div>
+                  ) : null}
+                </div>
               </a>
-              <a href={team.x} target="_blank" rel="noopener noreferrer" class="social-btn icon-btn" title="X / Twitter">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-              </a>
-              <a href={team.instagram} target="_blank" rel="noopener noreferrer" class="social-btn icon-btn" title="Instagram">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
-              </a>
+              
+              <div class="social-links-group">
+                <a href={team.website} target="_blank" rel="noopener noreferrer" class="social-btn website-btn" title={`${team.name} Official Website`}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                  <span>Website ↗</span>
+                </a>
+                <a href={team.x} target="_blank" rel="noopener noreferrer" class="social-btn icon-btn" title="X / Twitter">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                </a>
+                <a href={team.instagram} target="_blank" rel="noopener noreferrer" class="social-btn icon-btn" title="Instagram">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+                </a>
+              </div>
             </div>
-          </div>
 
-          <!-- Team Specs -->
-          <div class="specs-grid">
-            <div class="spec-item">
-              <span class="spec-label">Headquarters</span>
-              <span class="spec-value">{team.base}</span>
+            <div class="specs-grid">
+              <div class="spec-item">
+                <span class="spec-label">Headquarters</span>
+                <span class="spec-value">{team.base}</span>
+              </div>
+              <div class="spec-item">
+                <span class="spec-label">Team Principal</span>
+                <span class="spec-value">{team.principal}</span>
+              </div>
+              <div class="spec-item">
+                <span class="spec-label">Power Unit</span>
+                <span class="spec-value">{team.powerUnit}</span>
+              </div>
+              <div class="spec-item">
+                <span class="spec-label">World Titles</span>
+                <span class="spec-value">{team.championships > 0 ? `${team.championships} Constructors` : 'None'}</span>
+              </div>
             </div>
-            <div class="spec-item">
-              <span class="spec-label">Team Principal</span>
-              <span class="spec-value">{team.principal}</span>
-            </div>
-            <div class="spec-item">
-              <span class="spec-label">Power Unit</span>
-              <span class="spec-value">{team.powerUnit}</span>
-            </div>
-            <div class="spec-item">
-              <span class="spec-label">World Titles</span>
-              <span class="spec-value">{team.championships > 0 ? `${team.championships} Constructors` : 'None'}</span>
-            </div>
-          </div>
 
-          <!-- Drivers Container -->
-          <div class="drivers-section">
-            <span class="section-tag">Race Drivers</span>
-            <div class="drivers-grid">
-              {team.drivers.map((driver) => (
-                <div class="driver-card">
-                  <div class="driver-left">
-                    <span class="driver-number">{driver.number}</span>
-                    <div class="driver-meta">
-                      <div class="driver-name-row">
-                        <img 
-                          src={`https://flagcdn.com/w40/${driver.countryCode}.png`}
-                          width="18"
-                          height="13"
-                          alt={driver.nationality}
-                          class="driver-flag"
-                          loading="lazy"
-                        />
-                        
-                        <a href={`/drivers/${getDriverSlug(driver.code, driver.name)}`} class="driver-profile-link">
-                          <span class="driver-fullname">{driver.name}</span>
-                          <span class="driver-code-tag">{driver.code}</span>
-                        </a>
+            <div class="drivers-section">
+              <span class="section-tag">Race Drivers</span>
+              <div class="drivers-grid">
+                {team.drivers.map((driver) => (
+                  <div class="driver-card">
+                    <div class="driver-left">
+                      <span class="driver-number">{driver.number}</span>
+                      <div class="driver-meta">
+                        <div class="driver-name-row">
+                          <img 
+                            src={`https://flagcdn.com/w40/${driver.countryCode}.png`}
+                            width="18"
+                            height="13"
+                            alt={driver.nationality}
+                            class="driver-flag"
+                            loading="lazy"
+                          />
+                          
+                          <a href={`/drivers/${getDriverSlug(driver.code, driver.name)}`} class="driver-profile-link">
+                            <span class="driver-fullname">{driver.name}</span>
+                            <span class="driver-code-tag">{driver.code}</span>
+                          </a>
 
-                        {driver.isChampion ? (
-                          <div class="champion-icon" title="Defending Drivers' Champion">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                              <path d="M4.222 19.778c.026.173.082.342.164.502.19.373.498.665.875.83A2.08 2.08 0 0 0 6.222 21h11.556a2.08 2.08 0 0 0 .961-.102c.377-.165.685-.457.875-.83.082-.16.138-.329.164-.502L22 6.556a1 1 0 0 0-1.572-.818l-4.606 3.29-2.934-5.867a1 1 0 0 0-1.776 0l-2.934 5.867-4.606-3.29A1 1 0 0 0 2 6.556l2.222 13.222z"/>
-                            </svg>
-                          </div>
-                        ) : null}
-                        {driver.wdc ? (
-                          <span class="wdc-count-pill" title={`${driver.wdc}x World Champion`}>{driver.wdc}x WDC</span>
-                        ) : null}
+                          {driver.isChampion ? (
+                            <div class="champion-icon" title="Defending Drivers' Champion">
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M4.222 19.778c.026.173.082.342.164.502.19.373.498.665.875.83A2.08 2.08 0 0 0 6.222 21h11.556a2.08 2.08 0 0 0 .961-.102c.377-.165.685-.457.875-.83.082-.16.138-.329.164-.502L22 6.556a1 1 0 0 0-1.572-.818l-4.606 3.29-2.934-5.867a1 1 0 0 0-1.776 0l-2.934 5.867-4.606-3.29A1 1 0 0 0 2 6.556l2.222 13.222z"/>
+                              </svg>
+                            </div>
+                          ) : null}
+                          {driver.wdc ? (
+                            <span class="wdc-count-pill" title={`${driver.wdc}x World Champion`}>{driver.wdc}x WDC</span>
+                          ) : null}
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  <!-- Driver Socials -->
-                  <div class="driver-socials">
-                    {driver.x ? (
-                      <a href={driver.x} target="_blank" rel="noopener noreferrer" class="driver-icon-btn" title={`${driver.name} on X`}>
-                        <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-                      </a>
-                    ) : null}
-                    {driver.instagram ? (
-                      <a href={driver.instagram} target="_blank" rel="noopener noreferrer" class="driver-icon-btn" title={`${driver.name} on Instagram`}>
-                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
-                      </a>
-                    ) : null}
+                    <div class="driver-socials">
+                      {driver.x ? (
+                        <a href={driver.x} target="_blank" rel="noopener noreferrer" class="driver-icon-btn" title={`${driver.name} on X`}>
+                          <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                        </a>
+                      ) : null}
+                      {driver.instagram ? (
+                        <a href={driver.instagram} target="_blank" rel="noopener noreferrer" class="driver-icon-btn" title={`${driver.name} on Instagram`}>
+                          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+                        </a>
+                      ) : null}
+                    </div>
                   </div>
+                ))}
+              </div>
+            </div>
+          </article>
+        ))}
+      </div>
+
+      <!-- CONSTRUCTOR LINEAGE SECTION -->
+      <section class="lineage-section">
+        <div class="lineage-header">
+          <div class="header-text">
+            <span class="badge">Constructor History</span>
+            <h2>The Evolution of the Grid</h2>
+            <p>Tracing the buyouts, rebrands, and shifting identities of the grid.</p>
+          </div>
+          
+          <!-- NEW: Animated Scroll Hint -->
+          <div class="scroll-hint">
+            <span>Scroll Timeline</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </div>
+        </div>
+
+        <div class="timeline-container">
+          <div class="timeline-flex-wrapper">
+            
+            <!-- Left Side: Axis Names -->
+            <div class="timeline-names">
+              <div class="axis-label">Team</div>
+              <div class="names-list">
+                {teamLineage.map(team => (
+                  <div class="team-name-col"><strong>{team.currentTeam}</strong></div>
+                ))}
+              </div>
+            </div>
+
+            <!-- Right Side: Chart & Grid -->
+            <div class="timeline-chart">
+              
+              <!-- 1. Axis Years (Markers every 10 years for clarity) -->
+              <div class="axis-years">
+                {[1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020].map(year => (
+                  <span class="year-marker" style={`left: ${((year - timelineStart) / totalYears) * 100}%`}>{year}</span>
+                ))}
+                <!-- Anchor the final year marker to the exact end of the grid -->
+                <span class="year-marker" style="left: 100%;">2027</span>
+              </div>
+              
+              <!-- 2. Main Chart Area with Grid Background -->
+              <div class="chart-grid-area">
+                
+                <!-- Vertical grid lines (One for every year) -->
+                <div class="grid-lines-layer">
+                  {Array.from({ length: totalYears + 1 }).map((_, i) => (
+                    <div class="grid-line" style={`left: ${(i / totalYears) * 100}%`}></div>
+                  ))}
                 </div>
-              ))}
+                
+                <!-- The Row Data -->
+                <div class="chart-rows">
+                  {teamLineage.map((team) => (
+                    <div class="eras-col">
+                      {team.eras.map((era) => {
+                        const duration = era.end - era.start + 1;
+                        const widthPct = (duration / totalYears) * 100;
+                        
+                        return (
+                          <div 
+                            class="era-block" 
+                            style={`width: ${widthPct}%; background-color: ${era.color}; color: ${era.textDark ? '#000000' : '#ffffff'};`}
+                          >
+                            <span class="era-name">{era.shortName || era.name}</span>
+                            
+                            <!-- NEW: Custom Instant Tooltip -->
+                            <div class="era-tooltip">
+                              <strong style="color: #ffffff;">{era.name}</strong>
+                              <span style="color: #94a3b8; font-size: 0.75rem;">{era.start} - {era.end}</span>
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  ))}
+                </div>
+                
+              </div>
             </div>
           </div>
-        </article>
-      ))}
+        </div>
+      </section>
+
     </div>
+
+    <div id="drivers-view" class="view-section">
+      <div class="standalone-drivers-grid">
+        {ALL_DRIVERS.map((driver) => (
+          <a href={`/drivers/${getDriverSlug(driver.code, driver.name)}`} class={`standalone-driver-card team-border-${driver.teamKey}`}>
+            
+            <div class="driver-watermark">{driver.number}</div>
+
+            <div class="card-content">
+              <div class="driver-card-header">
+                <span class="driver-code">{driver.code}</span>
+                <img 
+                  src={`https://flagcdn.com/w40/${driver.countryCode}.png`}
+                  width="20"
+                  height="14"
+                  alt={driver.nationality}
+                  class="driver-flag-large"
+                  loading="lazy"
+                />
+              </div>
+
+              <div class="driver-card-body">
+                <h3>{driver.name}</h3>
+                <span class="team-name">{driver.teamName}</span>
+                
+                <div class="driver-achievements">
+                  {driver.isChampion && (
+                    <span class="champ-pill">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M4.222 19.778c.026.173.082.342.164.502.19.373.498.665.875.83A2.08 2.08 0 0 0 6.222 21h11.556a2.08 2.08 0 0 0 .961-.102c.377-.165.685-.457.875-.83.082-.16.138-.329.164-.502L22 6.556a1 1 0 0 0-1.572-.818l-4.606 3.29-2.934-5.867a1 1 0 0 0-1.776 0l-2.934 5.867-4.606-3.29A1 1 0 0 0 2 6.556l2.222 13.222z"/>
+                      </svg>
+                      Defending Champion
+                    </span>
+                  )}
+                  {driver.wdc ? (
+                    <span class="wdc-count-pill">{driver.wdc}x World Champion</span>
+                  ) : null}
+                </div>
+              </div>
+            </div>
+
+          </a>
+        ))}
+      </div>
+    </div>
+
   </main>
 </Layout>
+
+<script is:inline>
+  document.addEventListener('DOMContentLoaded', () => {
+    const toggleBtns = document.querySelectorAll('.toggle-btn');
+    const views = document.querySelectorAll('.view-section');
+
+    toggleBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        // Remove active state from all
+        toggleBtns.forEach(b => b.classList.remove('is-active'));
+        views.forEach(v => v.classList.remove('is-active'));
+
+        // Add active state to clicked
+        btn.classList.add('is-active');
+        const targetView = btn.getAttribute('data-view');
+        const targetElement = document.getElementById(`${targetView}-view`);
+        if (targetElement) {
+          targetElement.classList.add('is-active');
+        }
+      });
+    });
+  });
+</script>
 
 <style is:global>
   /* Base Container matching existing pages */
@@ -398,36 +564,97 @@ const TEAMS_DATA: Team[] = [
     padding: 3rem 1.5rem 5rem;
     width: 100%;
     box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   }
 
   .directory-page .section-header {
-    margin-bottom: 3rem;
+    margin-bottom: 3.5rem;
+  }
+
+  .header-top-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    gap: 1.5rem;
   }
 
   .directory-page .badge {
     display: inline-block;
     background-color: var(--color-primary, #e10600);
     color: #ffffff;
-    font-size: 0.75rem;
-    font-weight: 700;
+    font-size: 0.85rem;
+    font-weight: 800;
     text-transform: uppercase;
-    padding: 0.25rem 0.6rem;
-    border-radius: 4px;
-    letter-spacing: 0.05em;
+    padding: 0.4rem 1rem;
+    border-radius: 6px;
+    letter-spacing: 0.08em;
   }
 
-  .directory-page h1 {
-    font-size: 2.5rem;
-    margin: 0.75rem 0 0.5rem 0;
-    font-weight: 800;
-    color: #f8fafc;
+  .gradient-title { 
+    font-size: 3.5rem; 
+    margin: 0 0 1rem 0; 
+    font-weight: 900; 
+    letter-spacing: -0.03em; 
+    line-height: 1.1; 
+    background: linear-gradient(to right, #ffffff, #94a3b8);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
   }
 
   .directory-page .section-header p {
     color: var(--color-muted, #94a3b8);
     font-size: 1.15rem;
+    line-height: 1.6;
     margin: 0;
     max-width: 700px;
+  }
+
+  /* --- UI TOGGLE SWITCH --- */
+  .view-toggle {
+    display: flex;
+    background: #0f172a;
+    border: 1px solid #334155;
+    border-radius: 8px;
+    padding: 0.35rem;
+  }
+
+  .toggle-btn {
+    background: transparent;
+    border: none;
+    color: #94a3b8;
+    font-size: 0.9rem;
+    font-weight: 800;
+    padding: 0.6rem 1.25rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .toggle-btn:hover {
+    color: #f1f5f9;
+  }
+
+  .toggle-btn.is-active {
+    background: #1e293b;
+    color: #ffffff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  }
+
+  /* --- VIEW SECTIONS --- */
+  .view-section {
+    display: none;
+    animation: fadeIn 0.3s ease;
+  }
+
+  .view-section.is-active {
+    display: block;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
   }
 
   /* Teams Stack */
@@ -441,35 +668,37 @@ const TEAMS_DATA: Team[] = [
   .directory-page .team-card {
     background: #1e293b;
     border: 1px solid #334155;
-    border-radius: 8px;
+    border-radius: 12px;
     padding: 1.5rem 1.75rem;
-    border-left: 5px solid #334155;
-    transition: transform 0.2s ease, border-color 0.2s ease;
+    border-top: 4px solid #334155;
+    border-left: none; 
+    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
   }
 
   .directory-page .team-card:hover {
-    transform: translateY(-2px);
+    transform: translateY(-4px);
     border-color: #475569;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
   }
 
   /* Team Accent Ribbons */
-  .directory-page .team-border-redbull { border-left-color: #3671c6; }
-  .directory-page .team-border-ferrari { border-left-color: #e8002d; }
-  .directory-page .team-border-mclaren { border-left-color: #ff8000; }
-  .directory-page .team-border-mercedes { border-left-color: #27f4d2; }
-  .directory-page .team-border-astonmartin { border-left-color: #229971; }
-  .directory-page .team-border-alpine { border-left-color: #ff87bc; }
-  .directory-page .team-border-williams { border-left-color: #64c4ff; }
-  .directory-page .team-border-rb { border-left-color: #6692ff; }
-  .directory-page .team-border-audi { border-left-color: #00e700; }
-  .directory-page .team-border-cadillac { border-left-color: #d4af37; }
-  .directory-page .team-border-haas { border-left-color: #b6babd; }
+  .directory-page .team-border-redbull { border-top-color: #3671c6; }
+  .directory-page .team-border-ferrari { border-top-color: #e8002d; }
+  .directory-page .team-border-mclaren { border-top-color: #ff8000; }
+  .directory-page .team-border-mercedes { border-top-color: #27f4d2; }
+  .directory-page .team-border-astonmartin { border-top-color: #229971; }
+  .directory-page .team-border-alpine { border-top-color: #ff87bc; }
+  .directory-page .team-border-williams { border-top-color: #64c4ff; }
+  .directory-page .team-border-rb { border-top-color: #6692ff; }
+  .directory-page .team-border-audi { border-top-color: #00e700; }
+  .directory-page .team-border-cadillac { border-top-color: #d4af37; }
+  .directory-page .team-border-haas { border-top-color: #b6babd; }
 
   /* Team Color Dots */
   .directory-page .team-color-indicator {
-    width: 12px;
-    height: 12px;
-    border-radius: 3px;
+    width: 14px;
+    height: 14px;
+    border-radius: 4px;
     flex-shrink: 0;
   }
   .directory-page .team-bg-redbull { background: #3671c6; }
@@ -489,14 +718,13 @@ const TEAMS_DATA: Team[] = [
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding-bottom: 1rem;
+    padding-bottom: 1.25rem;
     border-bottom: 1px solid #334155;
-    margin-bottom: 1.25rem;
+    margin-bottom: 1.5rem;
     flex-wrap: wrap;
-    gap: 0.75rem;
+    gap: 1rem;
   }
 
-  /* --- NEW TEAM PROFILE LINK STYLES --- */
   .directory-page .team-profile-link {
     text-decoration: none;
     display: inline-block;
@@ -510,7 +738,6 @@ const TEAMS_DATA: Team[] = [
   .directory-page .team-profile-link:hover h2 {
     color: #38bdf8;
   }
-  /* ------------------------------------ */
 
   .directory-page .team-identity {
     display: flex;
@@ -519,8 +746,8 @@ const TEAMS_DATA: Team[] = [
   }
 
   .directory-page .team-header h2 {
-    font-size: 1.35rem;
-    font-weight: 700;
+    font-size: 1.5rem;
+    font-weight: 800;
     color: #f8fafc;
     margin: 0;
     transition: color 0.15s ease;
@@ -531,8 +758,8 @@ const TEAMS_DATA: Team[] = [
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    color: #ffd700;
-    filter: drop-shadow(0 0 6px rgba(255, 215, 0, 0.4));
+    color: #fbbf24;
+    filter: drop-shadow(0 0 6px rgba(251, 191, 36, 0.4));
   }
 
   /* Social Buttons */
@@ -549,10 +776,10 @@ const TEAMS_DATA: Team[] = [
     background: #0f172a;
     border: 1px solid #334155;
     color: #94a3b8;
-    padding: 0.4rem 0.65rem;
-    border-radius: 4px;
-    font-size: 0.8rem;
-    font-weight: 600;
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 700;
     text-decoration: none;
     transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
   }
@@ -564,9 +791,9 @@ const TEAMS_DATA: Team[] = [
   }
 
   .directory-page .icon-btn {
-    padding: 0.4rem;
-    width: 28px;
-    height: 28px;
+    padding: 0.5rem;
+    width: 32px;
+    height: 32px;
     justify-content: center;
     box-sizing: border-box;
   }
@@ -575,26 +802,26 @@ const TEAMS_DATA: Team[] = [
   .directory-page .specs-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 1.25rem;
-    margin-bottom: 1.25rem;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
   }
 
   .directory-page .spec-item {
     display: flex;
     flex-direction: column;
-    gap: 0.2rem;
+    gap: 0.3rem;
   }
 
   .directory-page .spec-label {
-    font-size: 0.72rem;
+    font-size: 0.75rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
     color: #64748b;
-    font-weight: 700;
+    font-weight: 800;
   }
 
   .directory-page .spec-value {
-    font-size: 0.92rem;
+    font-size: 0.95rem;
     font-weight: 600;
     color: #f8fafc;
   }
@@ -603,31 +830,31 @@ const TEAMS_DATA: Team[] = [
   .directory-page .drivers-section {
     background: #0f172a;
     border: 1px solid #334155;
-    border-radius: 6px;
-    padding: 1rem 1.25rem;
+    border-radius: 8px;
+    padding: 1.25rem 1.5rem;
   }
 
   .directory-page .section-tag {
     display: block;
-    font-size: 0.7rem;
+    font-size: 0.75rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
     color: #38bdf8;
-    font-weight: 700;
-    margin-bottom: 0.75rem;
+    font-weight: 800;
+    margin-bottom: 1rem;
   }
 
   .directory-page .drivers-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: 0.75rem;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1rem;
   }
 
   .directory-page .driver-card {
     background: #1e293b;
     border: 1px solid #334155;
-    border-radius: 6px;
-    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -636,14 +863,14 @@ const TEAMS_DATA: Team[] = [
   .directory-page .driver-left {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
+    gap: 1rem;
   }
 
   .directory-page .driver-number {
-    font-size: 1.15rem;
+    font-size: 1.25rem;
     font-weight: 900;
-    color: #475569;
-    width: 22px;
+    color: #64748b;
+    width: 26px;
     text-align: right;
     font-variant-numeric: tabular-nums;
   }
@@ -651,7 +878,7 @@ const TEAMS_DATA: Team[] = [
   .directory-page .driver-name-row {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.6rem;
     flex-wrap: wrap;
   }
 
@@ -661,7 +888,6 @@ const TEAMS_DATA: Team[] = [
     object-fit: cover;
   }
 
-  /* --- NEW DRIVER PROFILE LINK STYLES --- */
   .directory-page .driver-profile-link {
     display: inline-flex;
     align-items: center;
@@ -677,16 +903,16 @@ const TEAMS_DATA: Team[] = [
   }
 
   .directory-page .driver-fullname {
-    font-size: 0.95rem;
-    font-weight: 700;
+    font-size: 1rem;
+    font-weight: 800;
   }
 
   .directory-page .driver-code-tag {
-    font-size: 0.72rem;
+    font-size: 0.75rem;
     font-weight: 800;
     background: #0f172a;
     color: #94a3b8;
-    padding: 0.1rem 0.35rem;
+    padding: 0.15rem 0.4rem;
     border-radius: 4px;
     border: 1px solid #334155;
     white-space: nowrap;
@@ -700,13 +926,12 @@ const TEAMS_DATA: Team[] = [
     border-color: #38bdf8;
   }
 
-  /* Driver WDC Pill */
   .directory-page .wdc-count-pill {
-    font-size: 0.65rem;
+    font-size: 0.7rem;
     font-weight: 800;
-    background: rgba(217, 119, 6, 0.15);
-    color: #f59e0b;
-    padding: 0.15rem 0.4rem;
+    background: rgba(245, 158, 11, 0.15);
+    color: #fbbf24;
+    padding: 0.2rem 0.5rem;
     border-radius: 4px;
     border: 1px solid rgba(245, 158, 11, 0.3);
     letter-spacing: 0.05em;
@@ -717,16 +942,16 @@ const TEAMS_DATA: Team[] = [
   .directory-page .driver-socials {
     display: flex;
     align-items: center;
-    gap: 0.35rem;
+    gap: 0.4rem;
   }
 
   .directory-page .driver-icon-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 26px;
-    height: 26px;
-    border-radius: 4px;
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
     background: #0f172a;
     border: 1px solid #334155;
     color: #94a3b8;
@@ -740,13 +965,390 @@ const TEAMS_DATA: Team[] = [
     color: #ffffff;
   }
 
+  /* --- STANDALONE DRIVERS GRID VIEW --- */
+  .standalone-drivers-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .standalone-driver-card {
+    position: relative;
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 12px;
+    border-top: 4px solid #334155;
+    overflow: hidden;
+    text-decoration: none;
+    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    min-height: 180px;
+  }
+
+  .standalone-driver-card:hover {
+    transform: translateY(-4px);
+    border-color: #475569;
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+  }
+
+  .driver-watermark {
+    position: absolute;
+    bottom: -15px;
+    right: -5px;
+    font-size: 7rem;
+    font-weight: 900;
+    color: rgba(255, 255, 255, 0.04);
+    line-height: 1;
+    z-index: 0;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .card-content {
+    position: relative;
+    z-index: 1;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+  }
+
+  .driver-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 2rem;
+  }
+
+  .driver-code {
+    font-size: 1.25rem;
+    font-weight: 900;
+    color: #94a3b8;
+    letter-spacing: 0.05em;
+  }
+
+  .driver-flag-large {
+    border-radius: 3px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  }
+
+  .driver-card-body h3 {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin: 0 0 0.25rem 0;
+  }
+
+  .team-name {
+    display: block;
+    color: #cbd5e1;
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+  }
+
+  .driver-achievements {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: auto;
+  }
+
+  .champ-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.7rem;
+    font-weight: 800;
+    background: rgba(251, 191, 36, 0.15);
+    color: #fbbf24;
+    padding: 0.25rem 0.6rem;
+    border-radius: 4px;
+    border: 1px solid rgba(251, 191, 36, 0.3);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  /* --- CONSTRUCTOR LINEAGE STYLES --- */
+  .lineage-section {
+    margin-top: 5rem;
+    padding-top: 4rem;
+    border-top: 1px dashed #334155;
+  }
+
+  .lineage-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+  
+  .lineage-header h2 {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #f8fafc;
+    margin: 0.5rem 0;
+  }
+  
+  .lineage-header p {
+    color: #94a3b8;
+    margin: 0;
+  }
+
+  .scroll-hint {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #38bdf8;
+    font-size: 0.8rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    background: rgba(56, 189, 248, 0.1);
+    padding: 0.5rem 0.85rem;
+    border-radius: 6px;
+    border: 1px solid rgba(56, 189, 248, 0.2);
+    animation: nudge 2s infinite ease-in-out;
+  }
+
+  @keyframes nudge {
+    0%, 100% { transform: translateX(0); }
+    50% { transform: translateX(5px); }
+  }
+
+  .timeline-container {
+    background: #0f172a;
+    border: 1px solid #334155;
+    border-radius: 12px;
+    /* Removed the left padding here so the sticky column can sit flush */
+    padding: 2rem 2rem 2rem 0; 
+    overflow-x: auto;
+  }
+
+  .timeline-flex-wrapper {
+    display: flex;
+    min-width: 3800px; 
+  }
+
+  /* Left Side: Sticky Names */
+  .timeline-names {
+    position: sticky;
+    left: 0;
+    background-color: #0f172a;
+    /* Moved the 1.5rem left padding directly to this sticky element */
+    padding-left: 1.5rem; 
+    padding-right: 1rem;
+    display: flex;
+    flex-direction: column;
+    width: 160px;
+    flex-shrink: 0;
+    z-index: 10; /* Keeps names above the scrolling grid lines */
+    border-right: 1px solid #1e293b;
+    box-shadow: 10px 0 15px -5px rgba(0,0,0,0.5); /* Casts a shadow over the scrollable area */
+  }
+
+  /* Highlight the grid line every 10 years instead of every 4 */
+  .grid-line:nth-child(10n + 1) {
+    background-color: #334155;
+  }
+
+  /* Left Side: Names */
+  .timeline-names {
+    display: flex;
+    flex-direction: column;
+    width: 160px;
+    flex-shrink: 0;
+    z-index: 2;
+  }
+
+  .names-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .team-name-col {
+    height: 40px; 
+    display: flex;
+    align-items: center;
+    color: #f8fafc;
+    font-size: 0.95rem;
+  }
+
+  /* Right Side: Chart */
+  .timeline-chart {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+
+  /* Axis */
+  .axis-label {
+    height: 30px;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    color: #64748b;
+    font-size: 0.85rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+  }
+
+  .axis-years {
+    position: relative;
+    height: 30px;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #1e293b;
+    color: #64748b;
+    font-size: 0.85rem;
+    font-weight: 800;
+  }
+
+  .year-marker {
+    position: absolute;
+    transform: translateX(-50%); /* Centers the number perfectly over its line */
+  }
+
+  /* Grid & Rows */
+  .chart-grid-area {
+    position: relative;
+  }
+
+  .grid-lines-layer {
+    position: absolute;
+    top: -10px; /* Extends line slightly up to connect to the axis */
+    left: 0;
+    width: 100%;
+    height: calc(100% + 10px);
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  .grid-line {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background-color: #1e293b; /* Faint line for every year */
+  }
+  
+  /* Highlight every 4th line (matches our 2007, 2011, 2015 markers) */
+  .grid-line:nth-child(4n + 1) {
+    background-color: #334155;
+  }
+
+  .chart-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    position: relative;
+    z-index: 1; /* Floats colored bars above the grid */
+  }
+
+  .eras-col {
+    flex-grow: 1;
+    display: flex;
+    height: 40px;
+    border-radius: 6px;
+    /* overflow: hidden; --> REMOVED so tooltips can escape! */
+    background: #1e293b;
+    min-width: 600px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+  }
+
+  .era-block {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    font-size: 0.75rem;
+    font-weight: 800;
+    padding: 0 0.25rem;
+    transition: filter 0.2s;
+    cursor: pointer;
+    border-right: 1px solid rgba(0,0,0,0.3);
+    position: relative; /* Anchors the new tooltip */
+    min-width: 0; 
+  }
+
+  /* Re-apply rounded corners to the outer blocks to keep the graph looking neat */
+  .era-block:first-child {
+    border-top-left-radius: 6px;
+    border-bottom-left-radius: 6px;
+  }
+  
+  .era-block:last-child {
+    border-right: none;
+    border-top-right-radius: 6px;
+    border-bottom-right-radius: 6px;
+  }
+
+  .era-block:hover {
+    filter: brightness(1.15);
+  }
+
+  .era-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* --- CUSTOM INSTANT TOOLTIP --- */
+  .era-tooltip {
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%) translateY(5px);
+    background-color: #0f172a;
+    border: 1px solid #38bdf8;
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.2s ease;
+    z-index: 50;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.2rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+  }
+
+  /* Tooltip Triangle Pointer */
+  .era-tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 6px;
+    border-style: solid;
+    border-color: #38bdf8 transparent transparent transparent;
+  }
+
+  /* Reveal Tooltip on Hover */
+  .era-block:hover .era-tooltip {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+  }
+
   /* Responsive layout adjustments */
   @media (max-width: 768px) {
+    .gradient-title {
+      font-size: 2.75rem;
+    }
     .directory-page.page-container {
       padding: 2rem 1rem 4rem;
-    }
-    .directory-page h1 {
-      font-size: 2rem;
     }
     .directory-page .specs-grid {
       grid-template-columns: 1fr 1fr;

@@ -1,0 +1,113 @@
+---
+import { circuitGuidesData } from '@/data/circuitGuides';
+
+// Extract just the data we need for the map to keep the payload tiny
+const mapPoints = circuitGuidesData.map(race => ({
+  name: race.raceName,
+  circuit: race.circuitName,
+  lat: race.lat,
+  lon: race.lon,
+  slug: race.raceSlug // <-- CHANGED THIS to use raceSlug (e.g., 'british-gp')
+})).filter(race => race.lat !== 0); 
+---
+
+<div class="map-wrapper">
+  <div id="circuit-map" class="f1-map"></div>
+</div>
+
+<!-- Load Leaflet CSS & JS from CDN -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+<script is:inline define:vars={{ mapPoints }}>
+  document.addEventListener('DOMContentLoaded', () => {
+    // 1. Initialize the map (centered on Europe/Middle East)
+    const map = L.map('circuit-map', {
+      center: [30.0, 10.0],
+      zoom: 2,
+      scrollWheelZoom: false, 
+    });
+
+    // 2. Use the standard, 100% free OpenStreetMap layer (No API keys ever)
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+      maxZoom: 19
+    }).addTo(map);
+
+    // 3. Create a custom glowing red F1 dot
+    const customIcon = L.divIcon({
+      className: 'custom-f1-marker',
+      html: '<div class="marker-dot"></div>',
+      iconSize: [12, 12],
+      iconAnchor: [6, 6]
+    });
+
+    // 4. Loop through the data and plot the dots
+    mapPoints.forEach(point => {
+      const marker = L.marker([point.lat, point.lon], { icon: customIcon }).addTo(map);
+      
+      marker.bindPopup(`
+        <div style="text-align: center;">
+          <strong style="color: #0f172a; font-size: 14px;">${point.name}</strong><br/>
+          <span style="color: #64748b; font-size: 12px;">${point.circuit}</span><br/>
+          <a href="/travel-and-tickets/${point.slug}" style="display: inline-block; margin-top: 8px; color: #e10600; font-weight: bold; text-decoration: none;">View Guide &rarr;</a>
+        </div>
+      `);
+    });
+  });
+</script>
+
+<style is:global>
+  .map-wrapper {
+    width: 100%;
+    height: 450px;
+    background: #0f172a;
+    border: 1px solid #334155;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 3rem;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  }
+
+  .f1-map {
+    width: 100%;
+    height: 100%;
+    z-index: 1; 
+    background-color: #0f172a; 
+  }
+
+  /* 
+    THE MAGIC TRICK:
+    This targets the map tiles and mathematically inverts the colors. 
+    Hue-rotate ensures the oceans stay blue (instead of turning orange), 
+    resulting in a perfect dark mode map without needing an API key!
+  */
+  .leaflet-tile-pane {
+    filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
+  }
+
+  /* Custom CSS for the glowing red map dots */
+  .custom-f1-marker {
+    background: transparent;
+    border: none;
+  }
+  
+  .marker-dot {
+    width: 12px;
+    height: 12px;
+    background-color: #e10600;
+    border-radius: 50%;
+    border: 2px solid #ffffff;
+    box-shadow: 0 0 10px rgba(225, 6, 0, 0.8);
+    transition: transform 0.2s;
+  }
+
+  .marker-dot:hover {
+    transform: scale(1.5);
+    background-color: #38bdf8;
+  }
+
+  .leaflet-popup-content-wrapper {
+    border-radius: 8px;
+  }
+</style>

@@ -3,6 +3,7 @@
 import Layout from '@/layouts/Layout.astro';
 import { raceLogisticsData } from '@/data/travelAndTickets';
 import { circuitGuidesData } from '@/data/circuitGuides';
+import GlobalCircuitMap from '@/components/GlobalCircuitMap.astro';
 
 const now = new Date();
 
@@ -38,6 +39,8 @@ races.sort((a, b) => a.round - b.round);
       <h1 class="gradient-title">Tickets & Travel Guides</h1>
       <p class="subtitle">Select a race to explore official ticket options, verified resellers, airport hubs, and local circuit logistics.</p>
     </header>
+
+    <GlobalCircuitMap/>
 
     <div class="race-grid">
       {races.map((race) => (

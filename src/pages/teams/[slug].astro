@@ -3,6 +3,7 @@ import Layout from '@/layouts/Layout.astro';
 import seasonData from '@/content/results/season-2026.json';
 import Parser from 'rss-parser';
 import { TEAMS } from '@/data/teams';
+import { getEntry } from 'astro:content';
 
 // --- RSS PARSER SETUP ---
 interface CustomFeedItem {
@@ -99,7 +100,20 @@ export async function getStaticPaths() {
 
 const { team, allTeams } = Astro.props;
 
-// 2. FETCH LIVE API DATA FOR POINTS
+// --- 1. FETCH LIVE STATS FROM CMS ---
+let cmsStats = null;
+try {
+  cmsStats = await getEntry('teamStats', team.slug);
+} catch (e) {
+  console.log("Could not find CMS stats for", team.slug);
+}
+
+// Fallback to the hardcoded TS file if the CMS file is missing
+const poles = cmsStats?.data?.poles ?? team.history.poles;
+const fastestLaps = cmsStats?.data?.fastestLaps ?? team.history.fastestLaps;
+const championships = cmsStats?.data?.championships ?? team.history.championships;
+
+// --- 2. FETCH LIVE API DATA FOR POINTS ---
 let teamPoints = 0;
 let teamWins = 0;
 let teamPos = '--';
@@ -138,7 +152,7 @@ const displayTotal = Math.max(teamPoints, calcTotal);
 const d1Pct = displayTotal > 0 ? Math.round((d1Points / displayTotal) * 100) : 50;
 const d2Pct = displayTotal > 0 ? Math.round((d2Points / displayTotal) * 100) : 50;
 
-// 3. CALCULATE HEAD-TO-HEAD FROM LOCAL JSON
+// --- 3. CALCULATE HEAD-TO-HEAD FROM LOCAL JSON ---
 let d1Ahead = 0;
 let d2Ahead = 0;
 let d1Best = 99;
@@ -344,7 +358,7 @@ try {
       </div>
     </header>
 
-    <!-- NEW: Typography Driver Cards -->
+    <!-- Typography Driver Cards -->
     <section class="profile-section">
       <div class="section-title-row">
         <h2>2026 Driver Lineup</h2>
@@ -353,7 +367,6 @@ try {
 
       <div class="driver-cards-grid">
         <a href={`/drivers/${team.d1Slug}`} class="typo-driver-card" style={`--accent: ${team.color}`}>
-          <!-- Added conditional 'single-digit' class -->
           <div class={`driver-bg-number ${team.d1Number < 10 ? 'single-digit' : ''}`}>{team.d1Number}</div>
           <div class="driver-card-content">
             <div class="d-info-top">
@@ -367,7 +380,6 @@ try {
         </a>
 
         <a href={`/drivers/${team.d2Slug}`} class="typo-driver-card" style={`--accent: ${team.color}`}>
-          <!-- Added conditional 'single-digit' class -->
           <div class={`driver-bg-number ${team.d2Number < 10 ? 'single-digit' : ''}`}>{team.d2Number}</div>
           <div class="driver-card-content">
             <div class="d-info-top">
@@ -464,7 +476,7 @@ try {
       </div>
     </section>
 
-    <!-- NEW: Historical Legacy -->
+    <!-- Historical Legacy -->
     <section class="profile-section">
       <div class="section-title-row">
         <h2>Team Legacy</h2>
@@ -474,7 +486,7 @@ try {
       <div class="history-grid">
         <div class="history-card">
           <span class="h-label">World Championships</span>
-          <span class="h-val">{team.history.championships}</span>
+          <span class="h-val">{championships}</span>
         </div>
         <div class="history-card">
           <span class="h-label">First Entry</span>
@@ -482,11 +494,11 @@ try {
         </div>
         <div class="history-card">
           <span class="h-label">Pole Positions</span>
-          <span class="h-val">{team.history.poles}</span>
+          <span class="h-val">{poles}</span>
         </div>
         <div class="history-card">
           <span class="h-label">Fastest Laps</span>
-          <span class="h-val">{team.history.fastestLaps}</span>
+          <span class="h-val">{fastestLaps}</span>
         </div>
       </div>
     </section>
@@ -687,7 +699,7 @@ try {
   .section-title-row h2 { font-size: 1.5rem; font-weight: 800; color: #ffffff; margin: 0; }
   .section-badge { background: #0f172a; color: #38bdf8; border: 1px solid #334155; font-size: 0.75rem; font-weight: 700; padding: 0.25rem 0.5rem; border-radius: 4px; text-transform: uppercase; }
 
-  /* NEW: Typography Driver Cards */
+  /* Typography Driver Cards */
   .driver-cards-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -715,7 +727,7 @@ try {
 
   .driver-bg-number {
     position: absolute;
-    right: -2%; /* Pulled in from -10% to reveal the second digit */
+    right: -2%;
     bottom: -15%;
     font-size: 12rem;
     font-weight: 900;
@@ -728,7 +740,6 @@ try {
     transition: all 0.4s ease;
   }
 
-  /* Keep single digits balanced slightly further in */
   .driver-bg-number.single-digit {
     right: 5%; 
   }
@@ -774,7 +785,7 @@ try {
     letter-spacing: 0.05em;
   }
 
-  /* NEW: History Grid */
+  /* History Grid */
   .history-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));

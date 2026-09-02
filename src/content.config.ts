@@ -56,14 +56,27 @@ const drivers = defineCollection({
   }),
 });
 
-// 5. AI News & Previews Collection
+// 5. The Racing Line (SEO Articles)
 const news = defineCollection({
   loader: glob({ pattern: '**/[^_]*.{md,mdx}', base: './src/content/news' }),
   schema: z.object({
     title: z.string(),
+    heroImage: z.string().optional(),
     description: z.string(),
-    date: z.string().or(z.date()),
-    author: z.string().default('AI Desk'),
+    // z.coerce.date() safely converts TinaCMS strings into Astro Date objects
+    date: z.coerce.date(), 
+  }),
+});
+
+// 6. Team Weekly Stats
+const teamStats = defineCollection({
+  loader: glob({ pattern: '**/[^_]*.json', base: './src/content/teamStats' }),
+  schema: z.object({
+    teamName: z.string(),
+    slug: z.string(),
+    poles: z.number().default(0),
+    fastestLaps: z.number().default(0),
+    championships: z.string().default("0 Constructors' / 0 Drivers'"),
   }),
 });
 
@@ -73,5 +86,6 @@ export const collections = {
   tvGuides,
   creators,
   drivers,
-  news, 
+  news,
+  teamStats,
 };

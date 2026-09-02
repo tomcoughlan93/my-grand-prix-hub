@@ -1,19 +1,35 @@
 ---
 // src/pages/circuits-live/index.astro
 import Layout from '@/layouts/Layout.astro';
+import { circuitGuidesData } from '@/data/circuitGuides';
 import { getCollection } from 'astro:content';
 
-// Safely retrieve collections with fallback defaults
-const circuits = (await getCollection('circuits')) || [];
+// 1. Circuits: Pull from your static data file
+const circuitsCount = circuitGuidesData ? circuitGuidesData.length : 0;
+
+// 2. Grandstands: Pull from your TinaCMS collection
 const grandstands = (await getCollection('grandstands')) || [];
-const cityGuides = (await getCollection('cityGuides')) || [];
+const grandstandsCount = grandstands.length;
+
+// 3. City Guides: Exclude index, types, or template helper files from the count
+const cityGuideFiles = import.meta.glob([
+  '@/data/cityGuides/*.{ts,json,md}',
+  '!@/data/cityGuides/index.*',
+  '!@/data/cityGuides/types.*',
+  '!@/data/cityGuides/_*'
+]);
+
+const cityGuidesCount = Object.keys(cityGuideFiles).length;
 ---
 
-<Layout title="Circuits & Live Experience | My Grand Prix Hub">
+<Layout 
+  title="Circuits & Live Experience | My Grand Prix Hub"
+  description="Everything you need to plan your trackside Grand Prix weekend, from picking the best grandstand seats to exploring host cities."
+>
   <main class="page-container">
     <header class="section-header">
       <span class="badge">Trackside Hub</span>
-      <h1>Circuits & Live Experience</h1>
+      <h1 class="gradient-title">Circuits & Live Experience</h1>
       <p>Everything you need to plan your trackside Grand Prix weekend, from picking the best grandstand seats to exploring host cities.</p>
     </header>
 
@@ -22,7 +38,7 @@ const cityGuides = (await getCollection('cityGuides')) || [];
         <div class="card-badge">🏎️ Track Profiles</div>
         <h2>F1 Circuit Guides</h2>
         <p>Detailed overviews of every circuit on the F1 calendar. Track specs, lap records, zone maps, and spectator advice.</p>
-        <div class="card-meta">{circuits.length} Circuit Guides Available</div>
+        <div class="card-meta">{circuitsCount} Circuit Guides Available</div>
         <a href="/circuits-live/circuit-guides" class="hub-btn primary-btn">Browse Circuit Guides →</a>
       </div>
 
@@ -30,7 +46,7 @@ const cityGuides = (await getCollection('cityGuides')) || [];
         <div class="card-badge">💺 Seating & Sightlines</div>
         <h2>Grandstand Reviews</h2>
         <p>Unbiased fan ratings for grandstand views, giant TV screen visibility, roof coverage, and seat comfort across global tracks.</p>
-        <div class="card-meta">{grandstands.length} Grandstand Reviews Published</div>
+        <div class="card-meta">{grandstandsCount} Grandstand Reviews Published</div>
         <a href="/circuits-live/grandstands" class="hub-btn primary-btn">View Grandstand Reviews →</a>
       </div>
 
@@ -38,7 +54,7 @@ const cityGuides = (await getCollection('cityGuides')) || [];
         <div class="card-badge">📍 Trackside Cities</div>
         <h2>City & Fan Guides</h2>
         <p>Local spectator guides for Grand Prix host cities: fan zones, transport links, hotel districts, and sports bars showing live sessions.</p>
-        <div class="card-meta">{cityGuides.length} City Guides Available</div>
+        <div class="card-meta">{cityGuidesCount} City Guides Available</div>
         <a href="/circuits-live/city-guides" class="hub-btn primary-btn">Explore City Guides →</a>
       </div>
     </div>
@@ -49,31 +65,37 @@ const cityGuides = (await getCollection('cityGuides')) || [];
   .page-container {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 3rem 1.5rem 4rem 1.5rem;
+    padding: 4rem 1.5rem 6rem 1.5rem;
     width: 100%;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   }
 
   .section-header {
-    margin-bottom: 3rem;
+    margin-bottom: 3.5rem;
   }
 
   .badge {
     display: inline-block;
     background-color: #e10600;
     color: #ffffff;
-    font-size: 0.75rem;
-    font-weight: 700;
+    font-size: 0.85rem;
+    font-weight: 800;
     text-transform: uppercase;
-    padding: 0.25rem 0.6rem;
-    border-radius: 4px;
-    letter-spacing: 0.05em;
+    padding: 0.4rem 1rem;
+    border-radius: 6px;
+    letter-spacing: 0.08em;
+    margin-bottom: 1.25rem;
   }
 
-  h1 {
-    font-size: 2.75rem;
-    margin: 0.75rem 0 0.5rem 0;
-    font-weight: 800;
-    color: #f8fafc;
+  .gradient-title { 
+    font-size: 3.5rem; 
+    margin: 0 0 1rem 0; 
+    font-weight: 900; 
+    letter-spacing: -0.03em; 
+    line-height: 1.1; 
+    background: linear-gradient(to right, #ffffff, #94a3b8);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
   }
 
   .section-header p {
@@ -81,58 +103,91 @@ const cityGuides = (await getCollection('cityGuides')) || [];
     font-size: 1.15rem;
     margin: 0;
     max-width: 700px;
+    line-height: 1.6;
   }
 
   .hub-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 1.75rem;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 2rem;
   }
 
   .hub-card {
-    background: #1e293b;
-    border: 1px solid #334155;
-    border-radius: 8px;
-    padding: 2rem;
+    background: #0f172a;
+    border: 1px solid #1e293b;
+    border-radius: 12px;
+    padding: 2.5rem;
     display: flex;
     flex-direction: column;
+    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .hub-card:hover {
+    transform: translateY(-4px);
+    border-color: #38bdf8;
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
   }
 
   .card-badge {
     font-size: 0.85rem;
-    font-weight: 700;
+    font-weight: 800;
     color: #38bdf8;
-    margin-bottom: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 1rem;
   }
 
   .hub-card h2 {
-    font-size: 1.6rem;
-    color: #f8fafc;
-    margin: 0 0 0.75rem 0;
+    font-size: 1.75rem;
+    color: #ffffff;
+    margin: 0 0 1rem 0;
+    font-weight: 800;
+    letter-spacing: -0.01em;
   }
 
   .hub-card p {
-    color: #94a3b8;
-    font-size: 0.98rem;
+    color: #cbd5e1;
+    font-size: 1.05rem;
+    line-height: 1.6;
     margin: 0 0 1.5rem 0;
     flex-grow: 1;
   }
 
   .card-meta {
-    font-size: 0.8rem;
+    font-size: 0.85rem;
     color: #64748b;
-    font-weight: 600;
-    margin-bottom: 1.25rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid #1e293b;
   }
 
   .hub-btn {
     display: block;
     text-align: center;
-    padding: 0.75rem 1rem;
-    border-radius: 6px;
-    font-weight: 600;
+    padding: 0.85rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 800;
+    font-size: 0.95rem;
     text-decoration: none;
-    background-color: #e10600;
+    transition: all 0.2s ease;
+  }
+
+  .primary-btn {
+    background-color: transparent;
+    border: 1px solid #334155;
     color: #ffffff;
+  }
+
+  .hub-card:hover .primary-btn {
+    background-color: #e10600;
+    border-color: #e10600;
+  }
+
+  @media (max-width: 768px) {
+    .gradient-title { font-size: 2.75rem; }
+    .hub-card { padding: 1.75rem; }
   }
 </style>
